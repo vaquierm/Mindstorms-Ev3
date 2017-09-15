@@ -6,9 +6,9 @@ public class PController implements UltrasonicController {
 
   /* Constants */
   private static final int MOTOR_SPEED = 140;
-  private static final int FILTER_OUT = 20;
-  private final int ERROR_PROPORTIONALITY = 15;
-  private final int CORNER_SPEED_DIFFERENCE = 70;
+  private static final int FILTER_OUT = 40;
+  private final int ERROR_PROPORTIONALITY = 35;
+  private final int CORNER_SPEED_DIFFERENCE = 60;
   private static final int SPIN_SPEED = 150;
 
   private int spinningCounter;
@@ -40,12 +40,13 @@ public class PController implements UltrasonicController {
     // (n.b. this was not included in the Bang-bang controller, but easily
     // could have).
     //
-	if (distance >= 255 && filterControl < FILTER_OUT) {
+	if (distance >= 100 && filterControl < FILTER_OUT) {
       // bad value, do not set the distance var, however do increment the
       // filter value
       filterControl++;
+      this.distance = bandCenter;
     }
-	else if (distance >= 255) {
+	else if (distance >= 100) {
       // We have repeated large values, so there must actually be nothing
       // there: leave the distance alone
       this.distance = distance;
@@ -56,13 +57,13 @@ public class PController implements UltrasonicController {
       this.distance = distance;
     }
 	
-    if (distance >= 255) {
+    if (distance >= 100) {
     	wheelSpeedDifference = CORNER_SPEED_DIFFERENCE;
     }
     else {
     	wheelSpeedDifference = Math.abs(ERROR_PROPORTIONALITY * (bandCenter - distance)/10);
     	if(wheelSpeedDifference > 70)
-    		wheelSpeedDifference = 70;
+    		wheelSpeedDifference = 90;
     }
     
     spinningCounter++;
@@ -74,7 +75,7 @@ public class PController implements UltrasonicController {
         WallFollowingLab.leftMotor.forward();
     }
     else if (this.distance < bandCenter) { //Too close
-    	if (distance < 20) { // if the robot is way too close, it spins
+    	if (this.distance < 20) { // if the robot is way too close, it spins
     		WallFollowingLab.leftMotor.setSpeed(SPIN_SPEED);
     		WallFollowingLab.rightMotor.setSpeed(SPIN_SPEED);
     	    WallFollowingLab.rightMotor.backward();
@@ -90,19 +91,19 @@ public class PController implements UltrasonicController {
     		spinning = false;
     	}
     }
-    else if (spinningCounter > 10) { //Too far
+    else {//if (spinningCounter > 10) { //Too far
         WallFollowingLab.leftMotor.setSpeed(MOTOR_SPEED - wheelSpeedDifference);
         WallFollowingLab.rightMotor.setSpeed(MOTOR_SPEED + wheelSpeedDifference);
         WallFollowingLab.rightMotor.forward();
         WallFollowingLab.leftMotor.forward();
         spinning = false;
     }
-    else {
+    /*else {
     	WallFollowingLab.leftMotor.setSpeed(MOTOR_SPEED);
         WallFollowingLab.rightMotor.setSpeed(MOTOR_SPEED);
         WallFollowingLab.rightMotor.backward();
         WallFollowingLab.leftMotor.backward();
-    }
+    }*/
       
     
   }

@@ -31,12 +31,12 @@ public class BangBangController implements UltrasonicController {
   @Override
   public void processUSData(int distance) {
 	  
-	if (distance >= 255 && filterControl < FILTER_OUT) {
+	if (distance >= 100 && filterControl < FILTER_OUT) {
       // bad value, do not set the distance var, however do increment the
       // filter value
       filterControl++;
     }
-	 else if (distance >= 255) {
+	 else if (distance >= 100) {
       // We have repeated large values, so there must actually be nothing
       // there: leave the distance alone
       this.distance = distance;
