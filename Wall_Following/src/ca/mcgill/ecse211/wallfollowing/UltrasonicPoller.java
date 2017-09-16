@@ -13,7 +13,8 @@ public class UltrasonicPoller extends Thread {
   private SampleProvider us;
   private UltrasonicController cont;
   private float[] usData;
-
+  private float[] avgData;
+  
   public UltrasonicPoller(SampleProvider us, float[] usData, UltrasonicController cont) {
     this.us = us;
     this.cont = cont;
@@ -27,18 +28,34 @@ public class UltrasonicPoller extends Thread {
    * @see java.lang.Thread#run()
    */
   public void run() {
-    int distance;
-    while (true) {
-      us.fetchSample(usData, 0); // acquire data
-      distance = (int) (usData[0] * 100.0); // extract from buffer, cast to int
-      System.out.println(distance);
-      cont.processUSData(distance); // now take action depending on value
-      
-      try {
-        Thread.sleep(50);
-      } catch (Exception e) {
-      } // Poor man's timed sampling
-    }
-  }
+	    int distance;
+	    int i = 0;	
+	    int j;
+	    float sum;
+	    
+	    while (true) {
+	    	
+	      us.fetchSample(usData, 0); // acquire data
+	      avgData[avgData.length] = usData[0];
+	      i++;
+	      if (i > 5) {
+	    	  sum = 0;
+	    	  for (j = i-4;j <= i; j++) {
+	    		 sum += avgData[j];
+	    	  }
+	    	  sum = sum / 5;
+	    	  distance = (int)(sum * 100.0);
+	      }else {
+	    	  distance = (int) (usData[0] * 100.0); // extract from buffer, cast to int
+	      }
+	      System.out.println(distance);
+	      cont.processUSData(distance); // now take action depending on value
+	      
+	      try {
+	        Thread.sleep(50);
+	      } catch (Exception e) {
+	      } // Poor man's timed sampling
+	    }
+	  }
 
 }
