@@ -4,8 +4,8 @@ import lejos.hardware.motor.*;
 
 public class BangBangController implements UltrasonicController {
 	
-	  private static final int FILTER_OUT = 40;
-	  private static final int SPIN_SPEED = 190;
+	  private static final int FILTER_OUT = 35;
+	  private static final int SPIN_SPEED = 175;
 
   private final int bandCenter;
   private final int bandwidth;
@@ -35,6 +35,7 @@ public class BangBangController implements UltrasonicController {
       // bad value, do not set the distance var, however do increment the
       // filter value
       filterControl++;
+      this.distance = bandCenter; //while waiting for filter control to confirm that there is indeed nothing there, the robot goes straight
     }
 	 else if (distance >= 100) {
       // We have repeated large values, so there must actually be nothing
@@ -52,19 +53,29 @@ public class BangBangController implements UltrasonicController {
     	WallFollowingLab.leftMotor.setSpeed(motorLow);
         WallFollowingLab.rightMotor.setSpeed(motorLow);
         WallFollowingLab.rightMotor.forward();
+        WallFollowingLab.leftMotor.forward();
         spinning = false;
     }
     else if (this.distance < bandCenter) { //Too close
-    	if (this.distance < 20) { // if the robot is way too close, it spins
+    	if (this.distance < 10) { // if the robot is way way too close it backs up fast
+    		WallFollowingLab.leftMotor.setSpeed(300);
+    		WallFollowingLab.rightMotor.setSpeed(300);
+    	    WallFollowingLab.rightMotor.backward();
+    	    WallFollowingLab.leftMotor.backward();
+    	    spinning = true;
+    	}
+    	else if (this.distance < 20) { // if the robot is way too close, it spins
     		WallFollowingLab.leftMotor.setSpeed(SPIN_SPEED);
     		WallFollowingLab.rightMotor.setSpeed(SPIN_SPEED);
     	    WallFollowingLab.rightMotor.backward();
+    	    WallFollowingLab.leftMotor.forward();
     	    spinning = true;
     	}
     	else {
     		WallFollowingLab.leftMotor.setSpeed(motorHigh);
     		WallFollowingLab.rightMotor.setSpeed(motorLow);
     		WallFollowingLab.rightMotor.forward();
+    		WallFollowingLab.leftMotor.forward();
     		spinning = false;
     	}
     }
@@ -72,6 +83,7 @@ public class BangBangController implements UltrasonicController {
         WallFollowingLab.leftMotor.setSpeed(motorLow);
         WallFollowingLab.rightMotor.setSpeed(motorHigh);
         WallFollowingLab.rightMotor.forward();
+        WallFollowingLab.leftMotor.forward();
         spinning = false;
     }
   }
