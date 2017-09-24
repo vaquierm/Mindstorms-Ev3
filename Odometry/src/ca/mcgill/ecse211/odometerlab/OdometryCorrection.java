@@ -8,9 +8,9 @@ import lejos.robotics.SampleProvider;
 
 public class OdometryCorrection extends Thread {
 	
-	private static final float OFFSET = 5;
+	private static final float OFFSET = 7;
 	private static final int ANGLE_TOLERANCE = 1;
-	private static final int DISTANCE_TOLERANCE = 8;
+	private static final int DISTANCE_TOLERANCE = 4;
 	private static final int SQUARE_SIDE = 30;
 	
 	
@@ -78,9 +78,10 @@ public class OdometryCorrection extends Thread {
 				//System.out.println("("+X+", "+Y+")");
 				
 				if ((theta <= ANGLE_TOLERANCE || theta > 360 - ANGLE_TOLERANCE) && (Math.abs((Y - OFFSET) % SQUARE_SIDE) <= DISTANCE_TOLERANCE || Math.abs((Y - OFFSET + DISTANCE_TOLERANCE) % SQUARE_SIDE) <= DISTANCE_TOLERANCE)) { //traveling in +Y
-					closestMultiple = closestMultipleOfSquareSide(Y);
+					closestMultiple = closestMultipleOfSquareSide(Y - OFFSET);
 					thisCorrection = closestMultiple + 1;
 					if(thisCorrection != lastCorrection) {
+						//System.out.println("+Y");
 						//System.out.println("("+X+", "+Y+") +Y");
 						odometer.setY(closestMultiple + OFFSET);
 						//System.out.println("("+odometer.getX()+", "+odometer.getY()+") +Y");
@@ -89,33 +90,39 @@ public class OdometryCorrection extends Thread {
 					}
 				}
 				else if (theta <= 180 + ANGLE_TOLERANCE && theta >= 180 - ANGLE_TOLERANCE && (Math.abs((Y + OFFSET) % SQUARE_SIDE) <= DISTANCE_TOLERANCE || Math.abs((Y + OFFSET + DISTANCE_TOLERANCE) % SQUARE_SIDE) <= DISTANCE_TOLERANCE)) { //traveling in -Y
-					closestMultiple = closestMultipleOfSquareSide(Y);
+					closestMultiple = closestMultipleOfSquareSide(Y + OFFSET);
 					thisCorrection = closestMultiple + 2;
 					if(thisCorrection != lastCorrection) {
+						//System.out.println("-Y");
 						//System.out.println("("+X+", "+Y+") -Y");
 						odometer.setY(closestMultiple - OFFSET);
 						//System.out.println("("+odometer.getX()+", "+odometer.getY()+") -Y");
 						Sound.beep();
+						lastCorrection = thisCorrection;
 					}
 				}
 				else if (theta <= 90 + ANGLE_TOLERANCE && theta >= 90 - ANGLE_TOLERANCE && (Math.abs((X - OFFSET) % SQUARE_SIDE) <= DISTANCE_TOLERANCE || Math.abs((X - OFFSET + DISTANCE_TOLERANCE) % SQUARE_SIDE) <= DISTANCE_TOLERANCE)) { //traveling in +X
-					closestMultiple = closestMultipleOfSquareSide(Y);
+					closestMultiple = closestMultipleOfSquareSide(X - OFFSET);
 					thisCorrection = closestMultiple + 3;
 					if(thisCorrection != lastCorrection) {
+						//System.out.println("+X");
 						//System.out.println("("+X+", "+Y+") +X");
-						odometer.setY(closestMultiple + OFFSET);
+						odometer.setX(closestMultiple + OFFSET);
 						//System.out.println("("+odometer.getX()+", "+odometer.getY()+") +X");
 						Sound.beep();
+						lastCorrection = thisCorrection;
 					}
 				}
 				else if (theta <= 270 + ANGLE_TOLERANCE && theta >= 270 - ANGLE_TOLERANCE && (Math.abs((X + OFFSET) % SQUARE_SIDE) <= DISTANCE_TOLERANCE || Math.abs((X + OFFSET + DISTANCE_TOLERANCE) % SQUARE_SIDE) <= DISTANCE_TOLERANCE)) { //traveling in -X
-					closestMultiple = closestMultipleOfSquareSide(Y);
+					closestMultiple = closestMultipleOfSquareSide(X + OFFSET);
 					thisCorrection = closestMultiple + 4;
 					if(thisCorrection != lastCorrection) {
+						//System.out.println("-X");
 						//System.out.println("("+X+", "+Y+") -X");
-						odometer.setY(closestMultiple - OFFSET);
+						odometer.setX(closestMultiple - OFFSET);
 						//System.out.println("("+odometer.getX()+", "+odometer.getY()+") -X");
 						Sound.beep();
+						lastCorrection = thisCorrection;
 					}
 				}
 				else { //a line was detected but no odometer changes were made.
@@ -141,7 +148,9 @@ public class OdometryCorrection extends Thread {
 	
 	//returns the closest multiple of square_side given a value within the distance  tolerance band
 	private int closestMultipleOfSquareSide(double val) {
-		return ((int) (val + DISTANCE_TOLERANCE) / SQUARE_SIDE) * SQUARE_SIDE;
+		int out = ((int) (val + DISTANCE_TOLERANCE) / SQUARE_SIDE) * SQUARE_SIDE;
+		//System.out.println(val + ", " + out);
+		return out;
 	}
 
 	/*
@@ -169,7 +178,7 @@ public class OdometryCorrection extends Thread {
 	}
 
 	private void newDifferenceValue(int newVal) {
-		System.out.println(newVal + ", " + odometer.getX()+ ", " + odometer.getY());
+		//System.out.println(newVal + ", " + odometer.getX()+ ", " + odometer.getY());
 		if (differenceCounter < DIFFERENCE_POINTS) {
 			differenceData[differenceCounter] = newVal;
 			differenceCounter++;
