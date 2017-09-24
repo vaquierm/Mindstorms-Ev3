@@ -14,12 +14,12 @@ public class SquareDriver {
     // reset the motors
     for (EV3LargeRegulatedMotor motor : new EV3LargeRegulatedMotor[] {leftMotor, rightMotor}) {
       motor.stop();
-      motor.setAcceleration(3000);
+      motor.setAcceleration(250);
     }
 
     // wait 5 seconds
     try {
-      Thread.sleep(2000);
+      Thread.sleep(3000);
     } catch (InterruptedException e) {
       // there is nothing to be done here because it is not expected that
       // the odometer will be interrupted by another thread
@@ -36,9 +36,37 @@ public class SquareDriver {
       // turn 90 degrees clockwise
       leftMotor.setSpeed(ROTATE_SPEED);
       rightMotor.setSpeed(ROTATE_SPEED);
+      
+      /*
+       * Since the right motor was just rotating forward, the next degree in the opposite direction seem to not create any torque and the
+       * robot would jerk and skid, making the direction innacuate.
+       * To correct that we make the right wheel rotate one degree forward then update that in the odometer and wait a small delay to ensure that the 
+       * odometer is able to take that change into account.
+       */
+      leftMotor.rotate(-convertAngle(leftRadius, width, 1.0), false);
+      OdometryLab.odometer.setLeftMotorTachoCount(OdometryLab.odometer.getLeftMotorTachoCount() - 1);
+      try {
+    	  Thread.sleep(100);
+      } catch (InterruptedException e) {
+    	  
+      }
 
-      leftMotor.rotate(convertAngle(leftRadius, width, 90.0), true);
-      rightMotor.rotate(-convertAngle(rightRadius, width, 90.0), false);
+      leftMotor.rotate(-convertAngle(leftRadius, width, 90.0), true);
+      rightMotor.rotate(convertAngle(rightRadius, width, 90.0), false);
+      
+      /*
+       * Since the right motor was just rotating backwards, the next degree in the opposite direction seem to not create any torque and the
+       * robot would jerk and skid, making the direction innacuate.
+       * To correct that we make the right wheel rotate one degree forward then update that in the odometer and wait a small delay to ensure that the 
+       * odometer is able to take that change into account.
+       */
+      leftMotor.rotate(convertAngle(leftRadius, width, 1.0), false);
+      OdometryLab.odometer.setLeftMotorTachoCount(OdometryLab.odometer.getLeftMotorTachoCount() + 1);
+      try {
+    	  Thread.sleep(100);
+      } catch (InterruptedException e) {
+    	  
+      }
     }
   }
 
