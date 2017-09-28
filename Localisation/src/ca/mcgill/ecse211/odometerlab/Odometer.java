@@ -43,12 +43,12 @@ public class Odometer extends Thread {
 			double distL, distR, deltaD, deltaT, dX, dY;
 			int nowTachoL = leftMotor.getTachoCount();
 			int nowTachoR = rightMotor.getTachoCount();
-			distL = Math.PI * OdometryLab.WHEEL_RADIUS * (nowTachoL - leftMotorTachoCount) / 180;
-			distR = Math.PI * OdometryLab.WHEEL_RADIUS * (nowTachoR - rightMotorTachoCount) / 180;
+			distL = Math.PI * LocalisationLab.WHEEL_RADIUS * (nowTachoL - leftMotorTachoCount) / 180;
+			distR = Math.PI * LocalisationLab.WHEEL_RADIUS * (nowTachoR - rightMotorTachoCount) / 180;
 			leftMotorTachoCount = nowTachoL;
 			rightMotorTachoCount = nowTachoR;
 			deltaD = 0.5 * (distL + distR);
-			deltaT = (distR - distL) / OdometryLab.TRACK;
+			deltaT = (distR - distL) / LocalisationLab.TRACK;
 
 			synchronized (lock) {
 				setTheta(theta + deltaT);

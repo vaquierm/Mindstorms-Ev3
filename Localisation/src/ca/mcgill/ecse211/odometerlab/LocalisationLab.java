@@ -13,7 +13,7 @@ import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.hardware.sensor.SensorModes;
 import lejos.robotics.SampleProvider;
 
-public class OdometryLab {
+public class LocalisationLab {
 
   private static final EV3LargeRegulatedMotor leftMotor =
       new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
@@ -22,6 +22,7 @@ public class OdometryLab {
       new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
   
   private static final Port colorPort = LocalEV3.get().getPort("S1");
+  private static final Port usPort = LocalEV3.get().getPort("S2");
   
   public static Odometer odometer;
   
@@ -45,6 +46,12 @@ public class OdometryLab {
     SensorModes colorSensor = new EV3ColorSensor(colorPort); // colorSensor is the instance
     SampleProvider colorRed = colorSensor.getMode("Red"); // colorRed provides samples from this instance
     float[] colorRedData = new float[colorRed.sampleSize()]; // colorRedData is the buffer in which data are returned
+    
+    @SuppressWarnings("resource") // Because we don't bother to close this resource
+    SensorModes usSensor = new EV3UltrasonicSensor(usPort); // usSensor is the instance
+    SampleProvider usDistance = usSensor.getMode("Distance"); // usDistance provides samples from this instance
+    float[] usData = new float[usDistance.sampleSize()]; // usData is the buffer in which data are
+                                                         // returned
     
     OdometryCorrection odometryCorrection = new OdometryCorrection(odometer, colorRed, colorRedData);
 
