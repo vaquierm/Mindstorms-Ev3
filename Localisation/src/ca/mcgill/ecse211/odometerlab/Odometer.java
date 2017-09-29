@@ -48,7 +48,7 @@ public class Odometer extends Thread {
 			leftMotorTachoCount = nowTachoL;
 			rightMotorTachoCount = nowTachoR;
 			deltaD = 0.5 * (distL + distR);
-			deltaT = (distR - distL) / LocalisationLab.TRACK;
+			deltaT = (distL - distR) / LocalisationLab.TRACK;
 
 			synchronized (lock) {
 				setTheta(theta + deltaT);

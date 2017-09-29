@@ -5,10 +5,13 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor;
 public class Navigation {
 	
 	private Object lock = new Object();
+	
+	
 	private static final int FORWARD_SPEED = 250;
 	private static final int ROTATE_SPEED = 150;
 	
-	private boolean navigating = false;
+	private int interruptedTheta = -1; //This angle is the angle when the navigation was interrupted
+	
 	private Odometer odometer;
 	private EV3LargeRegulatedMotor leftMotor;
 	private EV3LargeRegulatedMotor rightMotor;
@@ -19,8 +22,9 @@ public class Navigation {
 
 	private final int[][] points = { { 2, 1 }, { 1, 2 }, { 1, 1 }, { 2, 0 } };
 
-	public Navigation(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, double leftRadius,
-			double rightRadius, double width) {
+	public Navigation(Odometer odometer, EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, double leftRadius,
+		double rightRadius, double width) {
+		this.odometer = odometer;
 		this.leftMotor = leftMotor;
 		this.rightMotor = rightMotor;
 		this.leftRadius = leftRadius;
@@ -35,12 +39,34 @@ public class Navigation {
 	 * This will make sure that yourheading is updated until you reach your
 	 * exact goal. This method will pollthe odometer for informatio
 	 */
-	private void travelTo(int x, int y) {
+	public void travelTo(int x, int y) {
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			
+		}
 		
+		
+		double currentX = odometer.getX();
+		double currentY = odometer.getY();
+		
+		double nextHeading = Math.toDegrees(Math.atan2(x - currentX, y - currentY));
+
+		turnTo(nextHeading);
+		
+		
+		leftMotor.setSpeed(FORWARD_SPEED);
+	    rightMotor.setSpeed(FORWARD_SPEED);
+	    
+	    double distance = Math.sqrt(Math.pow((y - currentY),2) + Math.pow((x - currentX),2));
+	    
+	    leftMotor.rotate(convertDistance(leftRadius, distance), true);
+	    rightMotor.rotate(convertDistance(rightRadius, distance), false);
+	    
+	   
 	}
 	
 	public void turnTo(double theta) {
-		setNavigating(true);
 		leftMotor.setSpeed(ROTATE_SPEED);
 	    rightMotor.setSpeed(ROTATE_SPEED);
 		double currentTheta = odometer.getThetaDegrees();
@@ -48,11 +74,10 @@ public class Navigation {
 		if (rightRotation < 0) {
 			rightRotation = rightRotation + 360;
 		}
-		double leftRotation = theta - currentTheta;
-		if (leftRotation > 0) {
-			leftRotation = leftRotation - 360;
+		double leftRotation = currentTheta - theta;
+		if (leftRotation < 0) {
+			leftRotation = leftRotation + 360;
 		}
-		leftRotation = -leftRotation;
 		
 		if (rightRotation < leftRotation) {
 			leftMotor.rotate(convertAngle(leftRadius, width, rightRotation), true);
@@ -62,7 +87,17 @@ public class Navigation {
 			leftMotor.rotate(-convertAngle(leftRadius, width, leftRotation), true);
 		    rightMotor.rotate(convertAngle(rightRadius, width, leftRotation), false);
 		}
-		setNavigating(false);
+	}
+	
+	public void interruptNav() {
+		rightMotor.stop();
+		leftMotor.stop();
+		
+		
+		leftMotor.rotate(convertAngle(leftRadius, width, 90), true);
+	    rightMotor.rotate(-convertAngle(rightRadius, width, 90), false);
+	    
+	    setInterruptedTheta((int) odometer.getThetaDegrees());
 	}
 
 
@@ -74,15 +109,18 @@ public class Navigation {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}
 	
-	public boolean isNavigating() {
+	public void setInterruptedTheta(int theta) {
 		synchronized(lock) {
-			return navigating;
+			interruptedTheta = theta;
 		}
 	}
 	
-	private void setNavigating(boolean nav) {
-		synchronized (lock) {
-			navigating = nav;
+	public int getInterruptedTheta() {
+		synchronized(lock) {
+			return interruptedTheta;
 		}
 	}
+	
+	
+	
 }

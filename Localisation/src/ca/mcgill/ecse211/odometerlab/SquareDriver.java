@@ -70,11 +70,11 @@ public class SquareDriver {
     }
   }
 
-  private static int convertDistance(double radius, double distance) {
+  public static int convertDistance(double radius, double distance) {
     return (int) ((180.0 * distance) / (Math.PI * radius));
   }
 
-  private static int convertAngle(double radius, double width, double angle) {
+  public static int convertAngle(double radius, double width, double angle) {
     return convertDistance(radius, Math.PI * width * angle / 360.0);
   }
 }

@@ -40,6 +40,9 @@ public class OdometryDisplay extends Thread {
       for (int i = 0; i < 3; i++) {
         t.drawString(formattedDoubleToString(position[i], 2), 3, i);
       }
+      
+      
+      t.drawString("" + NavigationController.getNavigationState(), 0, 3);
 
       // throttle the OdometryDisplay
       displayEnd = System.currentTimeMillis();
