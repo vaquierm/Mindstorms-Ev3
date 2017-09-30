@@ -14,7 +14,7 @@ public class Odometer extends Thread {
 	private EV3LargeRegulatedMotor rightMotor;
 
 
-	private static final long ODOMETER_PERIOD = 25; /*
+	private static final long ODOMETER_PERIOD = 15; /*
 													 * odometer update period,
 													 * in ms
 													 */

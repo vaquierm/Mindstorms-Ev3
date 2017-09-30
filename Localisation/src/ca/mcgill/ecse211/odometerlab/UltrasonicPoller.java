@@ -24,14 +24,13 @@ public class UltrasonicPoller extends Thread {
   private EV3LargeRegulatedMotor USMotor =
 	      new EV3LargeRegulatedMotor(LocalEV3.get().getPort("C"));
   
-  private boolean wallFollowing = false;
-  private Object lock = new Object();
 
   public UltrasonicPoller(Navigation navigation, SampleProvider us, float[] usData, UltrasonicController cont) {
     this.us = us;
     this.cont = cont;
     this.usData = usData;
     this.navigation = navigation;
+    USMotor.setSpeed(30);
   }
 
   /*
@@ -49,7 +48,7 @@ public class UltrasonicPoller extends Thread {
       switch (NavigationController.getNavigationState()) {
       case NAVIGATING:
     	  if(distance < OBSTACLE_THRESHOLD) { //an object was detected in front of  the robot, turn sensor towards the wall as the robot rotates
-        	  USMotor.rotate(90, true);
+        	  USMotor.rotate(-70, true);
         	  navigation.interruptNav();
         	  NavigationController.setNavigationState(NavigationState.AVOIDING);
           }
@@ -65,6 +64,10 @@ public class UltrasonicPoller extends Thread {
       } // Poor man's timed sampling
     }
   }
+  
+public void usSensorStraight() {
+	USMotor.rotate(70, true);
+}
   
 
 }

@@ -12,6 +12,8 @@ public class Navigation {
 	
 	private int interruptedTheta = -1; //This angle is the angle when the navigation was interrupted
 	
+	private NavigationController controller;
+	
 	private Odometer odometer;
 	private EV3LargeRegulatedMotor leftMotor;
 	private EV3LargeRegulatedMotor rightMotor;
@@ -30,6 +32,8 @@ public class Navigation {
 		this.leftRadius = leftRadius;
 		this.rightRadius = rightRadius;
 		this.width = width;
+		this.leftMotor.setAcceleration(1000);
+		this.rightMotor.setAcceleration(1000);
 	}
 
 	/*
@@ -41,7 +45,7 @@ public class Navigation {
 	 */
 	public void travelTo(int x, int y) {
 		try {
-			Thread.sleep(1000);
+			Thread.sleep(500);
 		} catch (InterruptedException e) {
 			
 		}
@@ -61,7 +65,7 @@ public class Navigation {
 	    double distance = Math.sqrt(Math.pow((y - currentY),2) + Math.pow((x - currentX),2));
 	    
 	    leftMotor.rotate(convertDistance(leftRadius, distance), true);
-	    rightMotor.rotate(convertDistance(rightRadius, distance), false);
+	    rightMotor.rotate(convertDistance(rightRadius, distance), true);
 	    
 	   
 	}
@@ -94,10 +98,12 @@ public class Navigation {
 		leftMotor.stop();
 		
 		
-		leftMotor.rotate(convertAngle(leftRadius, width, 90), true);
-	    rightMotor.rotate(-convertAngle(rightRadius, width, 90), false);
+		leftMotor.rotate(convertAngle(leftRadius, width, 75), true); //when an object is detected, we turn to starting to follow it as a wall.
+	    rightMotor.rotate(-convertAngle(rightRadius, width, 75), false);
 	    
 	    setInterruptedTheta((int) odometer.getThetaDegrees());
+	    
+	    
 	}
 
 
@@ -121,6 +127,9 @@ public class Navigation {
 		}
 	}
 	
+	public void setController(NavigationController cont) {
+		this.controller = cont;
+	}
 	
 	
 }

@@ -6,7 +6,7 @@ public class PController implements UltrasonicController {
 
 	/* Constants */
 	private static final int MOTOR_SPEED = 140;
-	private static final int FILTER_OUT = 45;
+	private static final int FILTER_OUT = 20;
 	private final int ERROR_PROPORTIONALITY = 35;
 	private final int CORNER_SPEED_DIFFERENCE = 45;
 	private static final int SPIN_SPEED = 150;
@@ -24,11 +24,7 @@ public class PController implements UltrasonicController {
 		this.bandWidth = bandWidth;
 		this.filterControl = 0;
 
-		LocalisationLab.leftMotor.setSpeed(MOTOR_SPEED); // Initalize motor
-															// rolling forward
-		LocalisationLab.rightMotor.setSpeed(MOTOR_SPEED);
-		LocalisationLab.leftMotor.forward();
-		LocalisationLab.rightMotor.forward();
+		
 	}
 
 	@Override
@@ -56,7 +52,7 @@ public class PController implements UltrasonicController {
 		corner = false;
 		if (this.distance >= 100) {
 			wheelSpeedDifference = CORNER_SPEED_DIFFERENCE;
-			LocalisationLab.leftMotor.setSpeed(140);
+			LocalisationLab.leftMotor.setSpeed(100);
 			LocalisationLab.rightMotor.setSpeed(240);
 			LocalisationLab.rightMotor.forward();
 			LocalisationLab.leftMotor.forward();

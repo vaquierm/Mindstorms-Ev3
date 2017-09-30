@@ -22,16 +22,16 @@ public class LocalisationLab {
 
 	public static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
 
-	private static final Port colorPort = LocalEV3.get().getPort("S1");
-	private static final Port usPort = LocalEV3.get().getPort("S2");
+	private static final Port colorPort = LocalEV3.get().getPort("S2");
+	private static final Port usPort = LocalEV3.get().getPort("S1");
 
 	public static Odometer odometer;
 
-	private static final int bandCenter = 40; // Offset from the wall (cm)
+	private static final int bandCenter = 25; // Offset from the wall (cm)
 	private static final int bandWidth = 3; // Width of dead band (cm)
 
 	public static final double WHEEL_RADIUS = 2.1;
-	public static final double TRACK = 17;
+	public static final double TRACK = 17.5;
 
 	public static void main(String[] args) {
 		int buttonChoice;
@@ -93,11 +93,11 @@ public class LocalisationLab {
 		if (buttonChoice == Button.ID_LEFT) {
 
 			List<Coordinate> coordinateList = new ArrayList<Coordinate>();
-			coordinateList.add(new Coordinate(30, 60));
-			coordinateList.add(new Coordinate(0, 60));
+			coordinateList.add(new Coordinate(00, 60));
 			coordinateList.add(new Coordinate(60, 60));
-			coordinateList.add(new Coordinate(30, 60));
-			coordinateList.add(new Coordinate(30, 0));
+			coordinateList.add(new Coordinate(60, 0));
+			coordinateList.add(new Coordinate(0, 0));
+			coordinateList.add(new Coordinate(0, 0));
 
 			new NavigationController(usPoller, odometer, nav, coordinateList, false).start();
 
