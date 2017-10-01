@@ -14,9 +14,12 @@ public class Navigation {
 	
 	private NavigationController controller;
 	
+	private static final int SLOW_ACCEL = 250;
+	private static final int FAST_ACCEL = 1000;
+	
 	private Odometer odometer;
-	private EV3LargeRegulatedMotor leftMotor;
-	private EV3LargeRegulatedMotor rightMotor;
+	public EV3LargeRegulatedMotor leftMotor;
+	public EV3LargeRegulatedMotor rightMotor;
 	private double leftRadius;
 	private double rightRadius;
 	private double width;
@@ -32,8 +35,8 @@ public class Navigation {
 		this.leftRadius = leftRadius;
 		this.rightRadius = rightRadius;
 		this.width = width;
-		this.leftMotor.setAcceleration(1000);
-		this.rightMotor.setAcceleration(1000);
+		this.leftMotor.setAcceleration(FAST_ACCEL);
+		this.rightMotor.setAcceleration(FAST_ACCEL);
 	}
 
 	/*
@@ -43,9 +46,9 @@ public class Navigation {
 	 * This will make sure that yourheading is updated until you reach your
 	 * exact goal. This method will pollthe odometer for informatio
 	 */
-	public void travelTo(int x, int y) {
+	public void travelTo(double x, double y) {
 		try {
-			Thread.sleep(500);
+			Thread.sleep(100);
 		} catch (InterruptedException e) {
 			
 		}
@@ -57,6 +60,12 @@ public class Navigation {
 		double nextHeading = Math.toDegrees(Math.atan2(x - currentX, y - currentY));
 
 		turnTo(nextHeading);
+		
+		try {
+			Thread.sleep(300);
+		} catch (InterruptedException e) {
+			
+		}
 		
 		
 		leftMotor.setSpeed(FORWARD_SPEED);
@@ -82,7 +91,8 @@ public class Navigation {
 		if (leftRotation < 0) {
 			leftRotation = leftRotation + 360;
 		}
-		
+		rightMotor.setAcceleration(SLOW_ACCEL);
+		leftMotor.setAcceleration(SLOW_ACCEL);
 		if (rightRotation < leftRotation) {
 			leftMotor.rotate(convertAngle(leftRadius, width, rightRotation), true);
 		    rightMotor.rotate(-convertAngle(rightRadius, width, rightRotation), false);
@@ -91,6 +101,8 @@ public class Navigation {
 			leftMotor.rotate(-convertAngle(leftRadius, width, leftRotation), true);
 		    rightMotor.rotate(convertAngle(rightRadius, width, leftRotation), false);
 		}
+		rightMotor.setAcceleration(FAST_ACCEL);
+		leftMotor.setAcceleration(FAST_ACCEL);
 	}
 	
 	public void interruptNav() {
@@ -98,8 +110,8 @@ public class Navigation {
 		leftMotor.stop();
 		
 		
-		leftMotor.rotate(convertAngle(leftRadius, width, 75), true); //when an object is detected, we turn to starting to follow it as a wall.
-	    rightMotor.rotate(-convertAngle(rightRadius, width, 75), false);
+		leftMotor.rotate(convertAngle(leftRadius, width, 90), true); //when an object is detected, we turn to starting to follow it as a wall.
+	    rightMotor.rotate(-convertAngle(rightRadius, width, 90), false);
 	    
 	    setInterruptedTheta((int) odometer.getThetaDegrees());
 	    

@@ -19,7 +19,7 @@ public class UltrasonicPoller extends Thread {
   
   private Navigation navigation;
   
-  private static final int OBSTACLE_THRESHOLD = 15;
+  private static final int OBSTACLE_THRESHOLD = 18;
   
   private EV3LargeRegulatedMotor USMotor =
 	      new EV3LargeRegulatedMotor(LocalEV3.get().getPort("C"));

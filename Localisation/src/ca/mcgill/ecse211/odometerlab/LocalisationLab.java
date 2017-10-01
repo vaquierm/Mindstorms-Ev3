@@ -31,7 +31,7 @@ public class LocalisationLab {
 	private static final int bandWidth = 3; // Width of dead band (cm)
 
 	public static final double WHEEL_RADIUS = 2.1;
-	public static final double TRACK = 17.5;
+	public static final double TRACK = 17.3;
 
 	public static void main(String[] args) {
 		int buttonChoice;
@@ -94,10 +94,16 @@ public class LocalisationLab {
 
 			List<Coordinate> coordinateList = new ArrayList<Coordinate>();
 			coordinateList.add(new Coordinate(00, 60));
-			coordinateList.add(new Coordinate(60, 60));
-			coordinateList.add(new Coordinate(60, 0));
-			coordinateList.add(new Coordinate(0, 0));
-			coordinateList.add(new Coordinate(0, 0));
+			coordinateList.add(new Coordinate(-60, 60));
+			coordinateList.add(new Coordinate(-60, 00));
+			coordinateList.add(new Coordinate(00, 00));
+		
+			
+			/*coordinateList.add(new Coordinate(00, 60.96));
+			coordinateList.add(new Coordinate(30.48, 30.48));
+			coordinateList.add(new Coordinate(60.96, 60.96));
+			coordinateList.add(new Coordinate(30.48, 30.48));
+			coordinateList.add(new Coordinate(30.48, 0));*/
 
 			new NavigationController(usPoller, odometer, nav, coordinateList, false).start();
 
@@ -121,8 +127,8 @@ public class LocalisationLab {
 				odometryCorrection.start();
 
 				List<Coordinate> coordinateList = new ArrayList<Coordinate>();
-				coordinateList.add(new Coordinate(0, 60));
-				coordinateList.add(new Coordinate(60, 0));
+				coordinateList.add(new Coordinate(0.0, 60.96));
+				coordinateList.add(new Coordinate(-60.96, 0.0));
 				
 
 				new NavigationController(usPoller, odometer, nav, coordinateList, true).start();

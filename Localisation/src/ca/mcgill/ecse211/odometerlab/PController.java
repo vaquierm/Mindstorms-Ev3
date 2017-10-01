@@ -6,7 +6,7 @@ public class PController implements UltrasonicController {
 
 	/* Constants */
 	private static final int MOTOR_SPEED = 140;
-	private static final int FILTER_OUT = 20;
+	private static final int FILTER_OUT = 16;
 	private final int ERROR_PROPORTIONALITY = 35;
 	private final int CORNER_SPEED_DIFFERENCE = 45;
 	private static final int SPIN_SPEED = 150;
@@ -53,7 +53,7 @@ public class PController implements UltrasonicController {
 		if (this.distance >= 100) {
 			wheelSpeedDifference = CORNER_SPEED_DIFFERENCE;
 			LocalisationLab.leftMotor.setSpeed(100);
-			LocalisationLab.rightMotor.setSpeed(240);
+			LocalisationLab.rightMotor.setSpeed(250);
 			LocalisationLab.rightMotor.forward();
 			LocalisationLab.leftMotor.forward();
 			corner = true;
@@ -71,13 +71,13 @@ public class PController implements UltrasonicController {
 				LocalisationLab.rightMotor.forward();
 				LocalisationLab.leftMotor.forward();
 			} else if (this.distance < bandCenter) { // Too close
-				if (this.distance < 10) {
-					LocalisationLab.leftMotor.setSpeed(300);
-					LocalisationLab.rightMotor.setSpeed(300);
+				if (this.distance < 8) {
+					LocalisationLab.leftMotor.setSpeed(200);
+					LocalisationLab.rightMotor.setSpeed(200);
 					LocalisationLab.rightMotor.backward();
 					LocalisationLab.leftMotor.backward();
 					spinning = false;
-				} else if (this.distance < 20) { // if the robot is way too
+				} else if (this.distance < 17) { // if the robot is way too
 													// close, it spins
 					LocalisationLab.leftMotor.setSpeed(SPIN_SPEED);
 					LocalisationLab.rightMotor.setSpeed(SPIN_SPEED);

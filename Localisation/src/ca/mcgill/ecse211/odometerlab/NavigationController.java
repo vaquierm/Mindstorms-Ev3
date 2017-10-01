@@ -46,7 +46,7 @@ public class NavigationController extends Thread {
 				double x = odometer.getX();
 				double y = odometer.getY();
 				
-				if(Math.sqrt(Math.pow(x - point.x, 2)+Math.pow(y - point.y, 2)) < 1.5) { //if the robot was not interrupted and roughly made it to its destination we can remove the next point to travel to.
+				if(!navigation.rightMotor.isMoving() && !navigation.leftMotor.isMoving() && Math.sqrt(Math.pow(x - point.x, 2)+Math.pow(y - point.y, 2)) < 1.5) { //if the robot was not interrupted and roughly made it to its destination we can remove the next point to travel to.
 					coordinateList.remove(0);
 					setNavigationState(NavigationState.READY);
 				}
