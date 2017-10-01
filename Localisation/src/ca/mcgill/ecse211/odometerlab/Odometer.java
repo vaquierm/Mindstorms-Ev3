@@ -2,6 +2,14 @@ package ca.mcgill.ecse211.odometerlab;
 
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
+/**
+ * 
+ * Odometer is from prior lab which simply keeps keeps track of the robots 
+ * calculated location and orientation
+ * 
+ * @author Oliver Clark
+ * @author Michael Vaquier
+ */
 public class Odometer extends Thread {
 	// robot position
 	private double x;

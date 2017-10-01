@@ -1,5 +1,13 @@
+//test
 package ca.mcgill.ecse211.odometerlab;
 
+/**
+ * Simple class to represent the coordinates where 
+ * the robot will travel
+ * 
+ * @author Oliver Clark
+ * @author Michael Vaquier
+ */
 public class Coordinate {
 	public double x;
 	public double y;

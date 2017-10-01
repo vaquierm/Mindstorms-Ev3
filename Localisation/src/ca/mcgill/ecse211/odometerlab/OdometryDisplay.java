@@ -6,6 +6,14 @@ package ca.mcgill.ecse211.odometerlab;
 
 import lejos.hardware.lcd.TextLCD;
 
+/**
+ * 
+ * 
+ * Displays Odometry values contained in an instance of Odometer
+ * 
+ * @author Oliver Clark
+ * @author Michael Vaquier
+ */
 public class OdometryDisplay extends Thread {
   private static final long DISPLAY_PERIOD = 250;
   private Odometer odometer;
