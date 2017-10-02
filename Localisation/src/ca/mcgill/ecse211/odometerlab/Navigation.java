@@ -2,6 +2,14 @@ package ca.mcgill.ecse211.odometerlab;
 
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
+/**
+ * 
+ * Navigation class which navigates robot to specified points, 
+ * determines direction to turn (Minimal turn) and how far to travel
+ * 
+ * @author Oliver Clark
+ * @author Michael Vaquier
+ */
 public class Navigation {
 	
 	private Object lock = new Object();

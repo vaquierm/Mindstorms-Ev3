@@ -16,6 +16,14 @@ import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.hardware.sensor.SensorModes;
 import lejos.robotics.SampleProvider;
 
+/**
+ * 
+ * LocalisationLab is where the robot's display is set up and where
+ * the sensors and motors are set up
+ * 
+ * @author Oliver Clark
+ * @author Michael Vaquier
+ */
 public class LocalisationLab {
 
 	public static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));

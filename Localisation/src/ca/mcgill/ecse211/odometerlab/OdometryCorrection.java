@@ -6,6 +6,12 @@ package ca.mcgill.ecse211.odometerlab;
 import lejos.hardware.Sound;
 import lejos.robotics.SampleProvider;
 
+/**
+ * 
+ * 
+ * @author Oliver Clark
+ * @author Michael Vaquier
+ */
 public class OdometryCorrection extends Thread {
 	
 	private static final int OFFSET = 6; //distance between sensor and center of the robot. (Sensor is behind the center)
