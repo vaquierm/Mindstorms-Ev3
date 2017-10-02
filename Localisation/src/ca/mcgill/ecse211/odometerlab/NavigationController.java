@@ -2,6 +2,16 @@ package ca.mcgill.ecse211.odometerlab;
 
 import java.util.List;
 
+/**
+ * 
+ * NavigationController allows the robot to switch between navigating 
+ * point to point using Navigation and wall following around an obstacle to avoid it
+ * using PController
+ * 
+ * 
+ * @author Oliver Clark
+ * @author Michael Vaquier
+ */
 public class NavigationController extends Thread {
 
 	private static Object lock = new Object();

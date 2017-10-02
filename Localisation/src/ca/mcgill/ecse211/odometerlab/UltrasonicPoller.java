@@ -11,6 +11,9 @@ import lejos.robotics.SampleProvider;
  * methods operate in about 20mS, and that the thread sleeps for 50 mS at the end of each loop, then
  * one cycle through the loop is approximately 70 mS. This corresponds to a sampling rate of 1/70mS
  * or about 14 Hz.
+ *
+ * @author Oliver Clark
+ * @author Michael Vaquier
  */
 public class UltrasonicPoller extends Thread {
   private SampleProvider us;

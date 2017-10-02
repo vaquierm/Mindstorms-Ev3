@@ -2,6 +2,14 @@ package ca.mcgill.ecse211.odometerlab;
 
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
+/**
+ * 
+ * PController from prior lab to follow the obstacle once
+ * interrupted from simple navigation
+ * 
+ * @author Oliver Clark
+ * @author Michael Vaquier
+ */
 public class PController implements UltrasonicController {
 
 	/* Constants */
