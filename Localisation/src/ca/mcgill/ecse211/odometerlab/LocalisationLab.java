@@ -31,7 +31,7 @@ public class LocalisationLab {
 	private static final int bandWidth = 3; // Width of dead band (cm)
 
 	public static final double WHEEL_RADIUS = 2.1;
-	public static final double TRACK = 17.3;
+	public static final double TRACK = 16.3;
 
 	public static void main(String[] args) {
 		int buttonChoice;
@@ -128,7 +128,7 @@ public class LocalisationLab {
 
 				List<Coordinate> coordinateList = new ArrayList<Coordinate>();
 				coordinateList.add(new Coordinate(0.0, 60.96));
-				coordinateList.add(new Coordinate(-60.96, 0.0));
+				coordinateList.add(new Coordinate(60.96, 0.0));
 				
 
 				new NavigationController(usPoller, odometer, nav, coordinateList, true).start();
