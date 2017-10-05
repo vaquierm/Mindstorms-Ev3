@@ -1,6 +1,6 @@
 // Lab2.java
 
-package ca.mcgill.ecse211.odometerlab;
+package ca.mcgill.ecse211.localisation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +15,7 @@ import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.hardware.sensor.SensorModes;
 import lejos.robotics.SampleProvider;
+import lejos.robotics.filter.MeanFilter;
 
 /**
  * 
@@ -24,22 +25,20 @@ import lejos.robotics.SampleProvider;
  * @author Oliver Clark
  * @author Michael Vaquier
  */
-public class NavigationLab {
+public class LocalisationLab {
 
-	public static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
+	public static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("B"));
 
-	public static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
+	public static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("C"));
 
 	private static final Port colorPort = LocalEV3.get().getPort("S2");
 	private static final Port usPort = LocalEV3.get().getPort("S1");
 
 	public static Odometer odometer;
 
-	private static final int bandCenter = 25; // Offset from the wall (cm)
-	private static final int bandWidth = 3; // Width of dead band (cm)
 
 	public static final double WHEEL_RADIUS = 2.1;
-	public static final double TRACK = 16.3;
+	public static final double TRACK = 17.4;
 
 	public static void main(String[] args) {
 		int buttonChoice;
@@ -57,12 +56,14 @@ public class NavigationLab {
 																// provides
 																// samples from
 																// this instance
-		float[] colorRedData = new float[colorRed.sampleSize()]; // colorRedData
+		SampleProvider colorRedMean = new MeanFilter(colorRed, 7);
+		float[] colorRedData = new float[colorRedMean.sampleSize()]; // colorRedData
 																	// is the
 																	// buffer in
 																	// which
 																	// data are
 																	// returned
+		
 
 		@SuppressWarnings("resource") // Because we don't bother to close this
 										// resource
@@ -73,16 +74,16 @@ public class NavigationLab {
 																	// samples
 																	// from this
 																	// instance
-		float[] usData = new float[usDistance.sampleSize()]; // usData is the
+		SampleProvider meanFilterUs = new MeanFilter(usDistance, 7);
+		float[] usData = new float[meanFilterUs.sampleSize()]; // usData is the
 																// buffer in
 																// which data
 																// are
 																// returned
 
-		OdometryCorrection odometryCorrection = new OdometryCorrection(odometer, colorRed, colorRedData);
+		ColorPoller colorPoller = new ColorPoller(odometer, colorRedMean, colorRedData);
 		Navigation nav = new Navigation(odometer, leftMotor, rightMotor, WHEEL_RADIUS, WHEEL_RADIUS, TRACK);
-		PController pController = new PController(bandCenter, bandWidth);
-		UltrasonicPoller usPoller = new UltrasonicPoller(nav, usDistance, usData, pController);
+		UltrasonicPoller usPoller = new UltrasonicPoller(meanFilterUs, usData);
 
 		do {
 			// clear the display
@@ -91,29 +92,18 @@ public class NavigationLab {
 			// ask the user whether the motors should drive in a square or float
 			t.drawString("< Left | Right >", 0, 0);
 			t.drawString("       |        ", 0, 1);
-			t.drawString(" Simple|Obstacle", 0, 2);
-			t.drawString("  nav  | avoid  ", 0, 3);
+			t.drawString(" Rising|Falling ", 0, 2);
+			t.drawString("  edge | edge   ", 0, 3);
 			t.drawString("       |        ", 0, 4);
 
 			buttonChoice = Button.waitForAnyPress();
 		} while (buttonChoice != Button.ID_LEFT && buttonChoice != Button.ID_RIGHT);
 
 		if (buttonChoice == Button.ID_LEFT) {
+			odometer.start();
 
-			List<Coordinate> coordinateList = new ArrayList<Coordinate>();
-			/*coordinateList.add(new Coordinate(00, 60));
-			coordinateList.add(new Coordinate(-60, 60));
-			coordinateList.add(new Coordinate(-60, 00));
-			coordinateList.add(new Coordinate(00, 00));*/
-		
+			new LocalisationManager(usPoller, colorPoller, nav, false).start();
 			
-			coordinateList.add(new Coordinate(30.48, 30.48));
-			coordinateList.add(new Coordinate(0, 60.96));
-			coordinateList.add(new Coordinate(60.96, 60.96));
-			coordinateList.add(new Coordinate(60.96, 30.48));
-			coordinateList.add(new Coordinate(30.48, 0));
-
-			new NavigationController(usPoller, odometer, nav, coordinateList, false).start();
 
 			odometryDisplay.start();
 
@@ -124,25 +114,18 @@ public class NavigationLab {
 			// ask the user whether the motors should drive in a square or float
 			t.drawString("< Left | Right >", 0, 0);
 			t.drawString("       |        ", 0, 1);
-			t.drawString(" Simple|Obstacle", 0, 2);
-			t.drawString("  nav  | avoid  ", 0, 3);
+			t.drawString(" Rising|Falling ", 0, 2);
+			t.drawString("  edge | edge   ", 0, 3);
 			t.drawString("       |        ", 0, 4);
 
 			buttonChoice = Button.waitForAnyPress();
 
 
 			if (buttonChoice == Button.ID_RIGHT) {
-				odometryCorrection.start();
-
-				List<Coordinate> coordinateList = new ArrayList<Coordinate>();
-				coordinateList.add(new Coordinate(30.48, 30.48));
-				coordinateList.add(new Coordinate(0, 60.96));
-				coordinateList.add(new Coordinate(60.96, 60.96));
-				coordinateList.add(new Coordinate(60.96, 30.48));
-				coordinateList.add(new Coordinate(30.48, 0));
+				odometer.start();
 				
-
-				new NavigationController(usPoller, odometer, nav, coordinateList, true).start();
+				new LocalisationManager(usPoller, colorPoller, nav, true).start();
+				
 				
 				odometryDisplay.start();
 			}

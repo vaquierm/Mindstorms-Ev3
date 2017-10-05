@@ -1,4 +1,4 @@
-package ca.mcgill.ecse211.odometerlab;
+package ca.mcgill.ecse211.localisation;
 
 import java.util.List;
 
@@ -20,24 +20,17 @@ public class NavigationController extends Thread {
 	private Odometer odometer;
 	private Navigation navigation;
 	private List<Coordinate> coordinateList;
-	private final boolean objectDetection;
 	private static NavigationState state = NavigationState.READY;
 	
 	public enum NavigationState { NAVIGATING, AVOIDING, READY }
 	
-	public NavigationController(UltrasonicPoller usPoller, Odometer odometer, Navigation navigation, List<Coordinate> coordinateList, boolean objectDetection) {
+	public NavigationController(UltrasonicPoller usPoller, Odometer odometer, Navigation navigation, List<Coordinate> coordinateList) {
 		this.usPoller = usPoller;
 		this.odometer = odometer;
 		this.navigation = navigation;
 		this.coordinateList = coordinateList;
-		this.objectDetection = objectDetection;
-		
-		navigation.setController(this);
 		
 		odometer.start();
-		if (this.objectDetection) {
-			this.usPoller.start();
-		}
 		
 	}
 	
@@ -61,16 +54,6 @@ public class NavigationController extends Thread {
 					setNavigationState(NavigationState.READY);
 				}
 				
-				break;
-			case AVOIDING:
-				int interrupted = navigation.getInterruptedTheta();
-				int current = (int) odometer.getThetaDegrees();
-				int difference = Math.abs(interrupted - current);
-				//System.out.println(difference);
-				if(difference < 195 && difference > 165) { //when the robot is pointing to the opposite direction after it was interrupted, we can start navigating again.
-					setNavigationState(NavigationState.READY);
-					usPoller.usSensorStraight();
-				}
 				break;
 				default:
 					break;
