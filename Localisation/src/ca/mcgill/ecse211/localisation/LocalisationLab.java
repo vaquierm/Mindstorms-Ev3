@@ -38,7 +38,7 @@ public class LocalisationLab {
 
 
 	public static final double WHEEL_RADIUS = 2.1;
-	public static final double TRACK = 17.4;
+	public static final double TRACK = 17;
 
 	public static void main(String[] args) {
 		int buttonChoice;
@@ -85,6 +85,13 @@ public class LocalisationLab {
 		Navigation nav = new Navigation(odometer, leftMotor, rightMotor, WHEEL_RADIUS, WHEEL_RADIUS, TRACK);
 		UltrasonicPoller usPoller = new UltrasonicPoller(meanFilterUs, usData);
 
+		
+		/*leftMotor.setAcceleration(250);
+		rightMotor.setAcceleration(250);
+		leftMotor.setSpeed(200);
+		rightMotor.setSpeed(200);
+		leftMotor.rotate(nav.convertAngle(WHEEL_RADIUS, TRACK, 360), true);
+		rightMotor.rotate(-nav.convertAngle(WHEEL_RADIUS, TRACK, 360), true);*/
 		do {
 			// clear the display
 			t.clear();

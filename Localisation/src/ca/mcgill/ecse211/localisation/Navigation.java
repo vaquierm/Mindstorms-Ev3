@@ -15,12 +15,12 @@ public class Navigation {
 	private Object lock = new Object();
 	
 	
-	private static final int FORWARD_SPEED = 250;
-	private static final int ROTATE_SPEED = 150;
+	private static final int FORWARD_SPEED = 150;
+	private static final int ROTATE_SPEED = 140;
 
 	
 	private static final int SLOW_ACCEL = 250;
-	private static final int FAST_ACCEL = 1000;
+	private static final int FAST_ACCEL = 500;
 	
 	private Odometer odometer;
 	public EV3LargeRegulatedMotor leftMotor;
@@ -48,7 +48,7 @@ public class Navigation {
 	 * This will make sure that yourheading is updated until you reach your
 	 * exact goal. This method will pollthe odometer for informatio
 	 */
-	public void travelTo(double x, double y) {
+	public void travelTo(double x, double y, boolean returnThread) {
 		try {
 			Thread.sleep(100);
 		} catch (InterruptedException e) {
@@ -76,7 +76,7 @@ public class Navigation {
 	    double distance = Math.sqrt(Math.pow((y - currentY),2) + Math.pow((x - currentX),2));
 	    
 	    leftMotor.rotate(convertDistance(leftRadius, distance), true);
-	    rightMotor.rotate(convertDistance(rightRadius, distance), true);
+	    rightMotor.rotate(convertDistance(rightRadius, distance), returnThread);
 	    
 	   
 	}
@@ -108,11 +108,11 @@ public class Navigation {
 	}
 
 
-	private int convertDistance(double radius, double distance) {
+	public int convertDistance(double radius, double distance) {
 		return (int) ((180.0 * distance) / (Math.PI * radius));
 	}
 
-	private int convertAngle(double radius, double width, double angle) {
+	public int convertAngle(double radius, double width, double angle) {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}
 

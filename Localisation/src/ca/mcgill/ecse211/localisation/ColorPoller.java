@@ -35,9 +35,10 @@ public class ColorPoller extends Thread {
 	private int lastAverage = -1; //last average used to calculate the new average.
 	private int[] differenceData; //shift register used for derivative data
 	
-	//this variable is used to track what correction was made last such that it
-	//does not correct multiple times and make the position even more innacurate.
-	private int lastCorrection = -1;
+	private boolean polling = false;
+	private Object lock = new Object();
+	
+	private Localisation localisation;
 
 	// constructor
 	public ColorPoller(Odometer odometer, SampleProvider colorRed, float[] colorRedData) {
@@ -62,8 +63,10 @@ public class ColorPoller extends Thread {
 	// run method (required for Thread)
 	public void run() {
 		long correctionStart, correctionEnd;
-
-		while (true) {
+		synchronized(lock) {
+			polling = true;
+		}
+		while (getPolling()) {
 			correctionStart = System.currentTimeMillis();
 
 			colorRed.fetchSample(colorRedData, 0); // acquire data
@@ -74,6 +77,7 @@ public class ColorPoller extends Thread {
 			newSensorValue(sample);
 			
 			if(isOnLine()) {
+				localisation.setWaiting(false);
 				Sound.beep();
 			}
 			
@@ -92,6 +96,7 @@ public class ColorPoller extends Thread {
 				}
 			}
 		}
+		return;
 	}
 	
 
@@ -165,6 +170,21 @@ public class ColorPoller extends Thread {
 			}
 		}
 		return result;
+	}
+	
+	public void stopPolling() {
+		synchronized(lock) {
+			polling = false;
+		}
+	}
+	private boolean getPolling() {
+		synchronized(lock) {
+			return polling;
+		}
+	}
+	
+	public void setLocalisation(Localisation localisation) {
+		this.localisation = localisation;
 	}
 	
 }

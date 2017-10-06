@@ -24,6 +24,7 @@ public class LocalisationManager extends Thread {
 		this.localisation = new Localisation(usPoller, colorPoller, this.fallingEdge);
 		usPoller.setLocalisation(this.localisation);
 		usPoller.setFallingEdgeMode(this.fallingEdge);
+		colorPoller.setLocalisation(this.localisation);
 	}
 	
 	public void run() {
@@ -38,12 +39,21 @@ public class LocalisationManager extends Thread {
 				while(Button.waitForAnyPress() != Button.ID_ENTER) {
 					
 				}
+				nav.turnTo(45);
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException e) {
+				}
 				localisation.fixXY();
+				setLocalisationState(LocalisationState.FULLY_LOCALIZED);
 				break;
 			default:
 				break;
 			}
 		}
+		nav.travelTo(0, 0, false);
+		nav.turnTo(0);
+		return;
 	}
 
 	public void setLocalisationState(LocalisationState state) {

@@ -41,7 +41,7 @@ public class NavigationController extends Thread {
 			switch(getNavigationState()) {
 			case READY:
 				
-				navigation.travelTo(point.x, point.y);
+				navigation.travelTo(point.x, point.y, true);
 				setNavigationState(NavigationState.NAVIGATING);
 				break;
 			case NAVIGATING:

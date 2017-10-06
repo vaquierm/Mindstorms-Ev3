@@ -6,12 +6,15 @@ public class Localisation {
 	private ColorPoller colorPoller;
 	private static final int ROTATION_SPEED = 150;
 	
+	private static final int COLOR_SENSOR_OFFSET = 15;
+	
 	private boolean fallingEdge;
 	
 	private boolean waiting = false;
 	private Object lock = new Object();
 	
-	private double[] edges = {-1, -1}; 
+	private double[] edges = {-1, -1};
+	private double[] lines = {-1, -1, -1, -1};
 	
 	public Localisation(UltrasonicPoller usPoller, ColorPoller colorPoller, boolean fallingEdge) {
 		this.usPoller = usPoller;
@@ -49,6 +52,7 @@ public class Localisation {
 	}
 	
 	public void fixXY() {
+		
 		colorPoller.start();
 		LocalisationLab.leftMotor.setSpeed(ROTATION_SPEED);
 		LocalisationLab.rightMotor.setSpeed(ROTATION_SPEED);
@@ -58,6 +62,44 @@ public class Localisation {
 		while(getWaiting()) {
 			
 		}
+		lines[0] = LocalisationLab.odometer.getThetaDegrees();
+		setWaiting(true);
+		while(getWaiting()) {
+			
+		}
+		lines[2] = LocalisationLab.odometer.getThetaDegrees();
+		setWaiting(true);
+		while(getWaiting()) {
+			
+		}
+		lines[1] = LocalisationLab.odometer.getThetaDegrees();
+		setWaiting(true);
+		while(getWaiting()) {
+			
+		}
+		lines[3] = LocalisationLab.odometer.getThetaDegrees();
+		LocalisationLab.leftMotor.stop(true);
+		LocalisationLab.rightMotor.stop();
+		
+		colorPoller.stopPolling();
+		LocalisationLab.odometer.setX(computeX());
+		LocalisationLab.odometer.setY(computeY());
+	}
+	
+	private double computeX() {
+		double thetaD = (lines[0] - lines[1])/2;
+		if(thetaD < 0) {
+			thetaD += 360;
+		}
+		return -COLOR_SENSOR_OFFSET * Math.cos(Math.toRadians(thetaD));
+	}
+	
+	private double computeY() {
+		double thetaD = (lines[2] - lines[3])/2;
+		if(thetaD < 0) {
+			thetaD += 360;
+		}
+		return -COLOR_SENSOR_OFFSET * Math.cos(Math.toRadians(thetaD));
 	}
 	
 	private double computeAngle() {
