@@ -6,12 +6,9 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.robotics.SampleProvider;
 
 /**
- * Control of the wall follower is applied periodically by the UltrasonicPoller
- * thread. The while loop at the bottom executes in a loop. Assuming that the
- * us.fetchSample, and cont.processUSData methods operate in about 20mS, and
- * that the thread sleeps for 50 mS at the end of each loop, then one cycle
- * through the loop is approximately 70 mS. This corresponds to a sampling rate
- * of 1/70mS or about 14 Hz.
+ * The Us Poller fetches data from the ultrasonic sensor and processes the samples to look for falling or rising edges
+ * depending on what mode it was set as.
+ * When an edge is detected, a flag variable is accessed in the localisation class to indicate that a line was found.
  *
  * @author Oliver Clark
  * @author Michael Vaquier
@@ -48,6 +45,11 @@ public class UltrasonicPoller extends Thread {
 		}
 	}
 
+	/*
+	 * This method starts the poling process of the us sensor
+	 * The polling stops when the polling boolean is accessed by another thread to terminate this process
+	 * @see java.lang.Thread#run()
+	 */
 	public void run() {
 		int distance;
 		synchronized(lock) {
@@ -70,6 +72,9 @@ public class UltrasonicPoller extends Thread {
 		return;
 	}
 
+	/*
+	 * This method is used to check if the current and past data indicates the presence of an edge.
+	 */
 	private void checkThreshold() {
 		boolean edge = false;
 		if (fallingEdge && currentAverage < EDGE_THRESHOLD && lastAverage > EDGE_THRESHOLD && lastAverage > 0) {

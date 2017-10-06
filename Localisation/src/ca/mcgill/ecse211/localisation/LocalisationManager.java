@@ -3,6 +3,15 @@ package ca.mcgill.ecse211.localisation;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
 
+/*
+ * The localisation manager holds the control flow to the localisation procedure
+ * It holds a reference to an instance of a localisation class which hold the specific logic for subtasks of the localisation procedure
+ * A protocol state machine is used to control the flow and current state of the procedure.
+ * 
+ * @author Michael Vaquier
+ * @author Oliver Clark
+ */
+
 public class LocalisationManager extends Thread {
 	
 	public enum LocalisationState { FULLY_LOCALIZED, DIRECTION_LOCALIZED, UNLOCALIZED }
@@ -27,6 +36,11 @@ public class LocalisationManager extends Thread {
 		colorPoller.setLocalisation(this.localisation);
 	}
 	
+	/*
+	 * This pethod executes a full procedure to localise the robot with the assumption
+	 * that it starts on the 45° line in the negative quadrant.
+	 * @see java.lang.Thread#run()
+	 */
 	public void run() {
 		while (getLocalisationState() != LocalisationState.FULLY_LOCALIZED) {
 			switch(getLocalisationState()) {

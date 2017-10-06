@@ -7,16 +7,14 @@ import lejos.hardware.Sound;
 import lejos.robotics.SampleProvider;
 
 /**
- * 
+ * The color poller fetches data from a color sensor and processes the data to determine if a line is detected.
+ * If a line is detected a flag variable in the localisation class is accessed to indicate that a line was found.
  * 
  * @author Oliver Clark
  * @author Michael Vaquier
  */
 public class ColorPoller extends Thread {
-	
-	private static final int OFFSET = 6; //distance between sensor and center of the robot. (Sensor is behind the center)
-	private static final int SQUARE_SIDE = 30; //The square side (we used an integer for faster calculation)
-	
+
 	
 	private static final long CORRECTION_PERIOD = 10;
 	private Odometer odometer;
@@ -60,7 +58,12 @@ public class ColorPoller extends Thread {
 		}
 	}
 
-	// run method (required for Thread)
+	/*
+	 * run method (required for Thread)
+	 * This method periodically fetches data from the color sensor and processes it.
+	 * This thread can be killed when the polling boolean is accessed form another thread.
+	 * @see java.lang.Thread#run()
+	 */
 	public void run() {
 		long correctionStart, correctionEnd;
 		synchronized(lock) {
