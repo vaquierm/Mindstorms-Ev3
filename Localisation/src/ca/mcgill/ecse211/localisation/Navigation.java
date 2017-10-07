@@ -106,6 +106,13 @@ public class Navigation {
 		rightMotor.setAcceleration(FAST_ACCEL);
 		leftMotor.setAcceleration(FAST_ACCEL);
 	}
+	
+	public void forward(double distance, boolean returnThread) {
+		leftMotor.setSpeed(ROTATE_SPEED);
+	    rightMotor.setSpeed(ROTATE_SPEED);
+		leftMotor.rotate(convertDistance(leftRadius, distance), true);
+	    rightMotor.rotate(convertDistance(rightRadius, distance), returnThread);
+	}
 
 
 	public int convertDistance(double radius, double distance) {

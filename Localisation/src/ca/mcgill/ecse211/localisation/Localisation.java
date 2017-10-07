@@ -1,6 +1,12 @@
 package ca.mcgill.ecse211.localisation;
-//Localisation outlines the procedure for both the US angle correction and color position correction
-//by using filtered data from the sensors to update the odometers accordingly
+
+/**
+ * Localisation outlines the procedure for both the US angle correction and color position correction
+ * by using filtered data from the sensors to update the odometers accordingly
+ * @author Michael Vaquier
+ * @author Oliver Clark
+ */
+
 public class Localisation {
 	
 	private UltrasonicPoller usPoller;
@@ -10,6 +16,8 @@ public class Localisation {
 	private static final int COLOR_SENSOR_OFFSET = 15;
 	
 	private boolean fallingEdge;
+	
+	public double edgeDifference = -1;
 	
 	private boolean waiting = false;
 	private Object lock = new Object();
@@ -42,9 +50,9 @@ public class Localisation {
 			
 		}
 		edges[1] = LocalisationLab.odometer.getThetaDegrees();	//once an edge value is found, add to edges array
+		LocalisationLab.odometer.setTheta(Math.toRadians(computeAngle())); //Uses compute angle to set odometer's theta orientation
 		LocalisationLab.leftMotor.stop(true);		//Two values have been found, stop spinning
 		LocalisationLab.rightMotor.stop();
-		LocalisationLab.odometer.setTheta(Math.toRadians(computeAngle())); //Uses compute angle to set odometer's theta orientation
 		usPoller.stopPolling();	//No longer need US sensor
 		
 		try {
@@ -109,6 +117,7 @@ public class Localisation {
 		if (heading < 0) {	//Corrects for negative difference
 			heading += 360;
 		}
+		edgeDifference = heading;
 		heading /= 2;
 		if (!fallingEdge) { // if rising edge
 			heading = 225 + heading; //formula for orientation
