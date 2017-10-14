@@ -127,6 +127,8 @@ public class Localisation {
 		}
 		return heading;
 	}
+	
+	
 	//These two methods allow for methods to wait till color/US sensors
 	//find edge data (edge of wall/line) to store in arrays before using that
 	//data to calculate a correction
