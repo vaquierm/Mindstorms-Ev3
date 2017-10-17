@@ -27,9 +27,9 @@ import lejos.robotics.filter.MeanFilter;
  */
 public class ZipLineLab {
 
-	public static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("B"));
+	public static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
 
-	public static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("C"));
+	public static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
 
 	private static final Port colorPort = LocalEV3.get().getPort("S2");
 	private static final Port usPort = LocalEV3.get().getPort("S1");
@@ -94,6 +94,8 @@ public class ZipLineLab {
 		localisationManager = new LocalisationManager(usPoller, colorPoller, navigation, false);
 		
 		navigationController = new NavigationController(usPoller, odometer, navigation, new LinkedList<Coordinate>());
+		
+		ZiplineController ziplineController = new ZiplineController();
 
 
 		//This code can be used to test the wheel base of the robot
@@ -113,13 +115,61 @@ public class ZipLineLab {
 		while (Button.waitForAnyPress() != Button.ID_ENTER)
 			;
 		
-		localisationManager.start();
+		//localisationManager.start();
 		
 		while (Button.waitForAnyPress() != Button.ID_ENTER)
 			;
 		
 		odometryDisplay.setDisplay(false);
-
+		
+		t.clear();
+		t.drawString("   x   |    y   ", 0, 0);
+		t.drawString("-------|--------", 0, 1);
+		t.drawString("   0   |    0   ", 0, 2);
+		t.drawString("       |        ", 0, 3);
+		
+		int x = 0;
+		int y = 0;
+		int id = Button.waitForAnyPress();
+		String draw;
+		while (id != Button.ID_ENTER) {
+			if (id == Button.ID_LEFT) {
+				x = (x - 1)%13;
+				if (x < 0)
+					x += 13;
+			}
+			else if (id == Button.ID_RIGHT) {
+				x = (x + 1)%13;
+			}
+			else if(id == Button.ID_UP) {
+				y = (y + 1)%13;
+			}
+			else if(id == Button.ID_DOWN) {
+				y = (y - 1)%13;
+				if (y < 0)
+					y += 13;
+			}
+			draw = "   " + Integer.toString(x);
+			if(x > 9) {
+				draw += "  |    ";
+			}
+			else {
+				draw += "   |    ";
+			}
+			draw += Integer.toString(y);
+			t.drawString(draw, 0, 2);
+			id = Button.waitForAnyPress();
+		}
+		
+		odometryDisplay.setDisplay(true);
+		
+		navigationController.addWayPoint(new Coordinate(x, y));
+		navigationController.start();
+		
+		while (Button.waitForAnyPress() != Button.ID_ENTER)
+			;
+		
+		ziplineController.start();
 
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE)
 			;
