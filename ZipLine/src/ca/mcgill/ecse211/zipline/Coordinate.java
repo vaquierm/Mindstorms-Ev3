@@ -1,5 +1,5 @@
 //test
-package ca.mcgill.ecse211.localisation;
+package ca.mcgill.ecse211.zipline;
 
 /**
  * Simple class to represent the coordinates where 

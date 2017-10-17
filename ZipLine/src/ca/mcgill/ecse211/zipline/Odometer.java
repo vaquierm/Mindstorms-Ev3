@@ -1,4 +1,4 @@
-package ca.mcgill.ecse211.localisation;
+package ca.mcgill.ecse211.zipline;
 
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
@@ -51,12 +51,12 @@ public class Odometer extends Thread {
 			double distL, distR, deltaD, deltaT, dX, dY;
 			int nowTachoL = leftMotor.getTachoCount();
 			int nowTachoR = rightMotor.getTachoCount();
-			distL = Math.PI * LocalisationLab.WHEEL_RADIUS * (nowTachoL - leftMotorTachoCount) / 180;
-			distR = Math.PI * LocalisationLab.WHEEL_RADIUS * (nowTachoR - rightMotorTachoCount) / 180;
+			distL = Math.PI * ZipLineLab.WHEEL_RADIUS * (nowTachoL - leftMotorTachoCount) / 180;
+			distR = Math.PI * ZipLineLab.WHEEL_RADIUS * (nowTachoR - rightMotorTachoCount) / 180;
 			leftMotorTachoCount = nowTachoL;
 			rightMotorTachoCount = nowTachoR;
 			deltaD = 0.5 * (distL + distR);
-			deltaT = (distL - distR) / LocalisationLab.TRACK;
+			deltaT = (distL - distR) / ZipLineLab.TRACK;
 
 			synchronized (lock) {
 				setTheta(theta + deltaT);

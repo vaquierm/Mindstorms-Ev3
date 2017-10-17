@@ -2,7 +2,7 @@
  * OdometryDisplay.java
  */
 
-package ca.mcgill.ecse211.localisation;
+package ca.mcgill.ecse211.zipline;
 
 import lejos.hardware.lcd.TextLCD;
 
