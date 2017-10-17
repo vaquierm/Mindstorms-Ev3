@@ -3,6 +3,8 @@
 package ca.mcgill.ecse211.zipline;
 
 
+import java.util.LinkedList;
+
 import lejos.hardware.Button;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.TextLCD;
@@ -33,6 +35,10 @@ public class ZipLineLab {
 	private static final Port usPort = LocalEV3.get().getPort("S1");
 
 	public static Odometer odometer;
+	
+	public static NavigationController navigationController;
+	
+	public static LocalisationManager localisationManager;
 
 
 	public static final double WHEEL_RADIUS = 2.1;
@@ -78,6 +84,16 @@ public class ZipLineLab {
 																// which data
 																// are
 																// returned
+		
+		ColorPoller colorPoller = new ColorPoller(odometer, colorRedMean, colorRedData);
+		
+		UltrasonicPoller usPoller = new UltrasonicPoller(meanFilterUs, usData);
+		
+		Navigation navigation = new Navigation(odometer, leftMotor, rightMotor, WHEEL_RADIUS, WHEEL_RADIUS, TRACK);
+		
+		localisationManager = new LocalisationManager(usPoller, colorPoller, navigation, false);
+		
+		navigationController = new NavigationController(usPoller, odometer, navigation, new LinkedList<Coordinate>());
 
 
 		//This code can be used to test the wheel base of the robot
@@ -94,6 +110,15 @@ public class ZipLineLab {
 		t.drawString(" localize then  ", 0, 2);
 		t.drawString("ride the zipline", 0, 3);
 		
+		while (Button.waitForAnyPress() != Button.ID_ENTER)
+			;
+		
+		localisationManager.start();
+		
+		while (Button.waitForAnyPress() != Button.ID_ENTER)
+			;
+		
+		odometryDisplay.setDisplay(false);
 
 
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE)

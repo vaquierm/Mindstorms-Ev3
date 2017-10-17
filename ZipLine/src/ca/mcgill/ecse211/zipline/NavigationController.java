@@ -64,7 +64,7 @@ public class NavigationController extends Thread {
 				
 			}
 		}
-		
+		return;
 	}
 	
 	public static NavigationState getNavigationState() {
@@ -77,6 +77,10 @@ public class NavigationController extends Thread {
 		synchronized (lock) {
 			state = navState;
 		}
+	}
+	
+	public void addWayPoint(Coordinate c) {
+		coordinateList.add(c);
 	}
 
 }

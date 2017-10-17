@@ -50,9 +50,6 @@ public class LocalisationManager extends Thread {
 				nav.turnTo(0);
 				break;
 			case DIRECTION_LOCALIZED:
-				while(Button.waitForAnyPress() != Button.ID_ENTER) {
-					
-				}
 				nav.turnTo(45);
 				//System.out.println(localisation.edgeDifference);
 				//nav.forward(((-14/11) * localisation.edgeDifference) + 233, false);
