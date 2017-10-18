@@ -27,9 +27,9 @@ import lejos.robotics.filter.MeanFilter;
  */
 public class ZipLineLab {
 
-	public static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
+	public static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("B"));
 
-	public static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
+	public static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("C"));
 
 	private static final Port colorPort = LocalEV3.get().getPort("S2");
 	private static final Port usPort = LocalEV3.get().getPort("S1");
@@ -45,7 +45,6 @@ public class ZipLineLab {
 	public static final double TRACK = 17;
 
 	public static void main(String[] args) {
-		int buttonChoice;
 
 		final TextLCD t = LocalEV3.get().getTextLCD();
 		odometer = new Odometer(leftMotor, rightMotor);
@@ -115,7 +114,7 @@ public class ZipLineLab {
 		while (Button.waitForAnyPress() != Button.ID_ENTER)
 			;
 		
-		//localisationManager.start();
+		localisationManager.start();
 		
 		while (Button.waitForAnyPress() != Button.ID_ENTER)
 			;
@@ -156,7 +155,7 @@ public class ZipLineLab {
 			else {
 				draw += "   |    ";
 			}
-			draw += Integer.toString(y);
+			draw += Integer.toString(y)+"  ";
 			t.drawString(draw, 0, 2);
 			id = Button.waitForAnyPress();
 		}
