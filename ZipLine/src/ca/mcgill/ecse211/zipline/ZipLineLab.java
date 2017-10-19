@@ -42,7 +42,7 @@ public class ZipLineLab {
 
 	public static final double TILE = 30.48;
 	public static final double WHEEL_RADIUS = 2.1;
-	public static final double TRACK = 17;
+	public static final double TRACK = 16.2;
 
 	public static void main(String[] args) {
 
@@ -94,7 +94,11 @@ public class ZipLineLab {
 		
 		navigationController = new NavigationController(usPoller, odometer, navigation, new LinkedList<Coordinate>());
 		
-		ZiplineController ziplineController = new ZiplineController();
+		ZiplineColorPoller ziplineColorPoller = new ZiplineColorPoller(colorRedMean, colorRedData);
+		
+		ZiplineController ziplineController = new ZiplineController(ziplineColorPoller);
+		
+		
 
 
 		//This code can be used to test the wheel base of the robot
@@ -162,8 +166,8 @@ public class ZipLineLab {
 		
 		odometryDisplay.setDisplay(true);
 		
-		navigationController.addWayPoint(new Coordinate(x * TILE, y * TILE));
-		navigationController.start();
+		navigation.travelTo(x * TILE, y * TILE, false);
+		navigation.turnTo(0);
 		
 		while (Button.waitForAnyPress() != Button.ID_ENTER)
 			;

@@ -18,13 +18,17 @@ public class ZiplineController extends Thread {
 	
 	private Object lock = new Object();
 	
-	public static final EV3LargeRegulatedMotor armMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("B"));
+	ZiplineColorPoller ziplineColorPoller;
 	
-	public ZiplineController() {
-		
+	public static final EV3LargeRegulatedMotor armMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
+	
+	public ZiplineController(ZiplineColorPoller ziplineColorPoller) {
+		this.ziplineColorPoller = ziplineColorPoller;
+		ziplineColorPoller.setController(this);
 	}
 	
 	public void run() {
+		ziplineColorPoller.start();
 		setWaiting(false);
 		ZipLineLab.leftMotor.setSpeed(ZIPLINE_MOUNT_SPEED);
 		ZipLineLab.rightMotor.setSpeed(ZIPLINE_MOUNT_SPEED);
@@ -34,12 +38,13 @@ public class ZiplineController extends Thread {
 		armMotor.forward();
 		setWaiting(true);
 		while(getWaiting());
-		ZipLineLab.leftMotor.stop(false);
+		ZipLineLab.leftMotor.stop(true);
 		ZipLineLab.rightMotor.stop();
 		setWaiting(true);
 		while(getWaiting());
-		armMotor.stop(false);
-		ZipLineLab.leftMotor.rotate(1000, false);
+		armMotor.stop(true);
+		ziplineColorPoller.stopPolling();
+		ZipLineLab.leftMotor.rotate(1000, true);
 		ZipLineLab.rightMotor.rotate(1000);
 		
 		return;

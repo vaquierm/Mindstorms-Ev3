@@ -47,7 +47,7 @@ public class LocalisationManager extends Thread {
 			case UNLOCALIZED:
 				localisation.alignAngle();
 				setLocalisationState(LocalisationState.DIRECTION_LOCALIZED);
-				nav.turnTo(0);
+				
 				break;
 			case DIRECTION_LOCALIZED:
 				nav.turnTo(45);

@@ -16,7 +16,7 @@ import lejos.robotics.SampleProvider;
 public class ZiplineColorPoller extends Thread {
 
 	
-	private static final long CORRECTION_PERIOD = 10;
+	private static final long CORRECTION_PERIOD = 50;
 	private SampleProvider colorRed;
 	private float[] colorRedData; //array used to fetch the sensor data
 	
@@ -25,7 +25,7 @@ public class ZiplineColorPoller extends Thread {
 	private int dataCounter = 0; //index used for filling the register at the start
 	private int[] sensorData; //Shift register used for sensor data
 
-	private static final int LIGHT_THRESHOLD = 2; 
+	private static final int LIGHT_THRESHOLD = 10; 
 	private int lastAverage = -1; //last average used to calculate the new average.
 	private int currentAverage = -1;
 	
@@ -66,14 +66,16 @@ public class ZiplineColorPoller extends Thread {
 															// int
 			//System.out.println(sample);
 			newSensorValue(sample);
-			
+			//System.out.println(currentAverage + "  " + lastAverage);
 			if(sendSignal()) {
-				ziplineContoller.setWaiting(false);
-				Sound.beep();
+				Sound.buzz();
 				try {
-					Thread.sleep(1000);
+					Thread.sleep(3000);
 				} catch (InterruptedException e) {
 				}
+				ziplineContoller.setWaiting(false);
+				
+				
 			}
 			
 			
@@ -105,6 +107,7 @@ public class ZiplineColorPoller extends Thread {
 		if (dataCounter < SAMPLE_POINTS) {
 			sensorData[dataCounter] = newVal;
 			lastAverage = newVal; // for the first few points the average is
+			currentAverage = newVal;
 									// just the last value.
 			dataCounter++;
 		} else {
@@ -121,7 +124,7 @@ public class ZiplineColorPoller extends Thread {
 
 
 	private void newAverageValue(int newVal) {
-		int newAverage = lastAverage + ((newVal - sensorData[0]) / SAMPLE_POINTS);
+		int newAverage = currentAverage + ((newVal - sensorData[0]) / SAMPLE_POINTS);
 		lastAverage = currentAverage;
 		//System.out.println("[" + sensorData[0] + ", " + sensorData[1] + ", " + sensorData[2] + ", " + sensorData[3] + ", " + sensorData[4]+ "]");
 		//System.out.println("new Average : "+ newAverage);
@@ -132,6 +135,10 @@ public class ZiplineColorPoller extends Thread {
 		if((currentAverage < LIGHT_THRESHOLD && lastAverage >= LIGHT_THRESHOLD) || (lastAverage < LIGHT_THRESHOLD && currentAverage >= LIGHT_THRESHOLD))
 			return true;
 		return false;
+	}
+	
+	public void setController(ZiplineController cont) {
+		this.ziplineContoller = cont;
 	}
 	
 

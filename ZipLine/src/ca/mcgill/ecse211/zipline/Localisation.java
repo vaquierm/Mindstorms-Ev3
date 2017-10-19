@@ -94,22 +94,24 @@ public class Localisation {
 		colorPoller.stopPolling();	//No longer need color sensor. Turn off.
 		ZipLineLab.odometer.setX(computeX());	//Use ComputeX() and ComputeY() to correct odometer's position
 		ZipLineLab.odometer.setY(computeY());
-		ZipLineLab.odometer.setTheta(computeThetaColor());
+		//ZipLineLab.odometer.setTheta(computeThetaColor());
 	}
 	//Method to compute X position with line data
 	private double computeX() {
-		double thetaD = (lines[0] - lines[1])/2;
+		double thetaD = (lines[0] - lines[1]);
 		if(thetaD < 0) {	//Corrects for negative difference
 			thetaD += 360;
 		}
+		thetaD/=2;
 		return -COLOR_SENSOR_OFFSET * Math.cos(Math.toRadians(thetaD));	//Formula for X coordinate, given in fourth quadrant
 	}
 	
 	private double computeY() {
-		double thetaD = (lines[2] - lines[3])/2;
+		double thetaD = (lines[2] - lines[3]);
 		if(thetaD < 0) {	//Corrects for negative difference
 			thetaD += 360;
 		}
+		thetaD /=2;
 		return -COLOR_SENSOR_OFFSET * Math.cos(Math.toRadians(thetaD));	//Formula for X coordinate, given in fourth quadrant
 	}
 	//Method to compute Y position with line data

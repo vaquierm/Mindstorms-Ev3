@@ -16,6 +16,8 @@ public class Navigation {
 	private static final int SLOW_ACCEL = 250;
 	private static final int FAST_ACCEL = 500;
 	
+	private double interruptedTheta = -1;
+	
 
 	public Navigation() {
 
@@ -90,6 +92,14 @@ public class Navigation {
 
 	public int convertAngle(double radius, double width, double angle) {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
+	}
+	
+	public void setInterruptedTheta(double theta) {
+		this.interruptedTheta = theta;
+	}
+	
+	public double getInterruptedTheta() {
+		return interruptedTheta;
 	}
 
 	

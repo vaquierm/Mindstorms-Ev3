@@ -84,18 +84,20 @@ public class Localisation {
 	}
 	//Method to compute X position with line data
 	private double computeX() {
-		double thetaD = (lines[0] - lines[1])/2;
+		double thetaD = (lines[0] - lines[1]);
 		if(thetaD < 0) {	//Corrects for negative difference
 			thetaD += 360;
 		}
+		thetaD /= 2;
 		return -COLOR_SENSOR_OFFSET * Math.cos(Math.toRadians(thetaD));	//Formula for X coordinate, given in fourth quadrant
 	}
 	
 	private double computeY() {
-		double thetaD = (lines[2] - lines[3])/2;
+		double thetaD = (lines[2] - lines[3]);
 		if(thetaD < 0) {	//Corrects for negative difference
 			thetaD += 360;
 		}
+		thetaD /= 2;
 		return -COLOR_SENSOR_OFFSET * Math.cos(Math.toRadians(thetaD));	//Formula for X coordinate, given in fourth quadrant
 	}
 	//Method to compute Y position with line data
