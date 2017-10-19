@@ -40,7 +40,7 @@ public class ZipLineLab {
 	
 	public static LocalisationManager localisationManager;
 
-
+	public static final double TILE = 30.48;
 	public static final double WHEEL_RADIUS = 2.1;
 	public static final double TRACK = 17;
 
@@ -162,7 +162,7 @@ public class ZipLineLab {
 		
 		odometryDisplay.setDisplay(true);
 		
-		navigationController.addWayPoint(new Coordinate(x, y));
+		navigationController.addWayPoint(new Coordinate(x * TILE, y * TILE));
 		navigationController.start();
 		
 		while (Button.waitForAnyPress() != Button.ID_ENTER)
