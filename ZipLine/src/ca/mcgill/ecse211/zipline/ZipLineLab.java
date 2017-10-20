@@ -111,6 +111,39 @@ public class ZipLineLab {
 
 
 		t.clear();
+		t.drawString("Which corner is ", 0, 0);
+		t.drawString("the robot       ", 0, 1);
+		t.drawString("starting at?    ", 0, 2);
+		t.drawString("       0        ", 0, 3);
+		int id = Button.waitForAnyPress();
+		String corner = "0";
+		String draw = "";
+		while (id != Button.ID_ENTER) {
+			switch(id) {
+			case Button.ID_DOWN:
+				draw = "       0        ";
+				corner = "0";
+				break;
+			case Button.ID_UP:
+				draw = "       1        ";
+				corner = "1";
+				break;
+			case Button.ID_LEFT:
+				draw = "       2        ";
+				corner = "2";
+				break;
+			case Button.ID_RIGHT:
+				draw = "       3        ";
+				corner = "3";
+				break;
+			default:
+				break;
+			}
+			t.drawString(draw, 0, 3);
+			id = Button.waitForAnyPress();
+		}
+		
+		t.clear();
 		t.drawString("   x0  |    y0  ", 0, 0);
 		t.drawString("-------|--------", 0, 1);
 		t.drawString("   0   |    0   ", 0, 2);
@@ -118,8 +151,7 @@ public class ZipLineLab {
 
 		int x = 0;
 		int y = 0;
-		int id = Button.waitForAnyPress();
-		String draw;
+		id = Button.waitForAnyPress();
 		while (id != Button.ID_ENTER) {
 			if (id == Button.ID_LEFT) {
 				x = (x - 1) % 13;
@@ -179,9 +211,10 @@ public class ZipLineLab {
 			id = Button.waitForAnyPress();
 		}
 
-
+		odometer.start();
+		odometryDisplay.start();
 		localisationManager.localize();
-
+		
 		navigation.travelTo(x * TILE, y * TILE, false);
 		navigation.turnTo(xc * TILE, yc * TILE);
 
