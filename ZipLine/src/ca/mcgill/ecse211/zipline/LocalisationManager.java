@@ -12,7 +12,7 @@ import lejos.hardware.Sound;
  * @author Oliver Clark
  */
 
-public class LocalisationManager extends Thread {
+public class LocalisationManager {
 	
 	public enum LocalisationState { FULLY_LOCALIZED, DIRECTION_LOCALIZED, UNLOCALIZED }
 	
@@ -41,7 +41,7 @@ public class LocalisationManager extends Thread {
 	 * that it starts on the 45° line in the negative quadrant.
 	 * @see java.lang.Thread#run()
 	 */
-	public void run() {
+	public void localize() {
 		while (getLocalisationState() != LocalisationState.FULLY_LOCALIZED) {
 			switch(getLocalisationState()) {
 			case UNLOCALIZED:
@@ -65,8 +65,6 @@ public class LocalisationManager extends Thread {
 				break;
 			}
 		}
-		nav.travelTo(0, 0, false);
-		nav.turnTo(0);
 		return;
 	}
 

@@ -2,7 +2,6 @@
 
 package ca.mcgill.ecse211.zipline;
 
-
 import java.util.LinkedList;
 
 import lejos.hardware.Button;
@@ -19,10 +18,10 @@ import lejos.robotics.filter.MeanFilter;
 
 /**
  * 
- * ZipLineLab is where the robot's display is set up and where
- * the sensors and motors are set up
+ * ZipLineLab is where the robot's display is set up and where the sensors and
+ * motors are set up
  * 
- * @author 
+ * @author
  * 
  */
 public class ZipLineLab {
@@ -35,9 +34,9 @@ public class ZipLineLab {
 	private static final Port usPort = LocalEV3.get().getPort("S1");
 
 	public static Odometer odometer;
-	
+
 	public static NavigationController navigationController;
-	
+
 	public static LocalisationManager localisationManager;
 
 	public static final double TILE = 30.48;
@@ -61,12 +60,14 @@ public class ZipLineLab {
 																// this instance
 		SampleProvider colorRedMean = new MeanFilter(colorRed, 7);
 		float[] colorRedData = new float[colorRedMean.sampleSize()]; // colorRedData
-																	// is the
-																	// buffer in
-																	// which
-																	// data are
-																	// returned
-		
+																		// is
+																		// the
+																		// buffer
+																		// in
+																		// which
+																		// data
+																		// are
+																		// returned
 
 		@SuppressWarnings("resource") // Because we don't bother to close this
 										// resource
@@ -84,94 +85,109 @@ public class ZipLineLab {
 																// are
 																// returned
 		
+		float[] usZiplineData = new float[meanFilterUs.sampleSize()];
+
 		ColorPoller colorPoller = new ColorPoller(odometer, colorRedMean, colorRedData);
-		
+
 		UltrasonicPoller usPoller = new UltrasonicPoller(meanFilterUs, usData);
-		
+
 		Navigation navigation = new Navigation(odometer, leftMotor, rightMotor, WHEEL_RADIUS, WHEEL_RADIUS, TRACK);
-		
+
 		localisationManager = new LocalisationManager(usPoller, colorPoller, navigation, false);
-		
+
 		navigationController = new NavigationController(usPoller, odometer, navigation, new LinkedList<Coordinate>());
-		
-		ZiplineColorPoller ziplineColorPoller = new ZiplineColorPoller(colorRedMean, colorRedData);
-		
-		ZiplineController ziplineController = new ZiplineController(ziplineColorPoller);
-		
-		
+
+		ZiplineUSPoller ziplineUSPoller = new ZiplineUSPoller(meanFilterUs, usZiplineData);
+
+		ZiplineController ziplineController = new ZiplineController(ziplineUSPoller);
+
+		// This code can be used to test the wheel base of the robot
+		/*
+		 * leftMotor.setAcceleration(250); rightMotor.setAcceleration(250);
+		 * leftMotor.setSpeed(200); rightMotor.setSpeed(200);
+		 * leftMotor.rotate(nav.convertAngle(WHEEL_RADIUS, TRACK, 360), true);
+		 * rightMotor.rotate(-nav.convertAngle(WHEEL_RADIUS, TRACK, 360), true);
+		 */
 
 
-		//This code can be used to test the wheel base of the robot
-		/*leftMotor.setAcceleration(250);
-		rightMotor.setAcceleration(250);
-		leftMotor.setSpeed(200);
-		rightMotor.setSpeed(200);
-		leftMotor.rotate(nav.convertAngle(WHEEL_RADIUS, TRACK, 360), true);
-		rightMotor.rotate(-nav.convertAngle(WHEEL_RADIUS, TRACK, 360), true);*/
-		
 		t.clear();
-		t.drawString("  Press on the  ", 0, 0);
-		t.drawString("middle button to", 0, 1);
-		t.drawString(" localize then  ", 0, 2);
-		t.drawString("ride the zipline", 0, 3);
-		
-		while (Button.waitForAnyPress() != Button.ID_ENTER)
-			;
-		
-		localisationManager.start();
-		
-		while (Button.waitForAnyPress() != Button.ID_ENTER)
-			;
-		
-		odometryDisplay.setDisplay(false);
-		
-		t.clear();
-		t.drawString("   x   |    y   ", 0, 0);
+		t.drawString("   x0  |    y0  ", 0, 0);
 		t.drawString("-------|--------", 0, 1);
 		t.drawString("   0   |    0   ", 0, 2);
 		t.drawString("       |        ", 0, 3);
-		
+
 		int x = 0;
 		int y = 0;
 		int id = Button.waitForAnyPress();
 		String draw;
 		while (id != Button.ID_ENTER) {
 			if (id == Button.ID_LEFT) {
-				x = (x - 1)%13;
+				x = (x - 1) % 13;
 				if (x < 0)
 					x += 13;
-			}
-			else if (id == Button.ID_RIGHT) {
-				x = (x + 1)%13;
-			}
-			else if(id == Button.ID_UP) {
-				y = (y + 1)%13;
-			}
-			else if(id == Button.ID_DOWN) {
-				y = (y - 1)%13;
+			} else if (id == Button.ID_RIGHT) {
+				x = (x + 1) % 13;
+			} else if (id == Button.ID_UP) {
+				y = (y + 1) % 13;
+			} else if (id == Button.ID_DOWN) {
+				y = (y - 1) % 13;
 				if (y < 0)
 					y += 13;
 			}
 			draw = "   " + Integer.toString(x);
-			if(x > 9) {
+			if (x > 9) {
 				draw += "  |    ";
-			}
-			else {
+			} else {
 				draw += "   |    ";
 			}
-			draw += Integer.toString(y)+"  ";
+			draw += Integer.toString(y) + "  ";
 			t.drawString(draw, 0, 2);
 			id = Button.waitForAnyPress();
 		}
 		
-		odometryDisplay.setDisplay(true);
-		
+		t.clear();
+		t.drawString("   xc  |    yc  ", 0, 0);
+		t.drawString("-------|--------", 0, 1);
+		t.drawString("   0   |    0   ", 0, 2);
+		t.drawString("       |        ", 0, 3);
+
+		int xc = 0;
+		int yc = 0;
+		id = Button.waitForAnyPress();
+		while (id != Button.ID_ENTER) {
+			if (id == Button.ID_LEFT) {
+				xc = (xc - 1) % 13;
+				if (xc < 0)
+					xc += 13;
+			} else if (id == Button.ID_RIGHT) {
+				xc = (xc + 1) % 13;
+			} else if (id == Button.ID_UP) {
+				yc = (yc + 1) % 13;
+			} else if (id == Button.ID_DOWN) {
+				yc = (yc - 1) % 13;
+				if (yc < 0)
+					yc += 13;
+			}
+			draw = "   " + Integer.toString(xc);
+			if (xc > 9) {
+				draw += "  |    ";
+			} else {
+				draw += "   |    ";
+			}
+			draw += Integer.toString(yc) + "  ";
+			t.drawString(draw, 0, 2);
+			id = Button.waitForAnyPress();
+		}
+
+
+		localisationManager.localize();
+
 		navigation.travelTo(x * TILE, y * TILE, false);
-		navigation.turnTo(0);
-		
+		navigation.turnTo(xc * TILE, yc * TILE);
+
 		while (Button.waitForAnyPress() != Button.ID_ENTER)
 			;
-		
+
 		ziplineController.start();
 
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE)

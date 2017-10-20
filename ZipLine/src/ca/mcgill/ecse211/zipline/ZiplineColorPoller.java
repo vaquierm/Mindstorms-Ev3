@@ -66,7 +66,7 @@ public class ZiplineColorPoller extends Thread {
 															// int
 			//System.out.println(sample);
 			newSensorValue(sample);
-			//System.out.println(currentAverage + "  " + lastAverage);
+			System.out.println(currentAverage + "  " + lastAverage);
 			if(sendSignal()) {
 				Sound.buzz();
 				try {

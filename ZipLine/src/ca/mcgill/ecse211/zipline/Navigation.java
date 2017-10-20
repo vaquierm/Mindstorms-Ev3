@@ -107,6 +107,15 @@ public class Navigation {
 		leftMotor.setAcceleration(FAST_ACCEL);
 	}
 	
+	public void turnTo(double x, double y) {
+		double currentX = odometer.getX();
+		double currentY = odometer.getY();
+		
+		double nextHeading = Math.toDegrees(Math.atan2(x - currentX, y - currentY));
+
+		turnTo(nextHeading);
+	}
+	
 	public void forward(double distance, boolean returnThread) {
 		leftMotor.setSpeed(ROTATE_SPEED);
 	    rightMotor.setSpeed(ROTATE_SPEED);
