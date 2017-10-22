@@ -28,7 +28,6 @@ public class ZiplineController extends Thread {
 	}
 	
 	public void run() {
-		ziplineUSPoller.start();
 		setWaiting(false);
 		ZipLineLab.leftMotor.setSpeed(ZIPLINE_MOUNT_SPEED);
 		ZipLineLab.rightMotor.setSpeed(ZIPLINE_MOUNT_SPEED);
@@ -36,6 +35,11 @@ public class ZiplineController extends Thread {
 		ZipLineLab.leftMotor.forward();
 		ZipLineLab.rightMotor.forward();
 		armMotor.forward();
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+		}
+		ziplineUSPoller.start();
 		setWaiting(true);
 		while(getWaiting());
 		armMotor.stop(true);

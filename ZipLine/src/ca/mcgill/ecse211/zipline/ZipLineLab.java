@@ -8,8 +8,7 @@ import lejos.hardware.Button;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.TextLCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
-import lejos.hardware.port.MotorPort;
-import lejos.hardware.port.Port;
+
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.hardware.sensor.SensorModes;
@@ -30,24 +29,31 @@ public class ZipLineLab {
 
 	public static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("C"));
 
-	private static final Port colorPort = LocalEV3.get().getPort("S2");
-	private static final Port usPort = LocalEV3.get().getPort("S1");
+	private static final lejos.hardware.port.Port colorPort = LocalEV3.get().getPort("S2");
+	private static final lejos.hardware.port.Port usPort = LocalEV3.get().getPort("S1");
 
 	public static Odometer odometer;
+	
+	public static String corner;
 
 	public static NavigationController navigationController;
 
 	public static LocalisationManager localisationManager;
 
+	public static final int BOARD_SIZE = 8;
 	public static final double TILE = 30.48;
 	public static final double WHEEL_RADIUS = 2.1;
 	public static final double TRACK = 16.2;
+	
+	public static TextLCD lcd;
+	public static OdometryDisplay odometryDisplay;
+	
 
 	public static void main(String[] args) {
 
-		final TextLCD t = LocalEV3.get().getTextLCD();
+		lcd = LocalEV3.get().getTextLCD();
 		odometer = new Odometer(leftMotor, rightMotor);
-		OdometryDisplay odometryDisplay = new OdometryDisplay(odometer, t);
+		odometryDisplay = new OdometryDisplay(odometer, lcd);
 
 		@SuppressWarnings("resource") // Because we don't bother to close this
 										// resource
@@ -88,6 +94,7 @@ public class ZipLineLab {
 		float[] usZiplineData = new float[meanFilterUs.sampleSize()];
 
 		ColorPoller colorPoller = new ColorPoller(odometer, colorRedMean, colorRedData);
+		colorPoller.start();
 
 		UltrasonicPoller usPoller = new UltrasonicPoller(meanFilterUs, usData);
 
@@ -110,13 +117,13 @@ public class ZipLineLab {
 		 */
 
 
-		t.clear();
-		t.drawString("Which corner is ", 0, 0);
-		t.drawString("the robot       ", 0, 1);
-		t.drawString("starting at?    ", 0, 2);
-		t.drawString("       0        ", 0, 3);
+		lcd.clear();
+		lcd.drawString("Which corner is ", 0, 0);
+		lcd.drawString("the robot       ", 0, 1);
+		lcd.drawString("starting at?    ", 0, 2);
+		lcd.drawString("       0        ", 0, 3);
 		int id = Button.waitForAnyPress();
-		String corner = "0";
+		corner = "0";
 		String draw = "";
 		while (id != Button.ID_ENTER) {
 			switch(id) {
@@ -139,15 +146,15 @@ public class ZipLineLab {
 			default:
 				break;
 			}
-			t.drawString(draw, 0, 3);
+			lcd.drawString(draw, 0, 3);
 			id = Button.waitForAnyPress();
 		}
 		
-		t.clear();
-		t.drawString("   x0  |    y0  ", 0, 0);
-		t.drawString("-------|--------", 0, 1);
-		t.drawString("   0   |    0   ", 0, 2);
-		t.drawString("       |        ", 0, 3);
+		lcd.clear();
+		lcd.drawString("   x0  |    y0  ", 0, 0);
+		lcd.drawString("-------|--------", 0, 1);
+		lcd.drawString("   0   |    0   ", 0, 2);
+		lcd.drawString("       |        ", 0, 3);
 
 		int x = 0;
 		int y = 0;
@@ -173,15 +180,15 @@ public class ZipLineLab {
 				draw += "   |    ";
 			}
 			draw += Integer.toString(y) + "  ";
-			t.drawString(draw, 0, 2);
+			lcd.drawString(draw, 0, 2);
 			id = Button.waitForAnyPress();
 		}
 		
-		t.clear();
-		t.drawString("   xc  |    yc  ", 0, 0);
-		t.drawString("-------|--------", 0, 1);
-		t.drawString("   0   |    0   ", 0, 2);
-		t.drawString("       |        ", 0, 3);
+		lcd.clear();
+		lcd.drawString("   xc  |    yc  ", 0, 0);
+		lcd.drawString("-------|--------", 0, 1);
+		lcd.drawString("   0   |    0   ", 0, 2);
+		lcd.drawString("       |        ", 0, 3);
 
 		int xc = 0;
 		int yc = 0;
@@ -207,13 +214,41 @@ public class ZipLineLab {
 				draw += "   |    ";
 			}
 			draw += Integer.toString(yc) + "  ";
-			t.drawString(draw, 0, 2);
+			lcd.drawString(draw, 0, 2);
 			id = Button.waitForAnyPress();
 		}
 
-		odometer.start();
 		odometryDisplay.start();
+		switch(corner) {
+		case "0":
+			odometer.setX(20);
+			odometer.setY(20);
+			break;
+		case "1":
+			odometer.setX((BOARD_SIZE * TILE) - 20);
+			odometer.setY(20);
+			break;
+		case "2":
+			odometer.setX((BOARD_SIZE * TILE) - 20);
+			odometer.setY((BOARD_SIZE * TILE) - 20);
+			break;
+		case "3":
+			odometer.setX(20);
+			odometer.setY((BOARD_SIZE * TILE) - 20);
+		}
+		
+		
+		/*odometer.setX(15);
+		odometer.setY(75);
+		localisationManager.getLocalisation().fixXY();*/
+		while (Button.waitForAnyPress() != Button.ID_ENTER)
+			;
+		
 		localisationManager.localize();
+		
+		navigation.travelTo(x * TILE, y * TILE, false);
+		
+		localisationManager.getLocalisation().fixXY();
 		
 		navigation.travelTo(x * TILE, y * TILE, false);
 		navigation.turnTo(xc * TILE, yc * TILE);
@@ -222,6 +257,7 @@ public class ZipLineLab {
 			;
 
 		ziplineController.start();
+		
 
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE)
 			;

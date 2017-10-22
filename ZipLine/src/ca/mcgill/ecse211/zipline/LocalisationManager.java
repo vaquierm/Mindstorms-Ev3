@@ -30,7 +30,7 @@ public class LocalisationManager {
 		this.fallingEdge = fallingEdge;
 		this.colorPoller = colorPoller;
 		this.nav = nav;
-		this.localisation = new Localisation(usPoller, colorPoller, this.fallingEdge);
+		this.localisation = new Localisation(usPoller, colorPoller, nav,  this.fallingEdge);
 		usPoller.setLocalisation(this.localisation);
 		usPoller.setFallingEdgeMode(this.fallingEdge);
 		colorPoller.setLocalisation(this.localisation);
@@ -47,19 +47,14 @@ public class LocalisationManager {
 			case UNLOCALIZED:
 				localisation.alignAngle();
 				setLocalisationState(LocalisationState.DIRECTION_LOCALIZED);
-				
+				nav.turnTo(0);
+				while(Button.waitForAnyPress() != Button.ID_ENTER);
 				break;
 			case DIRECTION_LOCALIZED:
-				nav.turnTo(45);
-				//System.out.println(localisation.edgeDifference);
-				//nav.forward(((-14/11) * localisation.edgeDifference) + 233, false);
-				nav.forward(9, false);
-				try {
-					Thread.sleep(500);
-				} catch (InterruptedException e) {
-				}
 				localisation.fixXY();
 				setLocalisationState(LocalisationState.FULLY_LOCALIZED);
+				nav.turnTo(0);
+				while(Button.waitForAnyPress() != Button.ID_ENTER);
 				break;
 			default:
 				break;
@@ -78,5 +73,9 @@ public class LocalisationManager {
 		synchronized(lock) {
 			return localisationState;
 		}
+	}
+	
+	public Localisation getLocalisation() {
+		return localisation;
 	}
 }

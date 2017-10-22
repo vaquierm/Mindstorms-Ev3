@@ -1,5 +1,8 @@
 package ca.mcgill.ecse211.zipline;
 
+import lejos.hardware.Button;
+import lejos.hardware.Sound;
+
 /**
  * Localisation outlines the procedure for both the US angle correction and color position correction
  * by using filtered data from the sensors to update the odometers accordingly
@@ -11,9 +14,20 @@ public class Localisation {
 	
 	private UltrasonicPoller usPoller;
 	private ColorPoller colorPoller;
+	private Navigation nav;
 	private static final int ROTATION_SPEED = 150;
 	
 	private static final int COLOR_SENSOR_OFFSET = 15;
+	
+	private int tileIndexX = 0;
+	private int tileIndexY = 0;
+	
+	private int tileCornerX = 0;
+	private int tileCornerY = 0;
+	
+	private int cornerCode = 0;
+	
+	private static final int colorLocalisationLineOffset = 7;
 	
 	private boolean fallingEdge;
 	
@@ -26,10 +40,11 @@ public class Localisation {
 	private double[] lines = {-1, -1, -1, -1};
 	//Localisation constructor that makes use of the US & Color sensor with the
 	//UltrasonicPoller and ColorPoller objects
-	public Localisation(UltrasonicPoller usPoller, ColorPoller colorPoller, boolean fallingEdge) {
+	public Localisation(UltrasonicPoller usPoller, ColorPoller colorPoller, Navigation nav, boolean fallingEdge) {
 		this.usPoller = usPoller;
 		this.fallingEdge = fallingEdge;
 		this.colorPoller = colorPoller;
+		this.nav = nav;
 	}
 	//Method outlining process for aligning to 0 deg. using an ultrasonic correction
 	public void alignAngle() {
@@ -55,15 +70,77 @@ public class Localisation {
 		ZipLineLab.rightMotor.stop();
 		usPoller.stopPolling();	//No longer need US sensor
 		
-		try {
-			Thread.sleep(500);
-		} catch (InterruptedException e) {
-		}
 	}
 	//Method to Localise X,Y coordinates
 	public void fixXY() {
+		double currentX = ZipLineLab.odometer.getX();
+		double currentY = ZipLineLab.odometer.getY();
 		
-		colorPoller.start(); 	//Need to detect lines, turn on color sensor
+		tileIndexX = (int) (currentX/ZipLineLab.TILE) + 1;
+		tileIndexY = (int) (currentY/ZipLineLab.TILE) + 1;
+		
+		if (2 * tileIndexX / ZipLineLab.BOARD_SIZE <= 1) {
+			tileCornerX = 1;
+		}
+		else {
+			tileCornerX = 0;
+		}
+		
+		if (2 * tileIndexY / ZipLineLab.BOARD_SIZE <= 1) {
+			tileCornerY = 1;
+		}
+		else {
+			tileCornerY = 0;
+		}
+		
+		double destinationX;
+		double destinationY;
+		
+		if (tileCornerX > 0) {
+			destinationX = (tileIndexX * ZipLineLab.TILE) - colorLocalisationLineOffset;
+		} else {
+			destinationX = ((tileIndexX - 1) * ZipLineLab.TILE) + colorLocalisationLineOffset;
+		}
+		
+		if (tileCornerY > 0) {
+			destinationY = (tileIndexY * ZipLineLab.TILE) - colorLocalisationLineOffset;
+		} else {
+			destinationY = ((tileIndexY - 1) * ZipLineLab.TILE) + colorLocalisationLineOffset;
+		}
+		
+		nav.travelTo(destinationX, destinationY, false);
+		
+		cornerCode = tileCornerY | (tileCornerX << 1);
+		/*
+		 * Corner code will be
+		 * 0 for bottom left
+		 * 1 for top left
+		 * 2 for bottom right
+		 * 3 for top right
+		 */
+		ZipLineLab.odometryDisplay.setDisplay(false);
+		ZipLineLab.lcd.drawString(tileCornerX + " " + tileCornerY + " " + cornerCode, 0, 4);
+		ZipLineLab.lcd.drawString(tileIndexX + " " + tileIndexY, 0, 5);
+		ZipLineLab.lcd.drawString(destinationX + " " + destinationY, 0, 6);
+		while(Button.waitForAnyPress() != Button.ID_ENTER);
+		ZipLineLab.odometryDisplay.setDisplay(true);
+		
+		switch (cornerCode) {
+		case 0:
+			nav.turnTo(225);
+			break;
+		case 1:
+			nav.turnTo(315);
+			break;
+		case 2:
+			nav.turnTo(135);
+			break;
+		case 3:
+			nav.turnTo(45);
+		}
+		
+		cornerCode = (cornerCode + 1) % lines.length;
+		colorPoller.resumeThread(); 	//Need to detect lines, turn on color sensor
 		ZipLineLab.leftMotor.setSpeed(ROTATION_SPEED);	//Start spinning in place
 		ZipLineLab.rightMotor.setSpeed(ROTATION_SPEED);
 		ZipLineLab.leftMotor.backward();
@@ -72,47 +149,74 @@ public class Localisation {
 		while(getWaiting()) {
 			
 		}
-		lines[0] = ZipLineLab.odometer.getThetaDegrees(); 	//Once a line has been found add to lines array
+		lines[cornerCode] = ZipLineLab.odometer.getThetaDegrees(); 	//Once a line has been found add to lines array
+		cornerCode = (cornerCode + 1) % lines.length;
 		setWaiting(true);	//Again waiting for a trigger value i.e a line
 		while(getWaiting()) {
 			
 		}
-		lines[2] = ZipLineLab.odometer.getThetaDegrees();	//Once a line has been found add to lines array
+		lines[cornerCode] = ZipLineLab.odometer.getThetaDegrees();	//Once a line has been found add to lines array
+		cornerCode = (cornerCode + 1) % lines.length;
 		setWaiting(true);	//Again waiting for a trigger value i.e a line
 		while(getWaiting()) {
 			
 		}
-		lines[1] = ZipLineLab.odometer.getThetaDegrees();	//Once a line has been found add to lines array
+		lines[cornerCode] = ZipLineLab.odometer.getThetaDegrees();	//Once a line has been found add to lines array
+		cornerCode = (cornerCode + 1) % lines.length;
 		setWaiting(true);	//Again waiting for a trigger value i.e a line
 		while(getWaiting()) {
 			
 		}
-		lines[3] = ZipLineLab.odometer.getThetaDegrees();	//Once a line has been found add to lines array
+		lines[cornerCode] = ZipLineLab.odometer.getThetaDegrees();	//Once a line has been found add to lines array
 		ZipLineLab.leftMotor.stop(true);	//Four lines have now been detected. Stop spinning
 		ZipLineLab.rightMotor.stop();
 		
 		colorPoller.stopPolling();	//No longer need color sensor. Turn off.
 		ZipLineLab.odometer.setX(computeX());	//Use ComputeX() and ComputeY() to correct odometer's position
 		ZipLineLab.odometer.setY(computeY());
-		ZipLineLab.odometer.setTheta(computeThetaColor());
+		//ZipLineLab.odometer.setTheta(computeThetaColor());
 	}
 	//Method to compute X position with line data
 	private double computeX() {
-		double thetaD = (lines[0] - lines[1]);
+		double thetaD = (lines[0] - lines[2]);
 		if(thetaD < 0) {	//Corrects for negative difference
 			thetaD += 360;
 		}
 		thetaD/=2;
-		return -COLOR_SENSOR_OFFSET * Math.cos(Math.toRadians(thetaD));	//Formula for X coordinate, given in fourth quadrant
+		double offset = Math.abs(COLOR_SENSOR_OFFSET * Math.cos(Math.toRadians(thetaD)));	//Formula for X coordinate, given in fourth quadrant
+		double out = 0;
+		switch (tileCornerX) {
+		case 0:
+			out = ((tileIndexX - 1) * ZipLineLab.TILE) + offset;
+			break;
+		case 1:
+			out = (tileIndexX * ZipLineLab.TILE) - offset;
+			break;
+		default:
+			break;
+		}
+		return out;	
 	}
 	
 	private double computeY() {
-		double thetaD = (lines[2] - lines[3]);
+		double thetaD = (lines[1] - lines[3]);
 		if(thetaD < 0) {	//Corrects for negative difference
 			thetaD += 360;
 		}
 		thetaD /=2;
-		return -COLOR_SENSOR_OFFSET * Math.cos(Math.toRadians(thetaD));	//Formula for X coordinate, given in fourth quadrant
+		double offset = Math.abs(COLOR_SENSOR_OFFSET * Math.cos(Math.toRadians(thetaD)));	//Formula for X coordinate, given in fourth quadrant
+		double out = 0;
+		switch (tileCornerY) {
+		case 0:
+			out = ((tileIndexY - 1) * ZipLineLab.TILE) + offset;
+			break;
+		case 1:
+			out = (tileIndexY * ZipLineLab.TILE) - offset;
+			break;
+		default:
+			break;
+		}
+		return out;	
 	}
 	//Method to compute Y position with line data
 	private double computeAngle() {
@@ -122,18 +226,49 @@ public class Localisation {
 		}
 		edgeDifference = heading;
 		heading /= 2;
+		int base = 0;
+		switch (ZipLineLab.corner) {
+		case "0":
+			if(!fallingEdge) {
+				base = 225;
+			} else {
+				base = 45;
+			}
+			break;
+		case "1":
+			if(!fallingEdge) {
+				base = 135;
+			} else {
+				base = 315;
+			}
+			break;
+		case "2":
+			if(!fallingEdge) {
+				base = 45;
+			} else {
+				base = 225;
+			}
+			break;
+		case "3":
+			if(!fallingEdge) {
+				base = 315;
+			} else {
+				base = 135;
+			}
+			break;
+		}
 		if (!fallingEdge) { // if rising edge
-			heading = 225 + heading; //formula for orientation
+			heading = base + heading; //formula for orientation
 		}
 		else {	// if falling edge
-			heading = 45 + heading;	//formula for orientation
+			heading = base + heading;	//formula for orientation
 		}
 		return heading;
 	}
 	
 	private double computeThetaColor() {
 
-		return Math.toRadians(270+((lines[1] - lines[0])/2));
+		return Math.toRadians(270+((lines[2] - lines[0])/2));
 	}
 	
 	
