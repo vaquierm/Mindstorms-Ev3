@@ -19,13 +19,6 @@ public class Localisation {
 	
 	private static final int COLOR_SENSOR_OFFSET = 15;
 	
-	private int tileIndexX = 0;
-	private int tileIndexY = 0;
-	
-	private int tileCornerX = 0;
-	private int tileCornerY = 0;
-	
-	private int cornerCode = 0;
 	
 	private static final int colorLocalisationLineOffset = 7;
 	
@@ -73,73 +66,33 @@ public class Localisation {
 	}
 	//Method to Localise X,Y coordinates
 	public void fixXY() {
+		
 		double currentX = ZipLineLab.odometer.getX();
 		double currentY = ZipLineLab.odometer.getY();
+		int currentTheta = (int) ZipLineLab.odometer.getThetaDegrees();
+		int referenceHeadingCode = 0;
+		currentX = getClosestMultiple(currentX);
+		currentY = getClosestMultiple(currentY);
+		currentTheta = getClosestReference(currentTheta);
 		
-		tileIndexX = (int) (currentX/ZipLineLab.TILE) + 1;
-		tileIndexY = (int) (currentY/ZipLineLab.TILE) + 1;
+		nav.turnTo(currentTheta);
 		
-		if (2 * tileIndexX / ZipLineLab.BOARD_SIZE <= 1) {
-			tileCornerX = 1;
-		}
-		else {
-			tileCornerX = 0;
-		}
-		
-		if (2 * tileIndexY / ZipLineLab.BOARD_SIZE <= 1) {
-			tileCornerY = 1;
-		}
-		else {
-			tileCornerY = 0;
-		}
-		
-		double destinationX;
-		double destinationY;
-		
-		if (tileCornerX > 0) {
-			destinationX = (tileIndexX * ZipLineLab.TILE) - colorLocalisationLineOffset;
-		} else {
-			destinationX = ((tileIndexX - 1) * ZipLineLab.TILE) + colorLocalisationLineOffset;
-		}
-		
-		if (tileCornerY > 0) {
-			destinationY = (tileIndexY * ZipLineLab.TILE) - colorLocalisationLineOffset;
-		} else {
-			destinationY = ((tileIndexY - 1) * ZipLineLab.TILE) + colorLocalisationLineOffset;
-		}
-		
-		nav.travelTo(destinationX, destinationY, false);
-		
-		cornerCode = tileCornerY | (tileCornerX << 1);
-		/*
-		 * Corner code will be
-		 * 0 for bottom left
-		 * 1 for top left
-		 * 2 for bottom right
-		 * 3 for top right
-		 */
-		ZipLineLab.odometryDisplay.setDisplay(false);
-		ZipLineLab.lcd.drawString(tileCornerX + " " + tileCornerY + " " + cornerCode, 0, 4);
-		ZipLineLab.lcd.drawString(tileIndexX + " " + tileIndexY, 0, 5);
-		ZipLineLab.lcd.drawString(destinationX + " " + destinationY, 0, 6);
-		while(Button.waitForAnyPress() != Button.ID_ENTER);
-		ZipLineLab.odometryDisplay.setDisplay(true);
-		
-		switch (cornerCode) {
-		case 0:
-			nav.turnTo(225);
+		switch(currentTheta) {
+		case 45:
+			referenceHeadingCode = 3;
 			break;
-		case 1:
-			nav.turnTo(315);
+		case 135:
+			referenceHeadingCode = 2;
 			break;
-		case 2:
-			nav.turnTo(135);
+		case 225:
+			referenceHeadingCode = 0;
 			break;
-		case 3:
-			nav.turnTo(45);
+		case 315:
+			referenceHeadingCode = 1;
 		}
 		
-		cornerCode = (cornerCode + 1) % lines.length;
+		
+		referenceHeadingCode = (referenceHeadingCode + 1) % lines.length;
 		colorPoller.resumeThread(); 	//Need to detect lines, turn on color sensor
 		ZipLineLab.leftMotor.setSpeed(ROTATION_SPEED);	//Start spinning in place
 		ZipLineLab.rightMotor.setSpeed(ROTATION_SPEED);
@@ -149,74 +102,87 @@ public class Localisation {
 		while(getWaiting()) {
 			
 		}
-		lines[cornerCode] = ZipLineLab.odometer.getThetaDegrees(); 	//Once a line has been found add to lines array
-		cornerCode = (cornerCode + 1) % lines.length;
+		lines[referenceHeadingCode] = ZipLineLab.odometer.getThetaDegrees(); 	//Once a line has been found add to lines array
+		referenceHeadingCode = (referenceHeadingCode + 1) % lines.length;
 		setWaiting(true);	//Again waiting for a trigger value i.e a line
 		while(getWaiting()) {
 			
 		}
-		lines[cornerCode] = ZipLineLab.odometer.getThetaDegrees();	//Once a line has been found add to lines array
-		cornerCode = (cornerCode + 1) % lines.length;
+		lines[referenceHeadingCode] = ZipLineLab.odometer.getThetaDegrees();	//Once a line has been found add to lines array
+		referenceHeadingCode = (referenceHeadingCode + 1) % lines.length;
 		setWaiting(true);	//Again waiting for a trigger value i.e a line
 		while(getWaiting()) {
 			
 		}
-		lines[cornerCode] = ZipLineLab.odometer.getThetaDegrees();	//Once a line has been found add to lines array
-		cornerCode = (cornerCode + 1) % lines.length;
+		lines[referenceHeadingCode] = ZipLineLab.odometer.getThetaDegrees();	//Once a line has been found add to lines array
+		referenceHeadingCode = (referenceHeadingCode + 1) % lines.length;
 		setWaiting(true);	//Again waiting for a trigger value i.e a line
 		while(getWaiting()) {
 			
 		}
-		lines[cornerCode] = ZipLineLab.odometer.getThetaDegrees();	//Once a line has been found add to lines array
+		lines[referenceHeadingCode] = ZipLineLab.odometer.getThetaDegrees();	//Once a line has been found add to lines array
 		ZipLineLab.leftMotor.stop(true);	//Four lines have now been detected. Stop spinning
 		ZipLineLab.rightMotor.stop();
 		
 		colorPoller.stopPolling();	//No longer need color sensor. Turn off.
-		ZipLineLab.odometer.setX(computeX());	//Use ComputeX() and ComputeY() to correct odometer's position
-		ZipLineLab.odometer.setY(computeY());
+		ZipLineLab.odometer.setX(computeX(currentX));	//Use ComputeX() and ComputeY() to correct odometer's position
+		ZipLineLab.odometer.setY(computeY(currentY));
 		//ZipLineLab.odometer.setTheta(computeThetaColor());
 	}
+	
+	//takes as input a heading in degrees and returns the closest heading at a 45 degree angle
+	private int getClosestReference(int current) {
+		if (current < 90)
+			return 45;
+		else if (current < 180)
+			return 135;
+		else if (current < 270)
+			return 225;
+		else
+			return 315;
+	}
+	
+	//return closest multiple of tile length
+	private double getClosestMultiple(double val) {
+		double mod = val % ZipLineLab.TILE;
+		int intDiv = (int) (val / ZipLineLab.TILE);
+		if (mod < ZipLineLab.TILE / 2) {
+			return intDiv * ZipLineLab.TILE;
+		} else
+			return (intDiv + 1) * ZipLineLab.TILE;
+	}
+	
 	//Method to compute X position with line data
-	private double computeX() {
+	private double computeX(double targetX) {
 		double thetaD = (lines[0] - lines[2]);
+		int magnitude = -1;
 		if(thetaD < 0) {	//Corrects for negative difference
 			thetaD += 360;
+		}
+		if(thetaD > 180) {
+			thetaD = 360 - thetaD;
+			magnitude = 1;
 		}
 		thetaD/=2;
 		double offset = Math.abs(COLOR_SENSOR_OFFSET * Math.cos(Math.toRadians(thetaD)));	//Formula for X coordinate, given in fourth quadrant
-		double out = 0;
-		switch (tileCornerX) {
-		case 0:
-			out = ((tileIndexX - 1) * ZipLineLab.TILE) + offset;
-			break;
-		case 1:
-			out = (tileIndexX * ZipLineLab.TILE) - offset;
-			break;
-		default:
-			break;
-		}
-		return out;	
+		
+		return targetX + (magnitude * offset);
 	}
 	
-	private double computeY() {
+	private double computeY(double targetY) {
 		double thetaD = (lines[1] - lines[3]);
+		int magnitude = -1;
 		if(thetaD < 0) {	//Corrects for negative difference
 			thetaD += 360;
 		}
-		thetaD /=2;
-		double offset = Math.abs(COLOR_SENSOR_OFFSET * Math.cos(Math.toRadians(thetaD)));	//Formula for X coordinate, given in fourth quadrant
-		double out = 0;
-		switch (tileCornerY) {
-		case 0:
-			out = ((tileIndexY - 1) * ZipLineLab.TILE) + offset;
-			break;
-		case 1:
-			out = (tileIndexY * ZipLineLab.TILE) - offset;
-			break;
-		default:
-			break;
+		if(thetaD > 180) {
+			thetaD = 360 - thetaD;
+			magnitude = 1;
 		}
-		return out;	
+		thetaD/=2;
+		double offset = Math.abs(COLOR_SENSOR_OFFSET * Math.cos(Math.toRadians(thetaD)));	//Formula for X coordinate, given in fourth quadrant
+		
+		return targetY + (magnitude * offset);	
 	}
 	//Method to compute Y position with line data
 	private double computeAngle() {

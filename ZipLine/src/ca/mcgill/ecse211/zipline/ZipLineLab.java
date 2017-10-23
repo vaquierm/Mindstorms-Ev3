@@ -43,7 +43,7 @@ public class ZipLineLab {
 	public static final int BOARD_SIZE = 8;
 	public static final double TILE = 30.48;
 	public static final double WHEEL_RADIUS = 2.1;
-	public static final double TRACK = 16.2;
+	public static final double TRACK = 16.6;
 	
 	public static TextLCD lcd;
 	public static OdometryDisplay odometryDisplay;
@@ -218,23 +218,32 @@ public class ZipLineLab {
 			id = Button.waitForAnyPress();
 		}
 
+		Coordinate initialLocalisation = new Coordinate(-1, -1);
 		odometryDisplay.start();
 		switch(corner) {
 		case "0":
 			odometer.setX(20);
 			odometer.setY(20);
+			initialLocalisation.x = TILE;
+			initialLocalisation.y = TILE;
 			break;
 		case "1":
 			odometer.setX((BOARD_SIZE * TILE) - 20);
 			odometer.setY(20);
+			initialLocalisation.x = (BOARD_SIZE - 1) * TILE;
+			initialLocalisation.y = TILE;
 			break;
 		case "2":
 			odometer.setX((BOARD_SIZE * TILE) - 20);
 			odometer.setY((BOARD_SIZE * TILE) - 20);
+			initialLocalisation.x = (BOARD_SIZE - 1) * TILE;
+			initialLocalisation.y = (BOARD_SIZE - 1) * TILE;
 			break;
 		case "3":
 			odometer.setX(20);
 			odometer.setY((BOARD_SIZE * TILE) - 20);
+			initialLocalisation.x = TILE;
+			initialLocalisation.y = (BOARD_SIZE - 1) * TILE;
 		}
 		
 		
@@ -244,9 +253,16 @@ public class ZipLineLab {
 		while (Button.waitForAnyPress() != Button.ID_ENTER)
 			;
 		
-		localisationManager.localize();
+		localisationManager.getLocalisation().alignAngle();
+		navigation.travelTo(initialLocalisation.x, initialLocalisation.y, false);
+		
+		localisationManager.getLocalisation().fixXY();
 		
 		navigation.travelTo(x * TILE, y * TILE, false);
+		navigation.travelTo(x * TILE, y * TILE, false);
+		
+		while (Button.waitForAnyPress() != Button.ID_ENTER)
+			;
 		
 		localisationManager.getLocalisation().fixXY();
 		

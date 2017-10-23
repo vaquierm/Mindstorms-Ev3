@@ -51,6 +51,7 @@ public class LocalisationManager {
 				while(Button.waitForAnyPress() != Button.ID_ENTER);
 				break;
 			case DIRECTION_LOCALIZED:
+				
 				localisation.fixXY();
 				setLocalisationState(LocalisationState.FULLY_LOCALIZED);
 				nav.turnTo(0);
