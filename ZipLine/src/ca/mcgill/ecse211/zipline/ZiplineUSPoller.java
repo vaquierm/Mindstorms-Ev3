@@ -22,7 +22,7 @@ public class ZiplineUSPoller extends Thread {
 
 	private int[] sensorData; // This array keeps the last SAMPLE_POINT points
 								// of the us sensor
-	private static final int SAMPLE_POINTS = 5;
+	private static final int SAMPLE_POINTS = 7;
 	private int dataCounter = 0;
 	private int currentAverage = -1;
 
@@ -48,6 +48,7 @@ public class ZiplineUSPoller extends Thread {
 	 */
 	public void run() {
 		int distance;
+		float runStart = System.currentTimeMillis();
 		synchronized(lock) {
 			polling = true;
 		}
@@ -57,7 +58,8 @@ public class ZiplineUSPoller extends Thread {
 													// to int
 			if (distance > 0) {
 				newSensorValue(distance);
-				if(checkThreshold()) {
+				if((System.currentTimeMillis() - runStart > 5000) && checkThreshold()) {
+					System.out.println(sensorData[0]+" "+ sensorData[1]+" "+ sensorData[2]+" "+sensorData[0]);
 					Sound.beep();
 					ziplineController.setWaiting(false);
 				}

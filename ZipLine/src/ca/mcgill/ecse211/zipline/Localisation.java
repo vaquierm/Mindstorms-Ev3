@@ -127,7 +127,11 @@ public class Localisation {
 		colorPoller.stopPolling();	//No longer need color sensor. Turn off.
 		ZipLineLab.odometer.setX(computeX(currentX));	//Use ComputeX() and ComputeY() to correct odometer's position
 		ZipLineLab.odometer.setY(computeY(currentY));
-		ZipLineLab.odometer.setTheta(Math.toRadians(computeThetaColor(referenceHeadingCode)));
+		double newT = computeThetaColor(referenceHeadingCode);
+		/*newT += 10;
+		if(newT > 360)
+			newT-= 360;*/
+		ZipLineLab.odometer.setTheta(Math.toRadians(newT));
 	}
 	
 	//takes as input a heading in degrees and returns the closest heading at a 45 degree angle

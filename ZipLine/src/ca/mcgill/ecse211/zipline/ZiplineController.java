@@ -35,10 +35,7 @@ public class ZiplineController extends Thread {
 		ZipLineLab.leftMotor.forward();
 		ZipLineLab.rightMotor.forward();
 		armMotor.forward();
-		try {
-			Thread.sleep(5000);
-		} catch (InterruptedException e) {
-		}
+
 		ziplineUSPoller.start();
 		setWaiting(true);
 		while(getWaiting());

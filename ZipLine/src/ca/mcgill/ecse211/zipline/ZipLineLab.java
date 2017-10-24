@@ -250,21 +250,16 @@ public class ZipLineLab {
 		/*odometer.setX(15);
 		odometer.setY(75);
 		localisationManager.getLocalisation().fixXY();*/
-		while (Button.waitForAnyPress() != Button.ID_ENTER)
-			;
+
 		
 		localisationManager.getLocalisation().alignAngle();
 		navigation.travelTo(initialLocalisation.x, initialLocalisation.y, false);
 		
 		localisationManager.getLocalisation().fixXY();
-		while (Button.waitForAnyPress() != Button.ID_ENTER)
-			;
 		
 		navigation.travelTo(x * TILE, y * TILE, false);
 		//navigation.travelTo(x * TILE, y * TILE, false);
 		
-		while (Button.waitForAnyPress() != Button.ID_ENTER)
-			;
 		
 		localisationManager.getLocalisation().fixXY();
 		
