@@ -127,7 +127,7 @@ public class Localisation {
 		colorPoller.stopPolling();	//No longer need color sensor. Turn off.
 		ZipLineLab.odometer.setX(computeX(currentX));	//Use ComputeX() and ComputeY() to correct odometer's position
 		ZipLineLab.odometer.setY(computeY(currentY));
-		//ZipLineLab.odometer.setTheta(computeThetaColor());
+		ZipLineLab.odometer.setTheta(Math.toRadians(computeThetaColor(referenceHeadingCode)));
 	}
 	
 	//takes as input a heading in degrees and returns the closest heading at a 45 degree angle
@@ -232,9 +232,48 @@ public class Localisation {
 		return heading;
 	}
 	
-	private double computeThetaColor() {
-
-		return Math.toRadians(270+((lines[2] - lines[0])/2));
+	private double computeThetaColor(int reference) {
+		double delta;
+		double out = 0;
+		//ZipLineLab.odometryDisplay.setDisplay(false);
+		switch(reference) {
+			case 3:
+				delta = lines[1] - lines[3];
+				if(delta < 0)
+					delta += 360;
+				delta /= 2;
+				out = 180 - delta;
+				break;
+			case 0:
+				delta = lines[1] - lines[3];
+				if(delta < 0)
+					delta += 360;
+				delta /= 2;
+				out = 180 + delta;
+				break;
+			case 1:
+				delta = lines[0] - lines[2];
+				if(delta < 0)
+					delta += 360;
+				delta /= 2;
+				//ZipLineLab.lcd.drawString(delta + "", 0, 5);
+				out = 270 + delta;
+				break;
+			case 2:
+				delta = lines[0] - lines[2];
+				if(delta < 0)
+					delta += 360;
+				delta /= 2;
+				//ZipLineLab.lcd.drawString(delta + "", 0, 5);
+				out = 270 - delta;
+				break;
+		}
+		if (out >= 360)
+			out -= 360;
+		else if (out < 0) {
+			out += 360;
+		}
+		return out;
 	}
 	
 	
