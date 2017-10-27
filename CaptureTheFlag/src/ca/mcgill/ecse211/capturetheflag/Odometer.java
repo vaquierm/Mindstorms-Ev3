@@ -1,4 +1,4 @@
-package ca.mcgill.ecse211.zipline;
+package ca.mcgill.ecse211.capturetheflag;
 
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
@@ -18,21 +18,26 @@ public class Odometer extends Thread {
 	private double thetaDegree;
 	private int leftMotorTachoCount;
 	private int rightMotorTachoCount;
+	
+	//Motors
 	private EV3LargeRegulatedMotor leftMotor;
 	private EV3LargeRegulatedMotor rightMotor;
+	
+	//Robot constants
+	private final double WHEEL_RADIUS;
+	private final double TRACK;
 
 
-	private static final long ODOMETER_PERIOD = 15; /*
-													 * odometer update period,
-													 * in ms
-													 */
+	private static final long ODOMETER_PERIOD = 15; 
 
 	private Object lock; /* lock object for mutual exclusion */
 
 	// default constructor
-	public Odometer(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor) {
+	public Odometer(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, double wheelRadius, double track) {
 		this.leftMotor = leftMotor;
 		this.rightMotor = rightMotor;
+		this.WHEEL_RADIUS = wheelRadius;
+		this.TRACK = track;
 		this.x = 0.0;
 		this.y = 0.0;
 		this.theta = 0.0;
@@ -51,12 +56,12 @@ public class Odometer extends Thread {
 			double distL, distR, deltaD, deltaT, dX, dY;
 			int nowTachoL = leftMotor.getTachoCount();
 			int nowTachoR = rightMotor.getTachoCount();
-			distL = Math.PI * ZipLineLab.WHEEL_RADIUS * (nowTachoL - leftMotorTachoCount) / 180;
-			distR = Math.PI * ZipLineLab.WHEEL_RADIUS * (nowTachoR - rightMotorTachoCount) / 180;
+			distL = Math.PI * WHEEL_RADIUS * (nowTachoL - leftMotorTachoCount) / 180;
+			distR = Math.PI * WHEEL_RADIUS * (nowTachoR - rightMotorTachoCount) / 180;
 			leftMotorTachoCount = nowTachoL;
 			rightMotorTachoCount = nowTachoR;
 			deltaD = 0.5 * (distL + distR);
-			deltaT = (distL - distR) / ZipLineLab.TRACK;
+			deltaT = (distL - distR) / TRACK;
 
 			synchronized (lock) {
 				setTheta(theta + deltaT);

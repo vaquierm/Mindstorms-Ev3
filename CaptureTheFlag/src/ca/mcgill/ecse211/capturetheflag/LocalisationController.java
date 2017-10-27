@@ -14,18 +14,32 @@ package ca.mcgill.ecse211.capturetheflag;
  * @author Oliver Clark
  */
 
-public class LocalisationController extends Thread {
+public class LocalisationController implements Runnable {
 	
-	public enum LocalisationState { FULLY_LOCALIZED, DIRECTION_LOCALIZED, UNLOCALIZED }
-	
+	//Lock objects for threading
 	private Object stateLock = new Object();
 	private Object pauseLock = new Object();
 	private volatile boolean paused = false;
 	
+	//Associations
+	Localisation localisation;
+	Navigation navigation;
+	
+	//Game board constants
+	private final double tile;
+	private final int startingCorner;
+	private final int boardSize;
+	
+	public enum LocalisationState { FULLY_LOCALIZED, DIRECTION_LOCALIZED, UNLOCALIZED }
+	
 	private LocalisationState localisationState = LocalisationState.UNLOCALIZED;
 	
-	public LocalisationController() {
-		
+	public LocalisationController(Localisation localisation, Navigation navigation, double tile, int startingCorner, int boardSize) {
+		this.localisation = localisation;
+		this.navigation = navigation;
+		this.tile = tile;
+		this.startingCorner = startingCorner;
+		this.boardSize = boardSize;
 	}
 	
 	/*
@@ -42,10 +56,28 @@ public class LocalisationController extends Thread {
 	}
 	
 	private void initialLocalisationRoutine() {
-		MainController.localisation.usLocalisation();
-		MainController.navigation.turnTo(45);
-		MainController.navigation.forward(9, false);
-		MainController.localisation.colorLocalisation();
+		localisation.usLocalisation();
+		navigateToInitialIntersection();
+		localisation.colorLocalisation();
+	}
+	
+	private void navigateToInitialIntersection() {
+		switch(startingCorner) {
+		case 0:
+			navigation.travelTo(tile, tile, false);
+			break;
+		case 1:
+			navigation.travelTo(((boardSize - 1) * tile), tile, false);
+			break;
+		case 2:
+			navigation.travelTo(((boardSize - 1) * tile), ((boardSize - 1) * tile), false);
+			break;
+		case 3:
+			navigation.travelTo(tile, ((boardSize - 1) * tile), false);
+			break;
+		default:
+			break;
+		}
 	}
 	
 	private void colorLocalisationRoutine() {
@@ -78,7 +110,7 @@ public class LocalisationController extends Thread {
 	}
 	
 	//resumes the thread
-    public void resumeThred() {
+    public void resumeThread() {
         synchronized (pauseLock) {
         	if (paused) {
         		paused = false;

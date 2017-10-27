@@ -1,5 +1,7 @@
 package ca.mcgill.ecse211.capturetheflag;
 
+import lejos.hardware.motor.EV3LargeRegulatedMotor;
+
 /**
  * 
  * Navigation class which navigates robot to specified points, 
@@ -18,9 +20,25 @@ public class Navigation {
 	
 	private double interruptedTheta = -1;
 	
+	//Motors
+	EV3LargeRegulatedMotor rightMotor;
+	EV3LargeRegulatedMotor leftMotor;
+	
+	//Associations
+	private Odometer odometer;
+	
+	//Robot constants
+	private final double WHEEL_RADIUS;
+	private final double TRACK;
+	
 
-	public Navigation() {
-
+	public Navigation(Odometer odometer, EV3LargeRegulatedMotor rightMotor, EV3LargeRegulatedMotor leftMotor, double wheelRadius, double track) {
+		this.rightMotor = rightMotor;
+		this.leftMotor = leftMotor;
+		this.odometer = odometer;
+		
+		this.WHEEL_RADIUS = wheelRadius;
+		this.TRACK = track;
 	}
 
 	/*
@@ -28,12 +46,12 @@ public class Navigation {
 	 * y), specified in tilepoints.This method should continuously
 	 * callturnTo(double theta)and thenset the motor speed to forward(straight).
 	 * This will make sure that yourheading is updated until you reach your
-	 * exact goal. This method will pollthe MainController.odometer for informatio
+	 * exact goal. This method will pollthe odometer for informatio
 	 */
 	public void travelTo(double x, double y, boolean returnThread) {		
 		
-		double currentX = MainController.odometer.getX();
-		double currentY = MainController.odometer.getY();
+		double currentX = odometer.getX();
+		double currentY = odometer.getY();
 		
 		double nextHeading = Math.toDegrees(Math.atan2(x - currentX, y - currentY));
 
@@ -53,9 +71,9 @@ public class Navigation {
 	}
 	
 	public void turnTo(double theta) {
-		MainController.leftMotor.setSpeed(ROTATE_SPEED);
-	    MainController.rightMotor.setSpeed(ROTATE_SPEED);
-		double currentTheta = MainController.odometer.getThetaDegrees();
+		leftMotor.setSpeed(ROTATE_SPEED);
+	    rightMotor.setSpeed(ROTATE_SPEED);
+		double currentTheta = odometer.getThetaDegrees();
 		double rightRotation = theta - currentTheta;
 		if (rightRotation < 0) {
 			rightRotation = rightRotation + 360;
@@ -64,25 +82,25 @@ public class Navigation {
 		if (leftRotation < 0) {
 			leftRotation = leftRotation + 360;
 		}
-		MainController.rightMotor.setAcceleration(SLOW_ACCEL);
-		MainController.leftMotor.setAcceleration(SLOW_ACCEL);
+		rightMotor.setAcceleration(SLOW_ACCEL);
+		leftMotor.setAcceleration(SLOW_ACCEL);
 		if (rightRotation < leftRotation) {
-			MainController.leftMotor.rotate(convertAngle(MainController.WHEEL_RADIUS, MainController.TRACK, rightRotation), true);
-		    MainController.rightMotor.rotate(-convertAngle(MainController.WHEEL_RADIUS, MainController.TRACK, rightRotation), false);
+			leftMotor.rotate(convertAngle(WHEEL_RADIUS, TRACK, rightRotation), true);
+		    rightMotor.rotate(-convertAngle(WHEEL_RADIUS, TRACK, rightRotation), false);
 		}
 		else {
-			MainController.leftMotor.rotate(-convertAngle(MainController.WHEEL_RADIUS, MainController.TRACK, leftRotation), true);
-		    MainController.rightMotor.rotate(convertAngle(MainController.WHEEL_RADIUS, MainController.TRACK, leftRotation), false);
+			leftMotor.rotate(-convertAngle(WHEEL_RADIUS, TRACK, leftRotation), true);
+		    rightMotor.rotate(convertAngle(WHEEL_RADIUS, TRACK, leftRotation), false);
 		}
-		MainController.rightMotor.setAcceleration(FAST_ACCEL);
-		MainController.leftMotor.setAcceleration(FAST_ACCEL);
+		rightMotor.setAcceleration(FAST_ACCEL);
+		leftMotor.setAcceleration(FAST_ACCEL);
 	}
 	
 	public void forward(double distance, boolean returnThread) {
-		MainController.leftMotor.setSpeed(FORWARD_SPEED);
-	    MainController.rightMotor.setSpeed(FORWARD_SPEED);
-		MainController.leftMotor.rotate(convertDistance(MainController.WHEEL_RADIUS, distance), true);
-	    MainController.rightMotor.rotate(convertDistance(MainController.WHEEL_RADIUS, distance), returnThread);
+		leftMotor.setSpeed(FORWARD_SPEED);
+	    rightMotor.setSpeed(FORWARD_SPEED);
+		leftMotor.rotate(convertDistance(WHEEL_RADIUS, distance), true);
+	    rightMotor.rotate(convertDistance(WHEEL_RADIUS, distance), returnThread);
 	}
 
 

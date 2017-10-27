@@ -173,6 +173,7 @@ public class Localisation {
 		return targetX + (magnitude * offset);
 	}
 	
+	//Method to compute Y position with line data
 	private double computeY(double targetY) {
 		double thetaD = (lines[1] - lines[3]);
 		int magnitude = -1;
@@ -188,7 +189,7 @@ public class Localisation {
 		
 		return targetY + (magnitude * offset);	
 	}
-	//Method to compute Y position with line data
+	
 	private double computeAngle() {
 		double heading = edges[1] - edges[0];
 		if (heading < 0) {	//Corrects for negative difference
@@ -239,7 +240,6 @@ public class Localisation {
 	private double computeThetaColor(int reference) {
 		double delta;
 		double out = 0;
-		//ZipLineLab.odometryDisplay.setDisplay(false);
 		switch(reference) {
 			case 3:
 				delta = lines[1] - lines[3];
@@ -260,7 +260,6 @@ public class Localisation {
 				if(delta < 0)
 					delta += 360;
 				delta /= 2;
-				//ZipLineLab.lcd.drawString(delta + "", 0, 5);
 				out = 270 + delta;
 				break;
 			case 2:
@@ -268,7 +267,6 @@ public class Localisation {
 				if(delta < 0)
 					delta += 360;
 				delta /= 2;
-				//ZipLineLab.lcd.drawString(delta + "", 0, 5);
 				out = 270 - delta;
 				break;
 		}
