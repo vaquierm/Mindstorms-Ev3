@@ -26,6 +26,8 @@ public class NavigationController implements Runnable {
 	private List<Coordinate> coordinateList;
 	private final boolean objectDetection = false;
 	private static NavigationState state = NavigationState.READY;
+	
+	private final GameParameters gameParameters;
 
 	// Associations
 	Odometer odometer;
@@ -35,19 +37,20 @@ public class NavigationController implements Runnable {
 	EV3LargeRegulatedMotor rightMotor;
 	EV3LargeRegulatedMotor leftMotor;
 
-	// Robot constants
 
 	public enum NavigationState {
 		NAVIGATING, AVOIDING, READY
 	}
 
 	public NavigationController(EV3LargeRegulatedMotor rightMotor, EV3LargeRegulatedMotor leftMotor, Odometer odometer,
-			Navigation navigation) {
+			Navigation navigation, GameParameters gameParameters) {
 		this.rightMotor = rightMotor;
 		this.leftMotor = leftMotor;
 
 		this.odometer = odometer;
 		this.navigation = navigation;
+		
+		this.gameParameters = gameParameters;
 	}
 
 	public void run() {
@@ -97,9 +100,20 @@ public class NavigationController implements Runnable {
 		objectAvoidanceUsPoller.stopPolling();
 	}
 
+	
+	/**
+	 * This method takes as input a list of Coordinates and modifies the object such
+	 * that the new path is rectangular and avoids physical features on the board
+	 * @param wayPoints
+	 */
 	private void changeToRectangularPath(List<Coordinate> wayPoints) {
-		// TODO Bill fill this to travel in rectangular paths rater than
-		// diagonals and avoid physical features
+		// TODO
+		/**
+		 * Look at the GameParameters class, all the parameters are there, this class has a reference to an instance of GameParameters
+		 * Use it to determine what path we cant use. You also need to use the odometer to get a rough idea of the current position of the robot.
+		 * 
+		 */
+		
 	}
 
 	public static NavigationState getNavigationState() {
