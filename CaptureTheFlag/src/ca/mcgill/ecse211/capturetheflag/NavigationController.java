@@ -32,6 +32,9 @@ public class NavigationController implements Runnable {
 	// Associations
 	Odometer odometer;
 	Navigation navigation;
+	
+	//Poller
+	UltrasonicPoller ultrasonicPoller;
 
 	// Motors
 	EV3LargeRegulatedMotor rightMotor;
@@ -43,12 +46,13 @@ public class NavigationController implements Runnable {
 	}
 
 	public NavigationController(EV3LargeRegulatedMotor rightMotor, EV3LargeRegulatedMotor leftMotor, Odometer odometer,
-			Navigation navigation, GameParameters gameParameters) {
+			Navigation navigation, UltrasonicPoller ultrasonicPoller, GameParameters gameParameters) {
 		this.rightMotor = rightMotor;
 		this.leftMotor = leftMotor;
 
 		this.odometer = odometer;
 		this.navigation = navigation;
+		this.ultrasonicPoller = ultrasonicPoller;
 		
 		this.gameParameters = gameParameters;
 	}
@@ -56,7 +60,7 @@ public class NavigationController implements Runnable {
 	public void run() {
 
 		if (objectDetection) {
-			objectAvoidanceUsPoller.resumeThread();
+			ultrasonicPoller.startPolling();
 		}
 
 		while (coordinateList.size() > 0) {
@@ -82,10 +86,10 @@ public class NavigationController implements Runnable {
 				int interrupted = (int) navigation.getInterruptedTheta();
 				int current = (int) odometer.getThetaDegrees();
 				int difference = Math.abs(interrupted - current);
-				// System.out.println(difference);
 				if (difference < 195 && difference > 165) { // when the robot is pointing to the opposite direction after it was interrupted, we can start navigating again.
 					setNavigationState(NavigationState.READY);
-					objectAvoidanceUsPoller.usSensorStraight();
+					//TODO turn sensor back forward
+					//objectAvoidanceUsPoller.usSensorStraight();
 				}
 				break;
 			default:
@@ -97,7 +101,7 @@ public class NavigationController implements Runnable {
 
 			}
 		}
-		objectAvoidanceUsPoller.stopPolling();
+		ultrasonicPoller.stopPolling();
 	}
 
 	

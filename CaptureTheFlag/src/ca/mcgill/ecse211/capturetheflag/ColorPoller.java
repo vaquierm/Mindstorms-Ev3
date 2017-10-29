@@ -4,12 +4,14 @@ import lejos.robotics.SampleProvider;
 
 public class ColorPoller implements Runnable {
 	
-	private boolean polling = false;
-	private Object pollingLock = new Object();
+	private volatile boolean polling = false;
 	
 	private static final int POLLING_PERIOD = 10;
 	
 	private ColorPollingState state = ColorPollingState.LOCALISATION;
+	
+	//data processing classes
+	private ColorLocalisationData colorLocalisationData;
 	
 	SampleProvider colorRedFront;
 	float[] colorRedDataFront;
@@ -18,7 +20,7 @@ public class ColorPoller implements Runnable {
 	SampleProvider colorRedSide;
 	float[] colorRedDataSide;
 	
-	public ColorPoller(SampleProvider colorRedBack, float[] colorRedDataBack, SampleProvider colorRedFront, float[] colorRedDataFront, SampleProvider colorRedSide, float[] colorRedDataSide) {
+	public ColorPoller(ColorLocalisationData colorLocalisationData, SampleProvider colorRedBack, float[] colorRedDataBack, SampleProvider colorRedFront, float[] colorRedDataFront, SampleProvider colorRedSide, float[] colorRedDataSide) {
 		this.colorRedFront = colorRedFront;
 		this.colorRedDataFront = colorRedDataFront;
 		this.colorRedBack = colorRedBack;
@@ -29,10 +31,8 @@ public class ColorPoller implements Runnable {
 	
 	public void run() {
 		long correctionStart, correctionEnd;
-		synchronized (pollingLock) {
-			polling = true;
-		}
-		while (getPolling()) {
+		polling = true;
+		while (polling) {
 			correctionStart = System.currentTimeMillis();
 
 			switch(state) {
@@ -71,20 +71,17 @@ public class ColorPoller implements Runnable {
 	}
 
 	private void processLocalisation() {
-		// TODO Auto-generated method stub
+		colorRedBack.fetchSample(colorRedDataBack, 0);
+		colorLocalisationData.processData((int) (colorRedDataBack[0] * 100));
 		
 	}
-
-	private boolean getPolling() {
-		synchronized(pollingLock) {
-			return polling;
-		}
+	
+	public void startPolling() {
+		new Thread(this).start();
 	}
 	
 	public void stopPolling() {
-		synchronized(pollingLock) {
-			polling = false;
-		}
+		polling = false;
 	}
 	
 	public enum ColorPollingState { LOCALISATION, ZIPLINING, BLOCK_SEARCHING }

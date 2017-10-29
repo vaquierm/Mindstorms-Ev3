@@ -4,12 +4,12 @@ import lejos.robotics.SampleProvider;
 
 public class UltrasonicPoller implements Runnable {
 	
-	private boolean polling = false;
-	private Object pollingLock = new Object();
+	private volatile boolean polling = false;
 	
 	private static final int POLLING_PERIOD = 10;
 	
 	private UltrasonicPollingState state = UltrasonicPollingState.LOCALISATION;
+	private Object stateLock = new Object();
 	
 	SampleProvider usDistance;
 	float[] usData;
@@ -21,17 +21,16 @@ public class UltrasonicPoller implements Runnable {
 	
 	public void run() {
 		long correctionStart, correctionEnd;
-		synchronized (pollingLock) {
-			polling = true;
-		}
-		while (getPolling()) {
+		polling = true;
+
+		while (polling) {
 			correctionStart = System.currentTimeMillis();
 
 			usDistance.fetchSample(usData, 0);
 			int sample = (int) (usData[0] * 100);
 			
 			if(sample > 0) {
-				switch(state) {
+				switch(getPollingState()) {
 				case LOCALISATION:
 					//TODO
 					break;
@@ -52,16 +51,25 @@ public class UltrasonicPoller implements Runnable {
 		}
 	}
 	
-	private boolean getPolling() {
-		synchronized(pollingLock) {
-			return polling;
+	public void setPollingState(UltrasonicPollingState state) {
+		synchronized (stateLock) {
+			this.state = state;
 		}
 	}
 	
-	public void stopPolling() {
-		synchronized(pollingLock) {
-			polling = false;
+	public UltrasonicPollingState getPollingState() {
+		synchronized (stateLock) {
+			return state;
 		}
+	}
+	
+	public void startPolling() {
+		new Thread(this).start();
+	}
+	
+	
+	public void stopPolling() {
+		polling = false;
 	}
 	
 	public enum UltrasonicPollingState { LOCALISATION, NAVIGATION }

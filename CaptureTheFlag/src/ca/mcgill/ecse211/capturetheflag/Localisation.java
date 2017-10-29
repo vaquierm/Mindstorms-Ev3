@@ -32,8 +32,12 @@ public class Localisation {
 	private final int startingCorner;
 	
 	//Associations
-	Odometer odometer;
-	Navigation navigation;
+	private Odometer odometer;
+	private Navigation navigation;
+	
+	//Poller
+	private UltrasonicPoller ultrasonicPoller;
+	private ColorPoller colorPoller;
 	
 	//Motors
 	private EV3LargeRegulatedMotor leftMotor;
@@ -41,18 +45,20 @@ public class Localisation {
 	
 	//Localisation constructor that makes use of the US & Color sensor with the
 	//UltrasonicPoller and colorLocalisationPoller objects
-	public Localisation(Odometer odometer, Navigation navigation, EV3LargeRegulatedMotor rightMotor, EV3LargeRegulatedMotor leftMotor, double tile, int startingCorner) {
+	public Localisation(Odometer odometer, Navigation navigation, UltrasonicPoller ultrasonicPoller, ColorPoller colorPoller, EV3LargeRegulatedMotor rightMotor, EV3LargeRegulatedMotor leftMotor, double tile, int startingCorner) {
 		this.rightMotor = rightMotor;
 		this.leftMotor = leftMotor;
 		this.odometer = odometer;
 		this.navigation = navigation;
+		this.ultrasonicPoller = ultrasonicPoller;
+		this.colorPoller = colorPoller;
 		this.tile = tile;
 		this.startingCorner = startingCorner;
 	}
 	
 	//Procedure and logic of ultrasonic localisation routine
 	public void usLocalisation() {
-		usLocalisationPoller.start();		//Start taking in US values
+		ultrasonicPoller.startPolling();		//Start taking in US values
 		leftMotor.setSpeed(ROTATION_SPEED);		
 		rightMotor.setSpeed(ROTATION_SPEED);
 		leftMotor.backward();			//Start spinning in place
@@ -68,7 +74,7 @@ public class Localisation {
 		odometer.setTheta(Math.toRadians(computeAngleUltrasonic())); //Uses compute angle to set odometer's theta orientation
 		leftMotor.stop(true);		//Two values have been found, stop spinning
 		rightMotor.stop();
-		usLocalisationPoller.stopPolling();	//No longer need US sensor
+		ultrasonicPoller.stopPolling();	//No longer need US sensor
 		
 		try {
 			Thread.sleep(500);
@@ -105,7 +111,7 @@ public class Localisation {
 		
 		
 		referenceHeadingCode = (referenceHeadingCode + 1) % lines.length;
-		colorLocalisationPoller.resumeThread(); 	//Need to detect lines, turn on color sensor
+		colorPoller.startPolling(); 	//Need to detect lines, turn on color sensor
 		leftMotor.setSpeed(ROTATION_SPEED);	//Start spinning in place
 		rightMotor.setSpeed(ROTATION_SPEED);
 		leftMotor.backward();
@@ -128,7 +134,7 @@ public class Localisation {
 		leftMotor.stop(true);	//Four lines have now been detected. Stop spinning
 		rightMotor.stop();
 		
-		colorLocalisationPoller.stopPolling();	//No longer need color sensor. Turn off.
+		colorPoller.stopPolling();	//No longer need color sensor. Turn off.
 		odometer.setX(computeX(currentX));	//Use ComputeX() and ComputeY() to correct odometer's position
 		odometer.setY(computeY(currentY));
 		double newT = computeThetaColor(referenceHeadingCode);

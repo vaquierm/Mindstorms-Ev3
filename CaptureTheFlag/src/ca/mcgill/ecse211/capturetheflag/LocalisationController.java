@@ -22,8 +22,8 @@ public class LocalisationController implements Runnable {
 	private volatile boolean paused = false;
 	
 	//Associations
-	Localisation localisation;
-	Navigation navigation;
+	private Localisation localisation;
+	private Navigation navigation;
 	
 	//Game board constants
 	private final double tile;
@@ -81,7 +81,7 @@ public class LocalisationController implements Runnable {
 	}
 	
 	private void colorLocalisationRoutine() {
-		//TODO think about a way to localize anywhere.
+		localisation.colorLocalisation();
 	}
 
 	public void setLocalisationState(LocalisationState state) {
