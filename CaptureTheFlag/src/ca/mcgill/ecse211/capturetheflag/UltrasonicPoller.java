@@ -8,15 +8,21 @@ public class UltrasonicPoller implements Runnable {
 	
 	private static final int POLLING_PERIOD = 10;
 	
+	//data processing
+	private UltrasonicLocalisationData ultrasonicLocalisationData;
+	private UltrasonicNavigationData ultrasonicNavigationData;
+	
 	private UltrasonicPollingState state = UltrasonicPollingState.LOCALISATION;
 	private Object stateLock = new Object();
 	
 	SampleProvider usDistance;
 	float[] usData;
 	
-	public UltrasonicPoller(SampleProvider usDistance, float[] usData) {
+	public UltrasonicPoller(SampleProvider usDistance, float[] usData, UltrasonicLocalisationData ultrasonicLocalisationData, UltrasonicNavigationData ultrasonicNavigationData) {
 		this.usDistance = usDistance;
 		this.usData = usData;
+		this.ultrasonicLocalisationData = ultrasonicLocalisationData;
+		this.ultrasonicNavigationData = ultrasonicNavigationData;
 	}
 	
 	public void run() {
@@ -32,10 +38,10 @@ public class UltrasonicPoller implements Runnable {
 			if(sample > 0) {
 				switch(getPollingState()) {
 				case LOCALISATION:
-					//TODO
+					ultrasonicLocalisationData.processData(sample);
 					break;
 				case NAVIGATION:
-					//TODO
+					ultrasonicNavigationData.processData(sample);
 					break;
 				}
 			}

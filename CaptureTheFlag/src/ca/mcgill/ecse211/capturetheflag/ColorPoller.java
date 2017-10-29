@@ -9,6 +9,7 @@ public class ColorPoller implements Runnable {
 	private static final int POLLING_PERIOD = 10;
 	
 	private ColorPollingState state = ColorPollingState.LOCALISATION;
+	private Object stateLock = new Object();
 	
 	//data processing classes
 	private ColorLocalisationData colorLocalisationData;
@@ -35,7 +36,7 @@ public class ColorPoller implements Runnable {
 		while (polling) {
 			correctionStart = System.currentTimeMillis();
 
-			switch(state) {
+			switch(getPollingState()) {
 			case LOCALISATION:
 				processLocalisation();
 				break;
@@ -73,7 +74,18 @@ public class ColorPoller implements Runnable {
 	private void processLocalisation() {
 		colorRedBack.fetchSample(colorRedDataBack, 0);
 		colorLocalisationData.processData((int) (colorRedDataBack[0] * 100));
-		
+	}
+	
+	public void setPollingState(ColorPollingState state) {
+		synchronized (stateLock) {
+			this.state = state;
+		}
+	}
+	
+	public ColorPollingState getPollingState() {
+		synchronized (stateLock) {
+			return state;
+		}
 	}
 	
 	public void startPolling() {

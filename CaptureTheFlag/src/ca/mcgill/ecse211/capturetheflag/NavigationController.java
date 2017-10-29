@@ -24,7 +24,7 @@ public class NavigationController implements Runnable {
 	private static Object stateLock = new Object();
 
 	private List<Coordinate> coordinateList;
-	private final boolean objectDetection = false;
+	private volatile boolean objectDetection = false;
 	private static NavigationState state = NavigationState.READY;
 	
 	private final GameParameters gameParameters;
@@ -39,16 +39,20 @@ public class NavigationController implements Runnable {
 	// Motors
 	EV3LargeRegulatedMotor rightMotor;
 	EV3LargeRegulatedMotor leftMotor;
+	EV3LargeRegulatedMotor frontMotor;
 
 
 	public enum NavigationState {
 		NAVIGATING, AVOIDING, READY
 	}
 
-	public NavigationController(EV3LargeRegulatedMotor rightMotor, EV3LargeRegulatedMotor leftMotor, Odometer odometer,
-			Navigation navigation, UltrasonicPoller ultrasonicPoller, GameParameters gameParameters) {
+	public NavigationController(EV3LargeRegulatedMotor rightMotor, EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor frontMotor,
+			Odometer odometer, Navigation navigation, UltrasonicPoller ultrasonicPoller, GameParameters gameParameters) {
 		this.rightMotor = rightMotor;
 		this.leftMotor = leftMotor;
+		this.frontMotor = frontMotor;
+		frontMotor.setSpeed(30);
+		frontMotor.resetTachoCount();
 
 		this.odometer = odometer;
 		this.navigation = navigation;
@@ -88,8 +92,7 @@ public class NavigationController implements Runnable {
 				int difference = Math.abs(interrupted - current);
 				if (difference < 195 && difference > 165) { // when the robot is pointing to the opposite direction after it was interrupted, we can start navigating again.
 					setNavigationState(NavigationState.READY);
-					//TODO turn sensor back forward
-					//objectAvoidanceUsPoller.usSensorStraight();
+					frontMotor.rotateTo(0, true);
 				}
 				break;
 			default:
@@ -118,6 +121,23 @@ public class NavigationController implements Runnable {
 		 * 
 		 */
 		
+	}
+	
+	/**
+	 * This method rotates the front motor where the sensors are attached to a specific angle
+	 * and returns the thread immediately
+	 * @param angle
+	 */
+	public void turnFrontMotor(int angle) {
+		frontMotor.rotateTo(angle, true);
+	}
+	
+	/**
+	 * This method should be called before running the navigation to determine of the system should be looking for objects to avoid or not.
+	 * @param b
+	 */
+	public void setObjectAvoidance(boolean b) {
+		objectDetection = b;
 	}
 
 	public static NavigationState getNavigationState() {

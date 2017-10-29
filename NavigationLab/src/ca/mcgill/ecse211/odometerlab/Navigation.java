@@ -114,16 +114,13 @@ public class Navigation {
 	}
 	
 	public void interruptNav() {
-		rightMotor.stop();
+		rightMotor.stop(true);
 		leftMotor.stop();
-		
 		
 		leftMotor.rotate(convertAngle(leftRadius, width, 90), true); //when an object is detected, we turn to starting to follow it as a wall.
 	    rightMotor.rotate(-convertAngle(rightRadius, width, 90), false);
 	    
 	    setInterruptedTheta((int) odometer.getThetaDegrees());
-	    
-	    
 	}
 
 

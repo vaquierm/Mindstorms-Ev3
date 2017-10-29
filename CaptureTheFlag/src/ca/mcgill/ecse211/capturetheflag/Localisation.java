@@ -4,6 +4,8 @@
 
 package ca.mcgill.ecse211.capturetheflag;
 
+import ca.mcgill.ecse211.capturetheflag.ColorPoller.ColorPollingState;
+import ca.mcgill.ecse211.capturetheflag.UltrasonicPoller.UltrasonicPollingState;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
 /**
@@ -58,6 +60,7 @@ public class Localisation {
 	
 	//Procedure and logic of ultrasonic localisation routine
 	public void usLocalisation() {
+		ultrasonicPoller.setPollingState(UltrasonicPollingState.LOCALISATION);
 		ultrasonicPoller.startPolling();		//Start taking in US values
 		leftMotor.setSpeed(ROTATION_SPEED);		
 		rightMotor.setSpeed(ROTATION_SPEED);
@@ -76,10 +79,6 @@ public class Localisation {
 		rightMotor.stop();
 		ultrasonicPoller.stopPolling();	//No longer need US sensor
 		
-		try {
-			Thread.sleep(500);
-		} catch (InterruptedException e) {
-		}
 	}
 	
 	//Procedure and logic of color loclisation routine
@@ -111,6 +110,7 @@ public class Localisation {
 		
 		
 		referenceHeadingCode = (referenceHeadingCode + 1) % lines.length;
+		colorPoller.setPollingState(ColorPollingState.LOCALISATION);
 		colorPoller.startPolling(); 	//Need to detect lines, turn on color sensor
 		leftMotor.setSpeed(ROTATION_SPEED);	//Start spinning in place
 		rightMotor.setSpeed(ROTATION_SPEED);
@@ -181,7 +181,6 @@ public class Localisation {
 	private double computeThetaColor(int reference) {
 		double delta;
 		double out = 0;
-		//odometryDisplay.setDisplay(false);
 		switch(reference) {
 			case 3:
 				delta = lines[1] - lines[3];
@@ -202,7 +201,6 @@ public class Localisation {
 				if(delta < 0)
 					delta += 360;
 				delta /= 2;
-				//lcd.drawString(delta + "", 0, 5);
 				out = 270 + delta;
 				break;
 			case 2:
@@ -210,7 +208,6 @@ public class Localisation {
 				if(delta < 0)
 					delta += 360;
 				delta /= 2;
-				//lcd.drawString(delta + "", 0, 5);
 				out = 270 - delta;
 				break;
 		}

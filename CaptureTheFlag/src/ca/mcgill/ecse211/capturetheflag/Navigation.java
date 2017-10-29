@@ -102,7 +102,19 @@ public class Navigation {
 		leftMotor.rotate(convertDistance(WHEEL_RADIUS, distance), true);
 	    rightMotor.rotate(convertDistance(WHEEL_RADIUS, distance), returnThread);
 	}
-
+	
+	public void interruptNav(boolean turnRight) {
+		rightMotor.stop(true);
+		leftMotor.stop();
+		int polarity = 1;
+		if (!turnRight) {
+			polarity = -1;
+		}
+		leftMotor.rotate(polarity * convertAngle(WHEEL_RADIUS, TRACK, 90), true); //when an object is detected, we turn to starting to follow it as a wall.
+	    rightMotor.rotate(- polarity * convertAngle(WHEEL_RADIUS, TRACK, 90), false);
+	    
+	    setInterruptedTheta((int) odometer.getThetaDegrees());
+	}
 
 	public int convertDistance(double radius, double distance) {
 		return (int) ((180.0 * distance) / (Math.PI * radius));
