@@ -21,8 +21,8 @@ public class Navigation {
 	private double interruptedTheta = -1;
 	
 	//Motors
-	EV3LargeRegulatedMotor rightMotor;
-	EV3LargeRegulatedMotor leftMotor;
+	private EV3LargeRegulatedMotor rightMotor;
+	private EV3LargeRegulatedMotor leftMotor;
 	
 	//Associations
 	private Odometer odometer;

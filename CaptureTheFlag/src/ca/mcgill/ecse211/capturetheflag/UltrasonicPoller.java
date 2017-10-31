@@ -69,6 +69,14 @@ public class UltrasonicPoller implements Runnable {
 		}
 	}
 	
+	public UltrasonicLocalisationData getUltrasonicLocalisationData() {
+		return ultrasonicLocalisationData;
+	}
+	
+	public UltrasonicNavigationData getUltrasonicNavigationData() {
+		return ultrasonicNavigationData;
+	}
+	
 	public void startPolling() {
 		new Thread(this).start();
 	}

@@ -27,6 +27,7 @@ public class UltrasonicNavigationData {
 	//Associations
 	private Navigation navigation;
 	private NavigationController navigationController;
+	private Odometer odometer;
 	
 	private boolean followingLeftWall = false;
 	
@@ -37,6 +38,9 @@ public class UltrasonicNavigationData {
 	private static final int CORNER_INNER_SPEED = 100;
 	private static final int BACKWARD_SPEED = 200;
 	private static final int SPIN_SPEED = 150;
+	
+	private final double tile;
+	private final double boardSize;
 
 	private final int bandCenter = 20;
 	private final int bandWidth = 3;
@@ -46,13 +50,12 @@ public class UltrasonicNavigationData {
 	private boolean corner = false;
 	
 	
-	public UltrasonicNavigationData(Navigation navigation,
-			NavigationController navigationController,
-			EV3LargeRegulatedMotor rightMotor, EV3LargeRegulatedMotor leftMotor) {
-		this.navigation = navigation;
-		this.navigationController = navigationController;
+	public UltrasonicNavigationData(EV3LargeRegulatedMotor rightMotor, EV3LargeRegulatedMotor leftMotor, double tile, double boardSize) {
 		this.rightMotor = rightMotor;
 		this.leftMotor = leftMotor;
+		
+		this.tile = tile;
+		this.boardSize = boardSize;
 	}
 
 	public void processData(int distance) {
@@ -163,7 +166,33 @@ public class UltrasonicNavigationData {
 	 * @return
 	 */
 	private boolean whichDirectionInterruption() {
-		//TODO logic to know which way the robot should avoid
-		return true;
+		int currentX = (int) odometer.getX();
+		int currentY = (int) odometer.getY();
+		int currentTheta = (int) odometer.getThetaDegrees();
+		
+		int nextHeading = (int) Math.toDegrees(Math.atan2(((boardSize / 2) * tile) - currentX, ((boardSize / 2) * tile) - currentY));
+		
+		int rightRotation = nextHeading - currentTheta;
+		if (rightRotation < 0) {
+			rightRotation = rightRotation + 360;
+		}
+		int leftRotation = currentTheta - nextHeading;
+		if (leftRotation < 0) {
+			leftRotation = leftRotation + 360;
+		}
+		return (rightRotation < leftRotation);
 	}
+	
+	public void setOdometer(Odometer odometer) {
+		this.odometer = odometer;
+	}
+	
+	public void setNavigation(Navigation navigation) {
+		this.navigation = navigation;
+	}
+	
+	public void setNavigationController(NavigationController navigationController) {
+		this.navigationController = navigationController;
+	}
+	
 }

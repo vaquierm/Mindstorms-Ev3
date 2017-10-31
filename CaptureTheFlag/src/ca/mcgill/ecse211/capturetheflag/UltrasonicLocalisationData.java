@@ -23,8 +23,7 @@ public class UltrasonicLocalisationData {
 	
 	private static final int EDGE_THRESHOLD = 50;
 	
-	public UltrasonicLocalisationData(Localisation localisation) {
-		this.localisation = localisation;
+	public UltrasonicLocalisationData() {
 	}
 	
 	public void processData(int newVal) {
@@ -55,6 +54,10 @@ public class UltrasonicLocalisationData {
 				}
 			}
 		}
+	}
+	
+	public void setLocalisation(Localisation localisation) {
+		this.localisation = localisation;
 	}
 	
 	private void threadWait() {

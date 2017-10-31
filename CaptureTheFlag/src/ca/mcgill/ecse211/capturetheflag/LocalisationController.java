@@ -14,10 +14,9 @@ package ca.mcgill.ecse211.capturetheflag;
  * @author Oliver Clark
  */
 
-public class LocalisationController implements Runnable {
+public class LocalisationController {
 	
 	//Lock objects for threading
-	private Object stateLock = new Object();
 	private Object pauseLock = new Object();
 	private volatile boolean paused = false;
 	
@@ -30,10 +29,6 @@ public class LocalisationController implements Runnable {
 	private final int startingCorner;
 	private final int boardSize;
 	
-	public enum LocalisationState { FULLY_LOCALIZED, DIRECTION_LOCALIZED, UNLOCALIZED }
-	
-	private LocalisationState localisationState = LocalisationState.UNLOCALIZED;
-	
 	public LocalisationController(Localisation localisation, Navigation navigation, double tile, int startingCorner, int boardSize) {
 		this.localisation = localisation;
 		this.navigation = navigation;
@@ -41,19 +36,7 @@ public class LocalisationController implements Runnable {
 		this.startingCorner = startingCorner;
 		this.boardSize = boardSize;
 	}
-	
-	/*
-	 * This method executes a full procedure to localise the robot with the assumption
-	 * that it starts on the 45° line in the negative quadrant.
-	 * @see java.lang.Thread#run()
-	 */
-	public void run() {
-		initialLocalisationRoutine();
-		while (true) {
-			pauseThread();
-			colorLocalisationRoutine();
-		}
-	}
+
 	
 	private void initialLocalisationRoutine() {
 		localisation.usLocalisation();
@@ -82,18 +65,6 @@ public class LocalisationController implements Runnable {
 	
 	private void colorLocalisationRoutine() {
 		localisation.colorLocalisation();
-	}
-
-	public void setLocalisationState(LocalisationState state) {
-		synchronized(stateLock) {
-			this.localisationState = state;
-		}
-	}
-	
-	public LocalisationState getLocalisationState() {
-		synchronized(stateLock) {
-			return localisationState;
-		}
 	}
 	
 	//pauses the thread

@@ -7,6 +7,7 @@ package ca.mcgill.ecse211.capturetheflag;
 import java.util.List;
 
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import lejos.hardware.motor.EV3MediumRegulatedMotor;
 
 /**
  * 
@@ -15,10 +16,11 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor;
  * using PController
  * 
  * 
- * @author Oliver Clark
  * @author Michael Vaquier
+ * @author Oliver Clark
+ * @author Zeyu Chen
  */
-public class NavigationController implements Runnable {
+public class NavigationController {
 
 	// Locks used for threading
 	private static Object stateLock = new Object();
@@ -30,23 +32,23 @@ public class NavigationController implements Runnable {
 	private final GameParameters gameParameters;
 
 	// Associations
-	Odometer odometer;
-	Navigation navigation;
+	private Odometer odometer;
+	private Navigation navigation;
 	
 	//Poller
-	UltrasonicPoller ultrasonicPoller;
+	private UltrasonicPoller ultrasonicPoller;
 
 	// Motors
-	EV3LargeRegulatedMotor rightMotor;
-	EV3LargeRegulatedMotor leftMotor;
-	EV3LargeRegulatedMotor frontMotor;
+	private EV3LargeRegulatedMotor rightMotor;
+	private EV3LargeRegulatedMotor leftMotor;
+	private EV3MediumRegulatedMotor frontMotor;
 
 
 	public enum NavigationState {
 		NAVIGATING, AVOIDING, READY
 	}
 
-	public NavigationController(EV3LargeRegulatedMotor rightMotor, EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor frontMotor,
+	public NavigationController(EV3LargeRegulatedMotor rightMotor, EV3LargeRegulatedMotor leftMotor, EV3MediumRegulatedMotor frontMotor,
 			Odometer odometer, Navigation navigation, UltrasonicPoller ultrasonicPoller, GameParameters gameParameters) {
 		this.rightMotor = rightMotor;
 		this.leftMotor = leftMotor;
@@ -59,9 +61,13 @@ public class NavigationController implements Runnable {
 		this.ultrasonicPoller = ultrasonicPoller;
 		
 		this.gameParameters = gameParameters;
+		
+		ultrasonicPoller.getUltrasonicNavigationData().setNavigation(navigation);
+		ultrasonicPoller.getUltrasonicNavigationData().setNavigationController(this);
+		ultrasonicPoller.getUltrasonicNavigationData().setOdometer(odometer);
 	}
 
-	public void run() {
+	public void runNavigationTask() {
 
 		if (objectDetection) {
 			ultrasonicPoller.startPolling();
@@ -115,12 +121,102 @@ public class NavigationController implements Runnable {
 	 */
 	private void changeToRectangularPath(List<Coordinate> wayPoints) {
 		// TODO
-		/**
-		 * Look at the GameParameters class, all the parameters are there, this class has a reference to an instance of GameParameters
-		 * Use it to determine what path we cant use. You also need to use the odometer to get a rough idea of the current position of the robot.
-		 * 
-		 */
+		double midx = (gameParameters.SV_UR.x - gameParameters.SV_LL.x) / 2;
+		double midy = (gameParameters.SH_UR.x - gameParameters.SH_LL.x) / 2;
+		Coordinate bridgemid = new Coordinate(midx, midy);
 		
+		for(int i = 0 ; i < (wayPoints.size() - 1) ; i++)
+		{
+			if(wayPoints.get(i).x != wayPoints.get(i+1).x && wayPoints.get(i).y != wayPoints.get(i+1).y)
+			{
+				Coordinate midVH = new Coordinate(wayPoints.get(i).x, wayPoints.get(i+1).y);
+				Coordinate midHV = new Coordinate(wayPoints.get(i+1).x, wayPoints.get(i).y);
+				
+                if(!mapPoint(midHV).equals("river"))
+                {
+                	if(mapPoint(wayPoints.get(i)).equals(mapPoint(midHV)))
+                	{
+                		wayPoints.add(i+1, midHV);
+                	}
+                	else
+                	{
+                		if(mapPoint(wayPoints.get(i)).equals("bridge"))
+                		{
+                			wayPoints.add(i+1, midHV);
+                		}    	
+                		else{		
+                			wayPoints.add(i+1,bridgemid);
+                		}             		
+                	}
+                }
+                
+                else if(mapPoint(midHV).equals("river") && !mapPoint(midVH).equals("river"))
+                {
+                	if(mapPoint(wayPoints.get(i)).equals(mapPoint(midVH)))
+                	{
+                		wayPoints.add(i+1, midVH);
+                	}
+                	else
+                	{
+                		if(mapPoint(wayPoints.get(i)).equals("bridge"))
+                		{
+                			wayPoints.add(i+1, midVH);
+                		}    	
+                		else{		
+                			wayPoints.add(i+1,bridgemid);
+                		}             		
+                	}
+                }
+                
+                else 
+                {
+                	wayPoints.add(i+1,bridgemid);
+				}
+                
+			}
+			else
+			{
+				if(!mapPoint(wayPoints.get(i)).equals(mapPoint(wayPoints.get(i+1))))
+				{
+					wayPoints.add(i+1, bridgemid);
+				}
+			}
+
+		}
+	}
+	
+	/**
+	 * This method takes as an input a coordinate and returns the region in which this point fits in, by looking at the gameParapeters
+	 * association that the instance has.
+	 * @param node
+	 * @return
+	 */
+	private String mapPoint(Coordinate node)
+	{
+		if(node.x > gameParameters.Green_LL.x && node.x < gameParameters.Green_UR.x && node.y > gameParameters.Green_LL.y && node.y < gameParameters.Green_UR.y)
+		{
+			return "Green";
+		}
+		else if(node.x > gameParameters.Red_LL.x && node.x < gameParameters.Red_UR.x && node.y > gameParameters.Red_LL.y && node.y < gameParameters.Red_LL.y)
+		{
+			return "red";
+		}
+		else if((node.x > gameParameters.SV_LL.x && node.x < gameParameters.SV_UR.x && node.y > gameParameters.SV_LL.y && node.y < gameParameters.SV_UR.y)
+				||(node.x > gameParameters.SH_LL.x && node.x < gameParameters.SH_UR.x && node.y > gameParameters.SH_LL.y && node.y < gameParameters.SH_UR.y))
+		{
+			return "bridge";
+		}
+		else {
+			return "river";
+		}
+	}
+	
+	public void setCoordinateList(List<Coordinate> coordinates) {
+		this.coordinateList = coordinates;
+	}
+	
+	public void addWayPoint(Coordinate newPoint) {
+		coordinateList.add(newPoint);
 	}
 	
 	/**

@@ -17,7 +17,6 @@ public class ColorLocalisationData {
 	//Associations
 	private Localisation localisation;
 	
-	private static final int SAMPLE_POINTS = 5;
 	private int lastData = -1;
 	
 	private static final int DIFFERENCE_THRESHOLD = 4;
@@ -28,9 +27,7 @@ public class ColorLocalisationData {
 	
 
 	
-	public ColorLocalisationData(Localisation localisation) {
-		this.localisation = localisation;
-		
+	public ColorLocalisationData() {
 	}
 	
 	public void processData(int newVal) {
@@ -39,7 +36,7 @@ public class ColorLocalisationData {
 			lastData = newVal;
 		} else {
 			difference = (newVal - lastData);
-			if (difference < DIFFERENCE_THRESHOLD) {
+			if (difference < -DIFFERENCE_THRESHOLD) {
 				lowPulse = true;
 				differenceCounter = DIFFERENCE_POINTS;
 			} else if (lowPulse && difference > DIFFERENCE_THRESHOLD) {
@@ -52,5 +49,9 @@ public class ColorLocalisationData {
 				}
 			}
 		}
+	}
+	
+	public void setLocalisation(Localisation localisation) {
+		this.localisation = localisation;
 	}
 }

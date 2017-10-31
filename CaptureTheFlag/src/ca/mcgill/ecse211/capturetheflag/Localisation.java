@@ -56,6 +56,8 @@ public class Localisation {
 		this.colorPoller = colorPoller;
 		this.tile = tile;
 		this.startingCorner = startingCorner;
+		colorPoller.getColorLocalisationData().setLocalisation(this);
+		ultrasonicPoller.getUltrasonicLocalisationData().setLocalisation(this);
 	}
 	
 	//Procedure and logic of ultrasonic localisation routine

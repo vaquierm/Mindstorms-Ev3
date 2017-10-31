@@ -13,6 +13,7 @@ public class ColorPoller implements Runnable {
 	
 	//data processing classes
 	private ColorLocalisationData colorLocalisationData;
+	private ZiplineLightData ziplineLightData;
 	
 	SampleProvider colorRedFront;
 	float[] colorRedDataFront;
@@ -80,6 +81,14 @@ public class ColorPoller implements Runnable {
 		synchronized (stateLock) {
 			this.state = state;
 		}
+	}
+	
+	public ColorLocalisationData getColorLocalisationData() {
+		return colorLocalisationData;
+	}
+	
+	public ZiplineLightData getZiplineLightData() {
+		return ziplineLightData;
 	}
 	
 	public ColorPollingState getPollingState() {
