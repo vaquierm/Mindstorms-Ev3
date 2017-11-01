@@ -1,6 +1,18 @@
+/**
+ * ColorPoller.java
+ */
+
 package ca.mcgill.ecse211.capturetheflag;
 
 import lejos.robotics.SampleProvider;
+
+/**
+ * The ColorPoller class is used to periodically poll one or multiple color sensors
+ * and send the data to be processed to a Data class
+ * A state machine is incorporated such that the color sensor polled will be the correct one(s) and the data will be sent to the correct processing class.
+ * @author Michael Vaquier
+ *
+ */
 
 public class ColorPoller implements Runnable {
 	
@@ -22,6 +34,16 @@ public class ColorPoller implements Runnable {
 	SampleProvider colorRedSide;
 	float[] colorRedDataSide;
 	
+	/**
+	 * Creates a CollorPoller object.
+	 * @param colorLocalisationData
+	 * @param colorRedBack
+	 * @param colorRedDataBack
+	 * @param colorRedFront
+	 * @param colorRedDataFront
+	 * @param colorRedSide
+	 * @param colorRedDataSide
+	 */
 	public ColorPoller(ColorLocalisationData colorLocalisationData, SampleProvider colorRedBack, float[] colorRedDataBack, SampleProvider colorRedFront, float[] colorRedDataFront, SampleProvider colorRedSide, float[] colorRedDataSide) {
 		this.colorRedFront = colorRedFront;
 		this.colorRedDataFront = colorRedDataFront;
@@ -60,6 +82,9 @@ public class ColorPoller implements Runnable {
 		}
 	}
 	
+	/**
+	 * Polls the front Color sensor and send the data to the blockColorData association to be processed
+	 */
 	private void processBlockSearching() {
 		// TODO 
 		//colorRed.fetchSample(colorRedData, 0);
@@ -67,44 +92,77 @@ public class ColorPoller implements Runnable {
 		
 	}
 
+	/**
+	 * Polls the back Color sensor and send the data to the ziplineLighData association to be processed
+	 */
 	private void processZiplining() {
 		// TODO Auto-generated method stub
 		
 	}
 
+	/**
+	 * Polls the back Color sensor and send the data to the colorLocalisationData association to be processed
+	 */
 	private void processLocalisation() {
 		colorRedBack.fetchSample(colorRedDataBack, 0);
 		colorLocalisationData.processData((int) (colorRedDataBack[0] * 100));
 	}
 	
+	/**
+	 * Sets the polling state of the poller
+	 * @param state
+	 */
 	public void setPollingState(ColorPollingState state) {
 		synchronized (stateLock) {
 			this.state = state;
 		}
 	}
 	
+	/**
+	 * This method returns the association to the ColorLocalisationData instance
+	 * @return
+	 */
 	public ColorLocalisationData getColorLocalisationData() {
 		return colorLocalisationData;
 	}
 	
+	/**
+	 * This method returns the association to the ZiplineLightData instance
+	 * @return
+	 */
 	public ZiplineLightData getZiplineLightData() {
 		return ziplineLightData;
 	}
 	
+	/**
+	 * Returns the polling state of the poller
+	 * @return
+	 */
 	public ColorPollingState getPollingState() {
 		synchronized (stateLock) {
 			return state;
 		}
 	}
 	
+	/**
+	 * This method can be will spawn a new thread and start the polling
+	 */
 	public void startPolling() {
 		new Thread(this).start();
 	}
 	
+	/**
+	 * This method will stop the polling of the poller thread and will let it terminate itself.
+	 */
 	public void stopPolling() {
 		polling = false;
 	}
 	
+	/**
+	 * This enumeration defines the states in which the ColorPoller can be in.
+	 * @author Michael Vaquier
+	 *
+	 */
 	public enum ColorPollingState { LOCALISATION, ZIPLINING, BLOCK_SEARCHING }
 
 }

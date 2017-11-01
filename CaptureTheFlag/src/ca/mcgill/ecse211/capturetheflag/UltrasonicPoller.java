@@ -1,12 +1,25 @@
+/**
+ * UltrasonicPoller.java
+ */
+
 package ca.mcgill.ecse211.capturetheflag;
 
 import lejos.robotics.SampleProvider;
+
+/**
+ * The UltrasonicPoller class has a reference of one ultrasonic poller and polls data
+ * periodically once its thread is started and stops when it is indicated to by terminating itself.
+ * The data fetched from the sensor is then sent to the correct data processing class according to
+ * the current polling state.
+ * @author Michael Vaquier
+ *
+ */
 
 public class UltrasonicPoller implements Runnable {
 	
 	private volatile boolean polling = false;
 	
-	private static final int POLLING_PERIOD = 10;
+	private static final int POLLING_PERIOD = 40;
 	
 	//data processing
 	private UltrasonicLocalisationData ultrasonicLocalisationData;
@@ -18,6 +31,13 @@ public class UltrasonicPoller implements Runnable {
 	SampleProvider usDistance;
 	float[] usData;
 	
+	/**
+	 * Creates an instance of the UltrasonicPoller class.
+	 * @param usDistance
+	 * @param usData
+	 * @param ultrasonicLocalisationData
+	 * @param ultrasonicNavigationData
+	 */
 	public UltrasonicPoller(SampleProvider usDistance, float[] usData, UltrasonicLocalisationData ultrasonicLocalisationData, UltrasonicNavigationData ultrasonicNavigationData) {
 		this.usDistance = usDistance;
 		this.usData = usData;
@@ -25,6 +45,10 @@ public class UltrasonicPoller implements Runnable {
 		this.ultrasonicNavigationData = ultrasonicNavigationData;
 	}
 	
+	/**
+	 * Called when a new thread is spawned with this poller.
+	 * Starts polling the ultrasonic sensor periodically.
+	 */
 	public void run() {
 		long correctionStart, correctionEnd;
 		polling = true;
@@ -57,35 +81,62 @@ public class UltrasonicPoller implements Runnable {
 		}
 	}
 	
+	/**
+	 * Sets the polling state of the poller.
+	 * @param state
+	 */
 	public void setPollingState(UltrasonicPollingState state) {
 		synchronized (stateLock) {
 			this.state = state;
 		}
 	}
 	
+	/**
+	 * Returns the current polling state of the poller.
+	 * @return
+	 */
 	public UltrasonicPollingState getPollingState() {
 		synchronized (stateLock) {
 			return state;
 		}
 	}
 	
+	/**
+	 * Gets the reference to the UltrasonicLocalisationData association.
+	 * @return
+	 */
 	public UltrasonicLocalisationData getUltrasonicLocalisationData() {
 		return ultrasonicLocalisationData;
 	}
 	
+	/**
+	 * Gets the reference to the UltrasonicNaviagtionData association.
+	 * @return
+	 */
 	public UltrasonicNavigationData getUltrasonicNavigationData() {
 		return ultrasonicNavigationData;
 	}
 	
+	/**
+	 * Spawns a thread that starts polling and processes data accordingly to its polling state.
+	 */
 	public void startPolling() {
 		new Thread(this).start();
 	}
 	
 	
+	/**
+	 * Stop the polling process by letting the thread terminate itself.
+	 */
 	public void stopPolling() {
 		polling = false;
 	}
 	
+	/**
+	 * This enumeration indicates the different states in which the UltrasonicPoller can be in.
+	 * @author Michael Vaquier
+	 *
+	 */
 	public enum UltrasonicPollingState { LOCALISATION, NAVIGATION }
 
 }

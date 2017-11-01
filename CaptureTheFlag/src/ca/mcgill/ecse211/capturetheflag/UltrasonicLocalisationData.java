@@ -23,9 +23,18 @@ public class UltrasonicLocalisationData {
 	
 	private static final int EDGE_THRESHOLD = 50;
 	
+	/**
+	 * Constructs an UltrasonicLocalisationData object.
+	 */
 	public UltrasonicLocalisationData() {
 	}
 	
+	/**
+	 * Processes the data coming from the ultrasonic poller and sends an interrupt to the localisation class when
+	 * an edge is found. The process looks for falling and rising edges at the same time and sticks with one
+	 * once the first edge is found.
+	 * @param newVal
+	 */
 	public void processData(int newVal) {
 		if (lastData < 0) {
 			lastData = newVal;
@@ -56,10 +65,17 @@ public class UltrasonicLocalisationData {
 		}
 	}
 	
+	/**
+	 * Sets the localisation association to the instance.
+	 * @param localisation
+	 */
 	public void setLocalisation(Localisation localisation) {
 		this.localisation = localisation;
 	}
 	
+	/**
+	 * Puts the thread to sleep for one second.
+	 */
 	private void threadWait() {
 		try {
 			Thread.sleep(1000);

@@ -1,16 +1,20 @@
+/**
+ * Odometer.java
+ */
+
 package ca.mcgill.ecse211.capturetheflag;
 
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
 /**
  * 
- * Odometer is from prior lab which simply keeps keeps track of the robots 
- * calculated location and orientation
+ * Odometer can spawn a thread to keep track of wheel rotation to have
+ * a good estimate of the position of the center of rotation of the robot.
  * 
- * @author Oliver Clark
  * @author Michael Vaquier
+ * @author Oliver Clark
  */
-public class Odometer extends Thread {
+public class Odometer implements Runnable {
 	// robot position
 	private double x;
 	private double y;
@@ -32,7 +36,13 @@ public class Odometer extends Thread {
 
 	private Object lock; /* lock object for mutual exclusion */
 
-	// default constructor
+	/**
+	 * Constructs an Odometer object.
+	 * @param leftMotor
+	 * @param rightMotor
+	 * @param wheelRadius
+	 * @param track
+	 */
 	public Odometer(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, double wheelRadius, double track) {
 		this.leftMotor = leftMotor;
 		this.rightMotor = rightMotor;
@@ -47,7 +57,10 @@ public class Odometer extends Thread {
 		lock = new Object();
 	}
 
-	// run method (required for Thread)
+	/**
+	 * Runs the odometer, to periodically poll the tachocount of the wheels
+	 * to update the current position of the robot.
+	 */
 	public void run() {
 		long updateStart, updateEnd;
 
@@ -83,18 +96,34 @@ public class Odometer extends Thread {
 		}
 	}
 
+	/**
+	 * Writes the current position of the robot in the input array only at the positions
+	 * where an update is requested.
+	 * The indices of the array corresponds to the positions as such:
+	 * 0: x
+	 * 1: y
+	 * 2: T
+	 * @param position
+	 * @param update
+	 */
 	public void getPosition(double[] position, boolean[] update) {
 		// ensure that the values don't change while the odometer is running
 		synchronized (lock) {
-			if (update[0])
-				position[0] = x;
-			if (update[1])
-				position[1] = y;
-			if (update[2])
-				position[2] = thetaDegree;
+			if (position.length == 3 && update.length == 3) {
+				if (update[0])
+					position[0] = x;
+				if (update[1])
+					position[1] = y;
+				if (update[2])
+					position[2] = thetaDegree;
+			}
 		}
 	}
 
+	/**
+	 * Gets the current X value stored in the odometer.
+	 * @return
+	 */
 	public double getX() {
 		double result;
 
@@ -105,6 +134,10 @@ public class Odometer extends Thread {
 		return result;
 	}
 
+	/**
+	 * Gets the current Y value stored in the odometer.
+	 * @return
+	 */
 	public double getY() {
 		double result;
 
@@ -115,6 +148,10 @@ public class Odometer extends Thread {
 		return result;
 	}
 
+	/**
+	 * Gets the current heading value stored in the odometer in radiant.
+	 * @return
+	 */
 	public double getTheta() {
 		double result;
 
@@ -125,6 +162,10 @@ public class Odometer extends Thread {
 		return result;
 	}
 	
+	/**
+	 * Gets the current heading value stored in the odometer in degrees.
+	 * @return
+	 */
 	public double getThetaDegrees() {
 		double result;
 
@@ -135,35 +176,64 @@ public class Odometer extends Thread {
 		return result;
 	}
 
-	// mutators
+	
+	/**
+	 * Writes the current positions from the input array
+	 * to the robot's odometer where an update is requested.
+	 * The indices of the array corresponds to the positions as such:
+	 * 0: x
+	 * 1: y
+	 * 2: T
+	 * @param position
+	 * @param update
+	 */
 	public void setPosition(double[] position, boolean[] update) {
 		// ensure that the values don't change while the odometer is running
 		synchronized (lock) {
-			if (update[0])
-				x = position[0];
-			if (update[1])
-				y = position[1];
-			if (update[2])
-				theta = position[2];
+			if(update.length == 3 && position.length == 3) {
+				if (update[0])
+					x = position[0];
+				if (update[1])
+					y = position[1];
+				if (update[2])
+					theta = position[2];
+			}
 		}
 	}
 
+	/**
+	 * Sets the current X value of the odometer.
+	 * @param x
+	 */
 	public void setX(double x) {
 		synchronized (lock) {
 			this.x = x;
 		}
 	}
 
+	/**
+	 * Sets the current Y value of the odometer.
+	 * @param y
+	 */
 	public void setY(double y) {
 		synchronized (lock) {
 			this.y = y;
 		}
 	}
 	
+	/**
+	 * Converts an angle in radiant to degrees.
+	 * @param rad
+	 * @return
+	 */
 	public double radiantToDegree(double rad) {
 		return rad * 180 / Math.PI;
 	}
 
+	/**
+	 * Sets the current heading of the robot in the odometer.
+	 * @param theta
+	 */
 	public void setTheta(double theta) {
 		while (theta < 0) {
 			theta += 2 * Math.PI;

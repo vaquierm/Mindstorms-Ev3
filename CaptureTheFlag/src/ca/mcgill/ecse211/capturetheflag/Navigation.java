@@ -1,3 +1,7 @@
+/**
+ * Navigation.java
+ */
+
 package ca.mcgill.ecse211.capturetheflag;
 
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
@@ -31,7 +35,14 @@ public class Navigation {
 	private final double WHEEL_RADIUS;
 	private final double TRACK;
 	
-
+	/**
+	 * Creates a Navigation object.
+	 * @param odometer
+	 * @param rightMotor
+	 * @param leftMotor
+	 * @param wheelRadius
+	 * @param track
+	 */
 	public Navigation(Odometer odometer, EV3LargeRegulatedMotor rightMotor, EV3LargeRegulatedMotor leftMotor, double wheelRadius, double track) {
 		this.rightMotor = rightMotor;
 		this.leftMotor = leftMotor;
@@ -41,12 +52,13 @@ public class Navigation {
 		this.TRACK = track;
 	}
 
-	/*
+	/**
 	 * This method causes the robot to travel to the absolute field location (x,
-	 * y), specified in tilepoints.This method should continuously
-	 * callturnTo(double theta)and thenset the motor speed to forward(straight).
-	 * This will make sure that yourheading is updated until you reach your
-	 * exact goal. This method will pollthe odometer for informatio
+	 * y), specified in tilepoints by first adjusting its heading then moving forward.
+	 * The returnThread boolean is used to determine if the thread should wait until the robot is done traveling to return
+	 * @param x
+	 * @param y
+	 * @param returnThread
 	 */
 	public void travelTo(double x, double y, boolean returnThread) {		
 		
@@ -70,6 +82,10 @@ public class Navigation {
 	   
 	}
 	
+	/**
+	 * Makes the robot turn (minimal angle) to a new heading.
+	 * @param theta
+	 */
 	public void turnTo(double theta) {
 		leftMotor.setSpeed(ROTATE_SPEED);
 	    rightMotor.setSpeed(ROTATE_SPEED);
@@ -96,6 +112,12 @@ public class Navigation {
 		leftMotor.setAcceleration(FAST_ACCEL);
 	}
 	
+	/**
+	 * Makes the robot move forward by a certain distance.
+	 * The returnThread boolean is used to determine if the thread should wait until the robot is done traveling to return.
+	 * @param distance
+	 * @param returnThread
+	 */
 	public void forward(double distance, boolean returnThread) {
 		leftMotor.setSpeed(FORWARD_SPEED);
 	    rightMotor.setSpeed(FORWARD_SPEED);
@@ -103,6 +125,11 @@ public class Navigation {
 	    rightMotor.rotate(convertDistance(WHEEL_RADIUS, distance), returnThread);
 	}
 	
+	/**
+	 * This method interrupts the current navigation of the robot. This interruption
+	 * is likely due it the ultrasonic sensor detecting an object in the robots trajectory.
+	 * @param turnRight
+	 */
 	public void interruptNav(boolean turnRight) {
 		rightMotor.stop(true);
 		leftMotor.stop();
@@ -116,18 +143,40 @@ public class Navigation {
 	    setInterruptedTheta((int) odometer.getThetaDegrees());
 	}
 
+	/**
+	 * Converts a distance to wheel rotation.
+	 * @param radius
+	 * @param distance
+	 * @return
+	 */
 	public int convertDistance(double radius, double distance) {
 		return (int) ((180.0 * distance) / (Math.PI * radius));
 	}
 
+	/**
+	 * Converts distance to wheel rotation required for the physical robot to turn by a certain
+	 * angle around its center of rotation.
+	 * @param radius
+	 * @param width
+	 * @param angle
+	 * @return
+	 */
 	public int convertAngle(double radius, double width, double angle) {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}
 	
+	/**
+	 * Saves the heading at which the navigation got interrupted.
+	 * @param theta
+	 */
 	public void setInterruptedTheta(double theta) {
 		this.interruptedTheta = theta;
 	}
 	
+	/**
+	 * Returns the heading at which the navigation got interrupted.
+	 * @return
+	 */
 	public double getInterruptedTheta() {
 		return interruptedTheta;
 	}

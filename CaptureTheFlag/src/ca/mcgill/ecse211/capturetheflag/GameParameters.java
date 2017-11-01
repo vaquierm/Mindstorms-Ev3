@@ -34,6 +34,31 @@ public class GameParameters {
 	public final Coordinate SG_LL; // lower left hand corner of search region in green player zone
 	public final Coordinate SG_UR; // upper right hand corner of search region in green player zone
 	
+	/**
+	 * Creates a GameParameters object
+	 * @param redTeam
+	 * @param greenTeam
+	 * @param redCorner
+	 * @param greenCorner
+	 * @param OG
+	 * @param OR
+	 * @param Red_LL
+	 * @param Red_UR
+	 * @param Green_LL
+	 * @param Green_UR
+	 * @param ZC_R
+	 * @param ZO_R
+	 * @param ZC_G
+	 * @param ZO_G
+	 * @param SH_LL
+	 * @param SH_UR
+	 * @param SV_LL
+	 * @param SV_UR
+	 * @param SR_LL
+	 * @param SR_UR
+	 * @param SG_LL
+	 * @param SG_UR
+	 */
 	public GameParameters(int redTeam, int greenTeam, int redCorner, int greenCorner, int OG, int OR, 
 			Coordinate Red_LL, Coordinate Red_UR, Coordinate Green_LL, Coordinate Green_UR,
 			Coordinate ZC_R, Coordinate ZO_R, Coordinate ZC_G, Coordinate ZO_G,

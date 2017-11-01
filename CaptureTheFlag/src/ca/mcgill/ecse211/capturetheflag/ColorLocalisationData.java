@@ -4,10 +4,9 @@
 
 package ca.mcgill.ecse211.capturetheflag;
 
-import java.util.Arrays;
-
 /**
  * The ColorLocalisationData class is used to process the data coming from the color poller
+ * An interrupt is sent to the Localisation class when a line is detected.
  * @author Michael Vaquier
  *
  */
@@ -26,7 +25,9 @@ public class ColorLocalisationData {
 	private boolean lowPulse = false;
 	
 
-	
+	/**
+	 * Creates a ColorLocalisationData object.
+	 */
 	public ColorLocalisationData() {
 	}
 	
@@ -51,6 +52,10 @@ public class ColorLocalisationData {
 		}
 	}
 	
+	/**
+	 * This method sets the association to an instance of the Localisation class.
+	 * @param localisation
+	 */
 	public void setLocalisation(Localisation localisation) {
 		this.localisation = localisation;
 	}

@@ -7,12 +7,10 @@ package ca.mcgill.ecse211.capturetheflag;
 import lejos.hardware.lcd.TextLCD;
 
 /**
- * 
- * 
  * Displays Odometry values contained in an instance of Odometer
  * 
- * @author Oliver Clark
  * @author Michael Vaquier
+ * @author Oliver Clark
  */
 public class Display extends Thread {
 	private static final long DISPLAY_PERIOD = 250;
@@ -21,13 +19,20 @@ public class Display extends Thread {
 	private boolean display = true;
 	private Object lock = new Object();
 
-	// constructor
+	/**
+	 * Creates a Display object.
+	 * @param odometer
+	 * @param t
+	 */
 	public Display(Odometer odometer, TextLCD t) {
 		this.odometer = odometer;
 		this.t = t;
 	}
 
-	// run method (required for Thread)
+	
+	/**
+	 * Creates a thread and periodically updates the LDC display
+	 */
 	public void run() {
 		long displayStart, displayEnd;
 		double[] position = new double[3];
@@ -111,12 +116,20 @@ public class Display extends Thread {
 		return result;
 	}
 
+	/**
+	 * Getter method for the display boolean
+	 * @return
+	 */
 	public boolean getDisplay() {
 		synchronized (lock) {
 			return display;
 		}
 	}
 
+	/**
+	 * Setter method for the display boolean
+	 * @param b
+	 */
 	public void setDisplay(boolean b) {
 		synchronized (lock) {
 			display = b;

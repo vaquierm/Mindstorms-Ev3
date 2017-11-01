@@ -50,6 +50,13 @@ public class UltrasonicNavigationData {
 	private boolean corner = false;
 	
 	
+	/**
+	 * Creates an instance of the UltrasonicNavigationData class.
+	 * @param rightMotor
+	 * @param leftMotor
+	 * @param tile
+	 * @param boardSize
+	 */
 	public UltrasonicNavigationData(EV3LargeRegulatedMotor rightMotor, EV3LargeRegulatedMotor leftMotor, double tile, double boardSize) {
 		this.rightMotor = rightMotor;
 		this.leftMotor = leftMotor;
@@ -58,6 +65,14 @@ public class UltrasonicNavigationData {
 		this.boardSize = boardSize;
 	}
 
+	/**
+	 * Processes data coming from the ultrasonic poller and performs different processing depending on the
+	 * current navigation state of the controller.
+	 * In NAVIGATING state, the distance to the closest object in front of the robot is found to avoid potential collisions.
+	 * In AVOIDING state, the data processor takes control of the wheels and follows the wall with the assumption that the
+	 * ultrasonic sensor is facing the side.
+	 * @param distance
+	 */
 	public void processData(int distance) {
 		switch (NavigationController.getNavigationState()) {
 	      case NAVIGATING:
@@ -183,14 +198,26 @@ public class UltrasonicNavigationData {
 		return (rightRotation < leftRotation);
 	}
 	
+	/**
+	 * Sets the Odometer association of the instance.
+	 * @param odometer
+	 */
 	public void setOdometer(Odometer odometer) {
 		this.odometer = odometer;
 	}
 	
+	/**
+	 * Sets the Navigation association of the instance.
+	 * @param navigation
+	 */
 	public void setNavigation(Navigation navigation) {
 		this.navigation = navigation;
 	}
 	
+	/**
+	 * Sets the NavigationController association of the instance.
+	 * @param navigationController
+	 */
 	public void setNavigationController(NavigationController navigationController) {
 		this.navigationController = navigationController;
 	}

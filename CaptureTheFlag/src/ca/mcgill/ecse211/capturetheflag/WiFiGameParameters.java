@@ -1,6 +1,7 @@
 /**
  * WifiGameParameters.java
  */
+
 package ca.mcgill.ecse211.capturetheflag;
 
 import java.util.Map;

@@ -13,8 +13,8 @@ import lejos.hardware.motor.EV3MediumRegulatedMotor;
  * 
  * NavigationController allows the robot to switch between navigating point to
  * point using Navigation and wall following around an obstacle to avoid it
- * using PController
- * 
+ * using PController logic.
+ * A state machine is used to determine the current state of the navigation and adjusts its behavior accordingly to its state.
  * 
  * @author Michael Vaquier
  * @author Oliver Clark
@@ -43,11 +43,25 @@ public class NavigationController {
 	private EV3LargeRegulatedMotor leftMotor;
 	private EV3MediumRegulatedMotor frontMotor;
 
-
+	/**
+	 * This enumeration defines the states in which the navigation controller can be in.
+	 * @author Michael Vaquier
+	 *
+	 */
 	public enum NavigationState {
 		NAVIGATING, AVOIDING, READY
 	}
 
+	/**
+	 * Creates a NavigationController object.
+	 * @param rightMotor
+	 * @param leftMotor
+	 * @param frontMotor
+	 * @param odometer
+	 * @param navigation
+	 * @param ultrasonicPoller
+	 * @param gameParameters
+	 */
 	public NavigationController(EV3LargeRegulatedMotor rightMotor, EV3LargeRegulatedMotor leftMotor, EV3MediumRegulatedMotor frontMotor,
 			Odometer odometer, Navigation navigation, UltrasonicPoller ultrasonicPoller, GameParameters gameParameters) {
 		this.rightMotor = rightMotor;
@@ -67,6 +81,10 @@ public class NavigationController {
 		ultrasonicPoller.getUltrasonicNavigationData().setOdometer(odometer);
 	}
 
+	/**
+	 * Runs the navigation task, and constantly checks if the heading at which the robot is traveling to
+	 * is consistent with the next wayPoint
+	 */
 	public void runNavigationTask() {
 
 		if (objectDetection) {
@@ -211,10 +229,18 @@ public class NavigationController {
 		}
 	}
 	
+	/**
+	 * Sets a new list of wayPoints to travel to.
+	 * @param coordinates
+	 */
 	public void setCoordinateList(List<Coordinate> coordinates) {
 		this.coordinateList = coordinates;
 	}
 	
+	/**
+	 * Adds a way point at the end of the current list.
+	 * @param newPoint
+	 */
 	public void addWayPoint(Coordinate newPoint) {
 		coordinateList.add(newPoint);
 	}
@@ -236,12 +262,20 @@ public class NavigationController {
 		objectDetection = b;
 	}
 
+	/**
+	 * Returns the current navigation state of the robot.
+	 * @return
+	 */
 	public static NavigationState getNavigationState() {
 		synchronized (stateLock) {
 			return state;
 		}
 	}
-
+	
+	/**
+	 * Sets the navigationState of the robot.
+	 * @param navState
+	 */
 	public static void setNavigationState(NavigationState navState) {
 		synchronized (stateLock) {
 			state = navState;

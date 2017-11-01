@@ -9,8 +9,9 @@ import ca.mcgill.ecse211.capturetheflag.UltrasonicPoller.UltrasonicPollingState;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
 /**
- * Localisation outlines the procedure for both the US angle correction and color position correction
- * by using filtered data from the sensors to update the odometers accordingly
+ * Localisation outlines the procedure for both the US angle correction and color position and angle correction
+ * by using filtered data from the sensors to update the odometer accordingly
+ * 
  * @author Michael Vaquier
  * @author Oliver Clark
  */
@@ -45,8 +46,17 @@ public class Localisation {
 	private EV3LargeRegulatedMotor leftMotor;
 	private EV3LargeRegulatedMotor rightMotor;
 	
-	//Localisation constructor that makes use of the US & Color sensor with the
-	//UltrasonicPoller and colorLocalisationPoller objects
+	/**
+	 * Creates a Localisation object.
+	 * @param odometer
+	 * @param navigation
+	 * @param ultrasonicPoller
+	 * @param colorPoller
+	 * @param rightMotor
+	 * @param leftMotor
+	 * @param tile
+	 * @param startingCorner
+	 */
 	public Localisation(Odometer odometer, Navigation navigation, UltrasonicPoller ultrasonicPoller, ColorPoller colorPoller, EV3LargeRegulatedMotor rightMotor, EV3LargeRegulatedMotor leftMotor, double tile, int startingCorner) {
 		this.rightMotor = rightMotor;
 		this.leftMotor = leftMotor;
@@ -60,7 +70,10 @@ public class Localisation {
 		ultrasonicPoller.getUltrasonicLocalisationData().setLocalisation(this);
 	}
 	
-	//Procedure and logic of ultrasonic localisation routine
+	/**
+	 * Performs the ultrasonic localisation routine assuming the robot's rotating center is on the 45° line in one of the four corners of the
+	 * Game board.
+	 */
 	public void usLocalisation() {
 		ultrasonicPoller.setPollingState(UltrasonicPollingState.LOCALISATION);
 		ultrasonicPoller.startPolling();		//Start taking in US values
@@ -83,7 +96,9 @@ public class Localisation {
 		
 	}
 	
-	//Procedure and logic of color loclisation routine
+	/**
+	 * Performs the color localisation routine assuming the robot is positioned relatively close to an intersection of two lines
+	 */
 	public void colorLocalisation() {
 		
 		double currentX = odometer.getX();
@@ -145,7 +160,12 @@ public class Localisation {
 	}
 
 
-	//Method to compute X position with line data
+	/**
+	 * Computes the real X value of the robot's center of rotation based on the relative headings at which
+	 * the back color sensor crossed the lines
+	 * @param targetX
+	 * @return
+	 */
 	private double computeX(double targetX) {
 		double thetaD = (lines[0] - lines[2]);
 		int magnitude = -1;
@@ -162,7 +182,12 @@ public class Localisation {
 		return targetX + (magnitude * offset);
 	}
 	
-	//Method to compute Y position with line data
+	/**
+	 * Computes the real Y value of the robot's center of rotation based on the relative headings at which
+	 * the back color sensor crossed the lines
+	 * @param targetY
+	 * @return
+	 */
 	private double computeY(double targetY) {
 		double thetaD = (lines[1] - lines[3]);
 		int magnitude = -1;
@@ -179,7 +204,13 @@ public class Localisation {
 		return targetY + (magnitude * offset);	
 	}
 	
-	//Method to compute Theta position with line data
+	/**
+	 * Computes the real heading of the robot based on the relative
+	 * headings at witch the back color sensor crossed the lines.
+	 * The input is based on the initial heading at which the robot started the localisation routine.
+	 * @param reference
+	 * @return
+	 */
 	private double computeThetaColor(int reference) {
 		double delta;
 		double out = 0;
@@ -221,7 +252,10 @@ public class Localisation {
 		return out;
 	}
 	
-	//Method to compute Theta position with edge data
+	/**
+	 * Computes the angle based on the relative headings at which the ultrasonic sensor detected the edges.
+	 * @return
+	 */
 	private double computeAngleUltrasonic() {
 		double heading = edges[1] - edges[0];
 		if (heading < 0) {	//Corrects for negative difference
@@ -269,7 +303,11 @@ public class Localisation {
 		return heading;
 	}
 	
-	//takes as input a heading in degrees and returns the closest heading at a 45 degree angle
+	/**
+	 * This method takes as input a heading in degrees and returns the closest heading at a 45 degree angle
+	 * @param current
+	 * @return
+	 */
 	private int getClosestReference(int current) {
 		if (current < 90)
 			return 45;
@@ -281,7 +319,11 @@ public class Localisation {
 			return 315;
 	}
 	
-	//return closest multiple of tile length
+	/**
+	 * This method returns the closest multiple of tile length
+	 * @param val
+	 * @return
+	 */
 	private double getClosestMultiple(double val) {
 		double mod = val % tile;
 		int intDiv = (int) (val / tile);
@@ -293,7 +335,9 @@ public class Localisation {
 	
 	
 	
-	//pauses the thread
+	/**
+	 * This method allows the thread to pause itself
+	 */
 	private void pauseThread() {
 		paused = true;
 		synchronized (pauseLock) {
@@ -306,7 +350,9 @@ public class Localisation {
         }
 	}
 	
-	//resumes the thread
+	/**
+	 * This method wakes up all threads that were paused within this instance of Localisation instance
+	 */
     public void resumeThread() {
         synchronized (pauseLock) {
         	if (paused) {
