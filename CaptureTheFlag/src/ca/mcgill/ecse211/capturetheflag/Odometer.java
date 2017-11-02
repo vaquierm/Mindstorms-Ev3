@@ -38,10 +38,10 @@ public class Odometer implements Runnable {
 
 	/**
 	 * Constructs an Odometer object.
-	 * @param leftMotor
-	 * @param rightMotor
-	 * @param wheelRadius
-	 * @param track
+	 * @param leftMotor  Reference to the left motor
+	 * @param rightMotor  Reference to the right motor
+	 * @param wheelRadius  Radius of the wheels
+	 * @param track  Width of the wheelbase
 	 */
 	public Odometer(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, double wheelRadius, double track) {
 		this.leftMotor = leftMotor;
@@ -103,8 +103,8 @@ public class Odometer implements Runnable {
 	 * 0: x
 	 * 1: y
 	 * 2: T
-	 * @param position
-	 * @param update
+	 * @param position  Array to be written to
+	 * @param update  Array indicating which indices to write to
 	 */
 	public void getPosition(double[] position, boolean[] update) {
 		// ensure that the values don't change while the odometer is running
@@ -122,7 +122,7 @@ public class Odometer implements Runnable {
 
 	/**
 	 * Gets the current X value stored in the odometer.
-	 * @return
+	 * @return  The current X value of the odometer
 	 */
 	public double getX() {
 		double result;
@@ -136,7 +136,7 @@ public class Odometer implements Runnable {
 
 	/**
 	 * Gets the current Y value stored in the odometer.
-	 * @return
+	 * @return  The current Y value of the odomeer
 	 */
 	public double getY() {
 		double result;
@@ -150,7 +150,7 @@ public class Odometer implements Runnable {
 
 	/**
 	 * Gets the current heading value stored in the odometer in radiant.
-	 * @return
+	 * @return  The current heading of the odometer in radiant
 	 */
 	public double getTheta() {
 		double result;
@@ -164,7 +164,7 @@ public class Odometer implements Runnable {
 	
 	/**
 	 * Gets the current heading value stored in the odometer in degrees.
-	 * @return
+	 * @return  The current heading of the odometer in degrees
 	 */
 	public double getThetaDegrees() {
 		double result;
@@ -184,8 +184,8 @@ public class Odometer implements Runnable {
 	 * 0: x
 	 * 1: y
 	 * 2: T
-	 * @param position
-	 * @param update
+	 * @param position  The array to read from
+	 * @param update  Array indicating which indices to read from
 	 */
 	public void setPosition(double[] position, boolean[] update) {
 		// ensure that the values don't change while the odometer is running
@@ -203,7 +203,7 @@ public class Odometer implements Runnable {
 
 	/**
 	 * Sets the current X value of the odometer.
-	 * @param x
+	 * @param x  New X value
 	 */
 	public void setX(double x) {
 		synchronized (lock) {
@@ -213,7 +213,7 @@ public class Odometer implements Runnable {
 
 	/**
 	 * Sets the current Y value of the odometer.
-	 * @param y
+	 * @param y  New Y value
 	 */
 	public void setY(double y) {
 		synchronized (lock) {
@@ -223,8 +223,8 @@ public class Odometer implements Runnable {
 	
 	/**
 	 * Converts an angle in radiant to degrees.
-	 * @param rad
-	 * @return
+	 * @param rad  Angle in radiant to convert
+	 * @return  Angle in degrees
 	 */
 	public double radiantToDegree(double rad) {
 		return rad * 180 / Math.PI;
@@ -232,7 +232,7 @@ public class Odometer implements Runnable {
 
 	/**
 	 * Sets the current heading of the robot in the odometer.
-	 * @param theta
+	 * @param theta  New theta in radiant to be set in the odometer
 	 */
 	public void setTheta(double theta) {
 		while (theta < 0) {

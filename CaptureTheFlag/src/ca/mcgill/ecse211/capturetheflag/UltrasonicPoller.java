@@ -33,10 +33,10 @@ public class UltrasonicPoller implements Runnable {
 	
 	/**
 	 * Creates an instance of the UltrasonicPoller class.
-	 * @param usDistance
-	 * @param usData
-	 * @param ultrasonicLocalisationData
-	 * @param ultrasonicNavigationData
+	 * @param usDistance  Ultrasonic sensor
+	 * @param usData  Ultrasonic sensor fetching array
+	 * @param ultrasonicLocalisationData  Association to UltrasonicLocalisationData instance
+	 * @param ultrasonicNavigationData  Association to UltrasonicNavigationData instance
 	 */
 	public UltrasonicPoller(SampleProvider usDistance, float[] usData, UltrasonicLocalisationData ultrasonicLocalisationData, UltrasonicNavigationData ultrasonicNavigationData) {
 		this.usDistance = usDistance;
@@ -83,7 +83,7 @@ public class UltrasonicPoller implements Runnable {
 	
 	/**
 	 * Sets the polling state of the poller.
-	 * @param state
+	 * @param state  New polling state to be set.
 	 */
 	public void setPollingState(UltrasonicPollingState state) {
 		synchronized (stateLock) {
@@ -93,7 +93,7 @@ public class UltrasonicPoller implements Runnable {
 	
 	/**
 	 * Returns the current polling state of the poller.
-	 * @return
+	 * @return  Current polling state
 	 */
 	public UltrasonicPollingState getPollingState() {
 		synchronized (stateLock) {
@@ -103,7 +103,7 @@ public class UltrasonicPoller implements Runnable {
 	
 	/**
 	 * Gets the reference to the UltrasonicLocalisationData association.
-	 * @return
+	 * @return  Reference to UtrasonicLocalisationData instance
 	 */
 	public UltrasonicLocalisationData getUltrasonicLocalisationData() {
 		return ultrasonicLocalisationData;
@@ -111,7 +111,7 @@ public class UltrasonicPoller implements Runnable {
 	
 	/**
 	 * Gets the reference to the UltrasonicNaviagtionData association.
-	 * @return
+	 * @return  Reference to UltrasonicNavigationData instance
 	 */
 	public UltrasonicNavigationData getUltrasonicNavigationData() {
 		return ultrasonicNavigationData;

@@ -21,8 +21,8 @@ public class UltrasonicNavigationData {
 	
 	
 	//Motors
-	EV3LargeRegulatedMotor rightMotor;
-	EV3LargeRegulatedMotor leftMotor;
+	private EV3LargeRegulatedMotor rightMotor;
+	private EV3LargeRegulatedMotor leftMotor;
 	
 	//Associations
 	private Navigation navigation;
@@ -52,10 +52,10 @@ public class UltrasonicNavigationData {
 	
 	/**
 	 * Creates an instance of the UltrasonicNavigationData class.
-	 * @param rightMotor
-	 * @param leftMotor
-	 * @param tile
-	 * @param boardSize
+	 * @param rightMotor  Reference to right motor
+	 * @param leftMotor  Reference to left motor
+	 * @param tile  Length of the side of a tile
+	 * @param boardSize  Size of the board (how many tiles on one side)
 	 */
 	public UltrasonicNavigationData(EV3LargeRegulatedMotor rightMotor, EV3LargeRegulatedMotor leftMotor, double tile, double boardSize) {
 		this.rightMotor = rightMotor;
@@ -71,7 +71,7 @@ public class UltrasonicNavigationData {
 	 * In NAVIGATING state, the distance to the closest object in front of the robot is found to avoid potential collisions.
 	 * In AVOIDING state, the data processor takes control of the wheels and follows the wall with the assumption that the
 	 * ultrasonic sensor is facing the side.
-	 * @param distance
+	 * @param distance  New distance fetched from the Ultrasonic sensor
 	 */
 	public void processData(int distance) {
 		switch (NavigationController.getNavigationState()) {
@@ -99,7 +99,7 @@ public class UltrasonicNavigationData {
 	 * Processes the input distance to control the motors to follow the wall.
 	 * The speed difference between the wheels depends on which side the wall the robot is following is.
 	 * To determine this, the method looks at the instance variable -followingLeftWall-
-	 * @param distance
+	 * @param distance  Distance from the wall
 	 */
 	private void processWallFollowing(int distance) {
 		int leftSpeed;
@@ -178,7 +178,7 @@ public class UltrasonicNavigationData {
 	 * This method returns which direction the robot should turn when its navigation
 	 * is interrupted to start wall following. The result is based on its odometer values
 	 * Turning right returns true, turning left returns false
-	 * @return
+	 * @return  True if turn right, false if turn left
 	 */
 	private boolean whichDirectionInterruption() {
 		int currentX = (int) odometer.getX();
@@ -200,7 +200,7 @@ public class UltrasonicNavigationData {
 	
 	/**
 	 * Sets the Odometer association of the instance.
-	 * @param odometer
+	 * @param odometer  Association to the odometer instance
 	 */
 	public void setOdometer(Odometer odometer) {
 		this.odometer = odometer;
@@ -208,7 +208,7 @@ public class UltrasonicNavigationData {
 	
 	/**
 	 * Sets the Navigation association of the instance.
-	 * @param navigation
+	 * @param navigation  Association to the Navigation instance
 	 */
 	public void setNavigation(Navigation navigation) {
 		this.navigation = navigation;
@@ -216,7 +216,7 @@ public class UltrasonicNavigationData {
 	
 	/**
 	 * Sets the NavigationController association of the instance.
-	 * @param navigationController
+	 * @param navigationController  Association to the NavigationController instance
 	 */
 	public void setNavigationController(NavigationController navigationController) {
 		this.navigationController = navigationController;

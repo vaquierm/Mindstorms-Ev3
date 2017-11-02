@@ -33,7 +33,7 @@ public class UltrasonicLocalisationData {
 	 * Processes the data coming from the ultrasonic poller and sends an interrupt to the localisation class when
 	 * an edge is found. The process looks for falling and rising edges at the same time and sticks with one
 	 * once the first edge is found.
-	 * @param newVal
+	 * @param newVal  New value read from the Ultrasonic sensor
 	 */
 	public void processData(int newVal) {
 		if (lastData < 0) {
@@ -67,7 +67,7 @@ public class UltrasonicLocalisationData {
 	
 	/**
 	 * Sets the localisation association to the instance.
-	 * @param localisation
+	 * @param localisation  Association to the new Localisation
 	 */
 	public void setLocalisation(Localisation localisation) {
 		this.localisation = localisation;

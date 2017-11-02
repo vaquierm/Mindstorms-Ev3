@@ -22,7 +22,7 @@ public class Localisation {
 	private static final int COLOR_SENSOR_OFFSET = 15;
 	
 	private boolean fallingEdge = false;
-	public double edgeDifference = -1;
+	private double edgeDifference = -1;
 	
 	private volatile boolean paused = false;
 	private Object pauseLock = new Object();
@@ -48,14 +48,14 @@ public class Localisation {
 	
 	/**
 	 * Creates a Localisation object.
-	 * @param odometer
-	 * @param navigation
-	 * @param ultrasonicPoller
-	 * @param colorPoller
-	 * @param rightMotor
-	 * @param leftMotor
-	 * @param tile
-	 * @param startingCorner
+	 * @param odometer  The localisation association
+	 * @param navigation  The Navigation association
+	 * @param ultrasonicPoller  The UltrasonicPoller Association
+	 * @param colorPoller  The CollerPoller association
+	 * @param rightMotor  Reference to the right motor
+	 * @param leftMotor  Reference to the left motor
+	 * @param tile  Length of the side of a tile
+	 * @param startingCorner  Corner in which the robot started
 	 */
 	public Localisation(Odometer odometer, Navigation navigation, UltrasonicPoller ultrasonicPoller, ColorPoller colorPoller, EV3LargeRegulatedMotor rightMotor, EV3LargeRegulatedMotor leftMotor, double tile, int startingCorner) {
 		this.rightMotor = rightMotor;
@@ -163,8 +163,8 @@ public class Localisation {
 	/**
 	 * Computes the real X value of the robot's center of rotation based on the relative headings at which
 	 * the back color sensor crossed the lines
-	 * @param targetX
-	 * @return
+	 * @param targetX  The X value of the line at which the robot is localizing
+	 * @return  The correct X value of the robot
 	 */
 	private double computeX(double targetX) {
 		double thetaD = (lines[0] - lines[2]);
@@ -185,8 +185,8 @@ public class Localisation {
 	/**
 	 * Computes the real Y value of the robot's center of rotation based on the relative headings at which
 	 * the back color sensor crossed the lines
-	 * @param targetY
-	 * @return
+	 * @param targetY  The X value of the line at which the robot is localizing
+	 * @return  The correct Y value of the robot
 	 */
 	private double computeY(double targetY) {
 		double thetaD = (lines[1] - lines[3]);
@@ -208,8 +208,8 @@ public class Localisation {
 	 * Computes the real heading of the robot based on the relative
 	 * headings at witch the back color sensor crossed the lines.
 	 * The input is based on the initial heading at which the robot started the localisation routine.
-	 * @param reference
-	 * @return
+	 * @param reference  The code corresponding to the initial heading at the start of the localisation {"0" : "225°", "1" : "315°", "2" : "135°", "3" : "45°"}
+	 * @return  The correct theta value of the robot in degrees based on the lined detected by the color sensor
 	 */
 	private double computeThetaColor(int reference) {
 		double delta;
@@ -254,7 +254,7 @@ public class Localisation {
 	
 	/**
 	 * Computes the angle based on the relative headings at which the ultrasonic sensor detected the edges.
-	 * @return
+	 * @return  The correct heading of the robot in degrees based on edges detected by the Ultrasonic sensor
 	 */
 	private double computeAngleUltrasonic() {
 		double heading = edges[1] - edges[0];
@@ -305,8 +305,8 @@ public class Localisation {
 	
 	/**
 	 * This method takes as input a heading in degrees and returns the closest heading at a 45 degree angle
-	 * @param current
-	 * @return
+	 * @param current  The current heading of the robot in degrees
+	 * @return  The closest heading that is a multiple of 45° in degrees
 	 */
 	private int getClosestReference(int current) {
 		if (current < 90)
@@ -321,8 +321,8 @@ public class Localisation {
 	
 	/**
 	 * This method returns the closest multiple of tile length
-	 * @param val
-	 * @return
+	 * @param val  Any value
+	 * @return  The closest multiple of a tile length
 	 */
 	private double getClosestMultiple(double val) {
 		double mod = val % tile;

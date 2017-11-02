@@ -47,14 +47,14 @@ public class MainController {
 	private static NavigationController navigationController;
 	private static LocalisationController localisationController;
 	private static ZiplineController ziplineController;
-//	private static final FlagSearchingController flagSearchingController;
+	//	private static final FlagSearchingController flagSearchingController;
 	
 	//Pollers
 	private static UltrasonicPoller ultrasonicPoller;
 	private static ColorPoller colorPoller;
 	
 	//Data Processing
-	private static ColorLocalisationData colorLocalisation;
+	private static ColorLocalisationData colorLocalisationData;
 	private static ZiplineLightData ziplineLightData;
 	private static UltrasonicLocalisationData ultrasonicLocalisationData;
 	private static UltrasonicNavigationData ultrasonicNavigationData;
@@ -99,12 +99,12 @@ public class MainController {
 		odometer = new Odometer(leftMotor, rightMotor, WHEEL_RADIUS, TRACK);
 		Display odometryDisplay = new Display(odometer, t);
 		
-		colorLocalisation = new ColorLocalisationData();
+		colorLocalisationData = new ColorLocalisationData();
 		ziplineLightData = new ZiplineLightData();
 		ultrasonicLocalisationData = new UltrasonicLocalisationData();
 		ultrasonicNavigationData = new UltrasonicNavigationData(rightMotor, leftMotor, TILE, BOARD_SIZE);
 		
-		colorPoller = new ColorPoller(colorLocalisation, colorVerticalRedMean, colorVerticalRedData, colorHorizontalRedMean, colorHorizontalRedData, colorSideRedMean, colorSideRedData);
+		colorPoller = new ColorPoller(colorVerticalRedMean, colorVerticalRedData, colorHorizontalRedMean, colorHorizontalRedData, colorSideRedMean, colorSideRedData, colorLocalisationData, ziplineLightData);
 		ultrasonicPoller = new UltrasonicPoller(meanFilterUs, usData, ultrasonicLocalisationData, ultrasonicNavigationData);
 		
 		navigation = new Navigation(odometer, rightMotor, leftMotor, WHEEL_RADIUS, TRACK);

@@ -34,7 +34,7 @@ public class ZiplineLightData {
 	/**
 	 * Takes as an input data coming from the color poller and processes it to detect is the robot has landed.
 	 * When the detection is made, an interrupt is sent to the ziplineController instance it is associated to to indicate this event.
-	 * @param newVal
+	 * @param newVal  New value fetched from the color sensor
 	 */
 	public void processData(int newVal) {
 		int difference;
@@ -54,7 +54,7 @@ public class ZiplineLightData {
 	
 	/**
 	 * Sets the ZiplineController association to this instance.
-	 * @param ziplineController
+	 * @param ziplineController  Association to ZiplineController instance
 	 */
 	public void setZiplineController(ZiplineController ziplineController) {
 		this.ziplineController = ziplineController;

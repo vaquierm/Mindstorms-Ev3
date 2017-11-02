@@ -36,12 +36,12 @@ public class ZiplineController {
 	
 	/**
 	 * Constructs an instance of the ZiplineController class.
-	 * @param odometer
-	 * @param colorPoller
-	 * @param rightMotor
-	 * @param leftMotor
-	 * @param topMotor
-	 * @param gameParameters
+	 * @param odometer  Association to Odometer instance
+	 * @param colorPoller  Association to ColorPoller instance
+	 * @param rightMotor  Reference to right motor
+	 * @param leftMotor  Reference to the left motor
+	 * @param topMotor  Reference to the top motor
+	 * @param gameParameters  Game parameters for this round
 	 */
 	public ZiplineController(Odometer odometer, ColorPoller colorPoller, EV3LargeRegulatedMotor rightMotor, EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor topMotor, GameParameters gameParameters) {
 		this.odometer = odometer;

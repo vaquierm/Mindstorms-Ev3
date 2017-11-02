@@ -26,8 +26,8 @@ public class WiFiGameParameters {
 
 	/**
 	 * Returns the game parameters sent over WiFi
-	 * @param TILE
-	 * @return
+	 * @param TILE  Length of the length of the side of a tile (cm)
+	 * @return  Game parameters received from the WiFi connection
 	 */
 	public static GameParameters getGameParameters(double TILE) {
 		// Initialize WifiConnection class

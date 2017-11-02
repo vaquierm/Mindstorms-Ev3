@@ -21,8 +21,8 @@ public class Display extends Thread {
 
 	/**
 	 * Creates a Display object.
-	 * @param odometer
-	 * @param t
+	 * @param odometer  The odometer association
+	 * @param t  The LCD display of the robot
 	 */
 	public Display(Odometer odometer, TextLCD t) {
 		this.odometer = odometer;
@@ -118,7 +118,7 @@ public class Display extends Thread {
 
 	/**
 	 * Getter method for the display boolean
-	 * @return
+	 * @return  The display boolean
 	 */
 	public boolean getDisplay() {
 		synchronized (lock) {
@@ -128,7 +128,7 @@ public class Display extends Thread {
 
 	/**
 	 * Setter method for the display boolean
-	 * @param b
+	 * @param b  The new display boolean
 	 */
 	public void setDisplay(boolean b) {
 		synchronized (lock) {

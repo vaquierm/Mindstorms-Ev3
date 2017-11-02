@@ -11,53 +11,141 @@ package ca.mcgill.ecse211.capturetheflag;
  */
 
 public class GameParameters {
-	public final int RedTeam; // (i=1,20) Team starting out from red zone
-	public final int GreenTeam; // (i=1,20) Team starting out from green zone
-	public final int RedCorner; // (i=1,4) Starting corner for red team
-	public final int GreenCorner; // (i=1,4) Starting corner for green team
-	public final int OG; // (i=1,5) color of green opponent flag
-	public final int OR; // (i=1,5) color of red opponent flag
-	public final Coordinate Red_LL; //  lower left hand corner of Red Zone
-	public final Coordinate Red_UR; //  upper right hand corner of Red Zone
-	public final Coordinate Green_LL; // lower left hand corner of Green Zone 
-	public final Coordinate Green_UR; // upper right hand corner of Green Zone
-	public final Coordinate ZC_R; // center coordinate of tower in Red Zone
-	public final Coordinate ZO_R; // grid crossing adjacent to tower in Red Zone
-	public final Coordinate ZC_G; // center coordinate of tower in Green Zone
-	public final Coordinate ZO_G; // grid crossing adjacent to tower in Green Zone
-	public final Coordinate SH_LL; // lower left hand corner of horizontal shallow water zone
-	public final Coordinate SH_UR; // upper right hand corner of horizontal shallow water zone
-	public final Coordinate SV_LL; // lower left hand corner of vertical shallow water zone
-	public final Coordinate SV_UR; // upper right hand corner of vertical shallow water zone
-	public final Coordinate SR_LL; // lower left hand corner of search region in red player zone
-	public final Coordinate SR_UR; // upper right hand corner of search region in red player zone
-	public final Coordinate SG_LL; // lower left hand corner of search region in green player zone
-	public final Coordinate SG_UR; // upper right hand corner of search region in green player zone
+	
+	/**
+	 * (i=1,20) Team starting out from red zone
+	 */
+	public final int RedTeam; 
+	
+	/**
+	 * (i=1,20) Team starting out from green zone
+	 */
+	public final int GreenTeam; 
+	
+	/**
+	 * (i=1,4) Starting corner for red team
+	 */
+	public final int RedCorner; 
+	
+	/**
+	 * (i=1,4) Starting corner for green team
+	 */
+	public final int GreenCorner;
+	
+	/**
+	 * (i=1,5) color of green opponent flag
+	 */
+	public final int OG;
+	
+	/**
+	 * (i=1,5) color of red opponent flag
+	 */
+	public final int OR; 
+	
+	/**
+	 * Lower left hand corner of Red Zone
+	 */
+	public final Coordinate Red_LL; 
+	
+	/**
+	 * Upper right hand corner of Red Zone
+	 */
+	public final Coordinate Red_UR; 
+	
+	/**
+	 * Lower left hand corner of Green Zone 
+	 */
+	public final Coordinate Green_LL; 
+	
+	/**
+	 * Upper right hand corner of Green Zone
+	 */
+	public final Coordinate Green_UR; 
+	
+	/**
+	 * Center coordinate of tower in Red Zone
+	 */
+	public final Coordinate ZC_R; 
+	
+	/**
+	 * Grid crossing adjacent to tower in Red Zone
+	 */
+	public final Coordinate ZO_R; 
+	
+	/**
+	 * Center coordinate of tower in Green Zone
+	 */
+	public final Coordinate ZC_G; 
+	
+	/**
+	 * Grid crossing adjacent to tower in Green Zone
+	 */
+	public final Coordinate ZO_G; 
+	
+	/**
+	 * Lower left hand corner of horizontal shallow water zone
+	 */
+	public final Coordinate SH_LL; 
+	
+	/**
+	 * Upper right hand corner of horizontal shallow water zone
+	 */
+	public final Coordinate SH_UR; 
+	
+	/**
+	 * Lower left hand corner of vertical shallow water zone
+	 */
+	public final Coordinate SV_LL; 
+	
+	/**
+	 * Upper right hand corner of vertical shallow water zone
+	 */
+	public final Coordinate SV_UR; 
+	
+	/**
+	 * Lower left hand corner of search region in red player zone
+	 */
+	public final Coordinate SR_LL; 
+	
+	/**
+	 * Upper right hand corner of search region in red player zone
+	 */
+	public final Coordinate SR_UR; 
+	
+	/**
+	 * Lower left hand corner of search region in green player zone
+	 */
+	public final Coordinate SG_LL; 
+	
+	/**
+	 * Upper right hand corner of search region in green player zone
+	 */
+	public final Coordinate SG_UR; 
 	
 	/**
 	 * Creates a GameParameters object
-	 * @param redTeam
-	 * @param greenTeam
-	 * @param redCorner
-	 * @param greenCorner
-	 * @param OG
-	 * @param OR
-	 * @param Red_LL
-	 * @param Red_UR
-	 * @param Green_LL
-	 * @param Green_UR
-	 * @param ZC_R
-	 * @param ZO_R
-	 * @param ZC_G
-	 * @param ZO_G
-	 * @param SH_LL
-	 * @param SH_UR
-	 * @param SV_LL
-	 * @param SV_UR
-	 * @param SR_LL
-	 * @param SR_UR
-	 * @param SG_LL
-	 * @param SG_UR
+	 * @param redTeam  (i=1,20) Team starting out from red zone
+	 * @param greenTeam  (i=1,20) Team starting out from green zone
+	 * @param redCorner  (i=1,4) Starting corner for red team
+	 * @param greenCorner  (i=1,4) Starting corner for green team
+	 * @param OG  (i=1,5) color of green opponent flag
+	 * @param OR  (i=1,5) color of red opponent flag
+	 * @param Red_LL  lower left hand corner of Red Zone
+	 * @param Red_UR  upper right hand corner of Red Zone
+	 * @param Green_LL  lower left hand corner of Green Zone 
+	 * @param Green_UR  upper right hand corner of Green Zone
+	 * @param ZC_R  center coordinate of tower in Red Zone
+	 * @param ZO_R  grid crossing adjacent to tower in Red Zone
+	 * @param ZC_G  center coordinate of tower in Green Zone
+	 * @param ZO_G  grid crossing adjacent to tower in Green Zone
+	 * @param SH_LL  lower left hand corner of horizontal shallow water zone
+	 * @param SH_UR  upper right hand corner of horizontal shallow water zone
+	 * @param SV_LL  lower left hand corner of vertical shallow water zone
+	 * @param SV_UR  upper right hand corner of vertical shallow water zone
+	 * @param SR_LL  lower left hand corner of search region in red player zone
+	 * @param SR_UR  upper right hand corner of search region in red player zone
+	 * @param SG_LL  lower left hand corner of search region in green player zone
+	 * @param SG_UR  upper right hand corner of search region in green player zone
 	 */
 	public GameParameters(int redTeam, int greenTeam, int redCorner, int greenCorner, int OG, int OR, 
 			Coordinate Red_LL, Coordinate Red_UR, Coordinate Green_LL, Coordinate Green_UR,

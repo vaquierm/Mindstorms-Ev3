@@ -54,13 +54,13 @@ public class NavigationController {
 
 	/**
 	 * Creates a NavigationController object.
-	 * @param rightMotor
-	 * @param leftMotor
-	 * @param frontMotor
-	 * @param odometer
-	 * @param navigation
-	 * @param ultrasonicPoller
-	 * @param gameParameters
+	 * @param rightMotor  Reference to the right motor
+	 * @param leftMotor  Reference to the left motor
+	 * @param frontMotor  Reference to the front motor
+	 * @param odometer  Association to an Odometer instance
+	 * @param navigation  Association to a Navigation instance
+	 * @param ultrasonicPoller  Association to an UltrasonicPoller
+	 * @param gameParameters  Game parameters for this round
 	 */
 	public NavigationController(EV3LargeRegulatedMotor rightMotor, EV3LargeRegulatedMotor leftMotor, EV3MediumRegulatedMotor frontMotor,
 			Odometer odometer, Navigation navigation, UltrasonicPoller ultrasonicPoller, GameParameters gameParameters) {
@@ -135,12 +135,12 @@ public class NavigationController {
 	/**
 	 * This method takes as input a list of Coordinates and modifies the object such
 	 * that the new path is rectangular and avoids physical features on the board
-	 * @param wayPoints
+	 * @param wayPoints List of Coordinates to be modified
 	 */
 	private void changeToRectangularPath(List<Coordinate> wayPoints) {
 		// TODO
-		double midx = (gameParameters.SV_UR.x - gameParameters.SV_LL.x) / 2;
-		double midy = (gameParameters.SH_UR.x - gameParameters.SH_LL.x) / 2;
+		double midx = (gameParameters.SV_UR.x + gameParameters.SV_LL.x) / 2;
+		double midy = (gameParameters.SH_UR.x + gameParameters.SH_LL.x) / 2;
 		Coordinate bridgemid = new Coordinate(midx, midy);
 		
 		for(int i = 0 ; i < (wayPoints.size() - 1) ; i++)
@@ -181,14 +181,14 @@ public class NavigationController {
                 			wayPoints.add(i+1, midVH);
                 		}    	
                 		else{		
-                			wayPoints.add(i+1,bridgemid);
+                			wayPoints.add(i+1, bridgemid);
                 		}             		
                 	}
                 }
                 
                 else 
                 {
-                	wayPoints.add(i+1,bridgemid);
+                	wayPoints.add(i+1, bridgemid);
 				}
                 
 			}
@@ -206,8 +206,8 @@ public class NavigationController {
 	/**
 	 * This method takes as an input a coordinate and returns the region in which this point fits in, by looking at the gameParapeters
 	 * association that the instance has.
-	 * @param node
-	 * @return
+	 * @param node  Coordinate checked for which zone it is in
+	 * @return  The zone in which the Coordinate falls in
 	 */
 	private String mapPoint(Coordinate node)
 	{

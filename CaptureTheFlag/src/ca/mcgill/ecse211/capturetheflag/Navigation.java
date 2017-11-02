@@ -11,8 +11,8 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor;
  * Navigation class which navigates robot to specified points, 
  * determines direction to turn (Minimal turn) and how far to travel
  * 
- * @author Oliver Clark
  * @author Michael Vaquier
+ * @author Oliver Clark
  */
 public class Navigation {
 		
@@ -37,11 +37,11 @@ public class Navigation {
 	
 	/**
 	 * Creates a Navigation object.
-	 * @param odometer
-	 * @param rightMotor
-	 * @param leftMotor
-	 * @param wheelRadius
-	 * @param track
+	 * @param odometer  Association to Odometer instance
+	 * @param rightMotor  Reference to the right motor
+	 * @param leftMotor  Reference to the left motor
+	 * @param wheelRadius  Radius of the wheels of the robot (cm)
+	 * @param track  Radius of the wheelbase of the robot (cm)
 	 */
 	public Navigation(Odometer odometer, EV3LargeRegulatedMotor rightMotor, EV3LargeRegulatedMotor leftMotor, double wheelRadius, double track) {
 		this.rightMotor = rightMotor;
@@ -56,9 +56,9 @@ public class Navigation {
 	 * This method causes the robot to travel to the absolute field location (x,
 	 * y), specified in tilepoints by first adjusting its heading then moving forward.
 	 * The returnThread boolean is used to determine if the thread should wait until the robot is done traveling to return
-	 * @param x
-	 * @param y
-	 * @param returnThread
+	 * @param x  The target X position to travel to
+	 * @param y  The target Y position to travel to
+	 * @param returnThread  If true the thread does not wait for the travel to complete
 	 */
 	public void travelTo(double x, double y, boolean returnThread) {		
 		
@@ -84,7 +84,7 @@ public class Navigation {
 	
 	/**
 	 * Makes the robot turn (minimal angle) to a new heading.
-	 * @param theta
+	 * @param theta  Target heading to turn to
 	 */
 	public void turnTo(double theta) {
 		leftMotor.setSpeed(ROTATE_SPEED);
@@ -115,8 +115,8 @@ public class Navigation {
 	/**
 	 * Makes the robot move forward by a certain distance.
 	 * The returnThread boolean is used to determine if the thread should wait until the robot is done traveling to return.
-	 * @param distance
-	 * @param returnThread
+	 * @param distance  Distance to travel forward
+	 * @param returnThread  If true the thread does not wait for the travel to complete
 	 */
 	public void forward(double distance, boolean returnThread) {
 		leftMotor.setSpeed(FORWARD_SPEED);
@@ -128,7 +128,7 @@ public class Navigation {
 	/**
 	 * This method interrupts the current navigation of the robot. This interruption
 	 * is likely due it the ultrasonic sensor detecting an object in the robots trajectory.
-	 * @param turnRight
+	 * @param turnRight  If true the robot turns right 90° upon interruption, if false it turn left by 90°
 	 */
 	public void interruptNav(boolean turnRight) {
 		rightMotor.stop(true);
@@ -145,9 +145,9 @@ public class Navigation {
 
 	/**
 	 * Converts a distance to wheel rotation.
-	 * @param radius
-	 * @param distance
-	 * @return
+	 * @param radius  Radius of the wheel
+	 * @param distance  Distance to convert
+	 * @return  Wheel rotation in degrees
 	 */
 	public int convertDistance(double radius, double distance) {
 		return (int) ((180.0 * distance) / (Math.PI * radius));
@@ -156,10 +156,10 @@ public class Navigation {
 	/**
 	 * Converts distance to wheel rotation required for the physical robot to turn by a certain
 	 * angle around its center of rotation.
-	 * @param radius
-	 * @param width
-	 * @param angle
-	 * @return
+	 * @param radius  Radius of the wheel
+	 * @param width  Width of the wheelbase
+	 * @param angle  Angle turn wanted
+	 * @return  Wheel rotation in degrees
 	 */
 	public int convertAngle(double radius, double width, double angle) {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
@@ -167,7 +167,7 @@ public class Navigation {
 	
 	/**
 	 * Saves the heading at which the navigation got interrupted.
-	 * @param theta
+	 * @param theta  New theta to be set
 	 */
 	public void setInterruptedTheta(double theta) {
 		this.interruptedTheta = theta;
@@ -175,7 +175,7 @@ public class Navigation {
 	
 	/**
 	 * Returns the heading at which the navigation got interrupted.
-	 * @return
+	 * @return  Current theta at which navigation was interrupted
 	 */
 	public double getInterruptedTheta() {
 		return interruptedTheta;

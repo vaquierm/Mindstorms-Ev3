@@ -25,11 +25,11 @@ public class LocalisationController {
 	
 	/**
 	 * Creates a LocalisationController object.
-	 * @param localisation
-	 * @param navigation
-	 * @param tile
-	 * @param startingCorner
-	 * @param boardSize
+	 * @param localisation  Association to Localisation instance
+	 * @param navigation  Association to Navigation instance
+	 * @param tile  Tile length of the board
+	 * @param startingCorner  Starting corner of the robot
+	 * @param boardSize  Size of the board (number of tiles on one side)
 	 */
 	public LocalisationController(Localisation localisation, Navigation navigation, double tile, int startingCorner, int boardSize) {
 		this.localisation = localisation;

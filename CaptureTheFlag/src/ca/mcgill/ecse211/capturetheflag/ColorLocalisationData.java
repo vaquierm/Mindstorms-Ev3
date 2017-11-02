@@ -31,6 +31,13 @@ public class ColorLocalisationData {
 	public ColorLocalisationData() {
 	}
 	
+	/**
+	 * This method is used to process data coming from the color poller
+	 * to determine if the color sensor is crossing a line.
+	 * When a line is detected, an interrupt is sent to the localisation association to alert
+	 * if of this event.
+	 * @param newVal  New value read by the sensor.
+	 */
 	public void processData(int newVal) {
 		int difference;
 		if (lastData < 0) {
@@ -54,7 +61,7 @@ public class ColorLocalisationData {
 	
 	/**
 	 * This method sets the association to an instance of the Localisation class.
-	 * @param localisation
+	 * @param localisation  The localisation instance that will be set as an association.
 	 */
 	public void setLocalisation(Localisation localisation) {
 		this.localisation = localisation;
