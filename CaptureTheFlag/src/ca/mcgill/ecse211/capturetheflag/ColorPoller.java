@@ -105,7 +105,8 @@ public class ColorPoller implements Runnable {
 	 * Polls the back Color sensor and send the data to the ziplineLighData association to be processed
 	 */
 	private void processZiplining() {
-		// TODO Auto-generated method stub
+		colorRedBack.fetchSample(colorRedDataBack, 0);
+		ziplineLightData.processData((int) (colorRedDataBack[0] * 100));
 		
 	}
 
@@ -156,7 +157,8 @@ public class ColorPoller implements Runnable {
 	/**
 	 * This method can be will spawn a new thread and start the polling
 	 */
-	public void startPolling() {
+	public void startPolling(ColorPollingState state) {
+		setPollingState(state);
 		new Thread(this).start();
 	}
 	

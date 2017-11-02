@@ -4,6 +4,8 @@
 
 package ca.mcgill.ecse211.capturetheflag;
 
+import lejos.hardware.Button;
+
 /**
  * The localisation manager holds the control flow to the localisation procedure
  * It holds a reference to an instance of a localisation class which hold the specific logic for subtasks of the localisation procedure
@@ -43,7 +45,7 @@ public class LocalisationController {
 	 * Performs the initial localisation routine involving
 	 * an ultrasonic localisation, navigation to the closest intersection, then color localisation.
 	 */
-	private void initialLocalisationRoutine() {
+	public void initialLocalisationRoutine() {
 		localisation.usLocalisation();
 		navigateToInitialIntersection();
 		localisation.colorLocalisation();

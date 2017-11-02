@@ -18,8 +18,8 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
 public class Localisation {
 	
-	private static final int ROTATION_SPEED = 150;
-	private static final int COLOR_SENSOR_OFFSET = 15;
+	private static final int ROTATION_SPEED = 90;
+	private static final double COLOR_SENSOR_OFFSET = 12.5;
 	
 	private boolean fallingEdge = false;
 	private double edgeDifference = -1;
@@ -75,8 +75,7 @@ public class Localisation {
 	 * Game board.
 	 */
 	public void usLocalisation() {
-		ultrasonicPoller.setPollingState(UltrasonicPollingState.LOCALISATION);
-		ultrasonicPoller.startPolling();		//Start taking in US values
+		ultrasonicPoller.startPolling(UltrasonicPollingState.LOCALISATION);		//Start taking in US values
 		leftMotor.setSpeed(ROTATION_SPEED);		
 		rightMotor.setSpeed(ROTATION_SPEED);
 		leftMotor.backward();			//Start spinning in place
@@ -127,8 +126,7 @@ public class Localisation {
 		
 		
 		referenceHeadingCode = (referenceHeadingCode + 1) % lines.length;
-		colorPoller.setPollingState(ColorPollingState.LOCALISATION);
-		colorPoller.startPolling(); 	//Need to detect lines, turn on color sensor
+		colorPoller.startPolling(ColorPollingState.LOCALISATION); 	//Need to detect lines, turn on color sensor
 		leftMotor.setSpeed(ROTATION_SPEED);	//Start spinning in place
 		rightMotor.setSpeed(ROTATION_SPEED);
 		leftMotor.backward();
@@ -331,6 +329,14 @@ public class Localisation {
 			return intDiv * tile;
 		} else
 			return (intDiv + 1) * tile;
+	}
+	
+	/**
+	 * Sets the falling edge attribute
+	 * @param fallingEdge  New fallingEdge
+	 */
+	public void setFallingEdge(boolean fallingEdge) {
+		this.fallingEdge = fallingEdge;
 	}
 	
 	

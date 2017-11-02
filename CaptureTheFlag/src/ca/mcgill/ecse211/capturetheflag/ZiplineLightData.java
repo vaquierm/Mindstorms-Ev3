@@ -37,6 +37,7 @@ public class ZiplineLightData {
 	 * @param newVal  New value fetched from the color sensor
 	 */
 	public void processData(int newVal) {
+		System.out.println(newVal);
 		int difference;
 		if (lastData < 0) {
 			lastData = newVal;

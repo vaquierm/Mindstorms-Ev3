@@ -6,6 +6,7 @@ package ca.mcgill.ecse211.capturetheflag;
 
 import java.util.List;
 
+import ca.mcgill.ecse211.capturetheflag.UltrasonicPoller.UltrasonicPollingState;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.motor.EV3MediumRegulatedMotor;
 
@@ -88,7 +89,7 @@ public class NavigationController {
 	public void runNavigationTask() {
 
 		if (objectDetection) {
-			ultrasonicPoller.startPolling();
+			ultrasonicPoller.startPolling(UltrasonicPollingState.NAVIGATION);
 		}
 
 		while (coordinateList.size() > 0) {

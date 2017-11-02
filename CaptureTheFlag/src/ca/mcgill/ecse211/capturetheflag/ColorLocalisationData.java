@@ -4,6 +4,8 @@
 
 package ca.mcgill.ecse211.capturetheflag;
 
+import lejos.hardware.Sound;
+
 /**
  * The ColorLocalisationData class is used to process the data coming from the color poller
  * An interrupt is sent to the Localisation class when a line is detected.
@@ -43,12 +45,16 @@ public class ColorLocalisationData {
 		if (lastData < 0) {
 			lastData = newVal;
 		} else {
-			difference = (newVal - lastData);
+			difference = newVal - lastData;
+			lastData = newVal;	
 			if (difference < -DIFFERENCE_THRESHOLD) {
 				lowPulse = true;
 				differenceCounter = DIFFERENCE_POINTS;
 			} else if (lowPulse && difference > DIFFERENCE_THRESHOLD) {
+				Sound.beep();
 				localisation.resumeThread();
+				lowPulse = false;
+				differenceCounter = DIFFERENCE_POINTS;
 			} else {
 				differenceCounter--;
 				if(differenceCounter < 0) {

@@ -4,6 +4,7 @@
 
 package ca.mcgill.ecse211.capturetheflag;
 
+import ca.mcgill.ecse211.capturetheflag.ColorPoller.ColorPollingState;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
 /**
@@ -62,7 +63,7 @@ public class ZiplineController {
 	 * update the odometer values accordingly and stops the motors shortly after.
 	 */
 	public void runZiplineTask() {
-		colorPoller.startPolling();
+		colorPoller.startPolling(ColorPollingState.ZIPLINING);
 		rightMotor.setSpeed(DRIVE_SPEED);
 		leftMotor.setSpeed(DRIVE_SPEED);
 		topMotor.setSpeed(PULLEY_SPEED);

@@ -59,7 +59,7 @@ public class UltrasonicPoller implements Runnable {
 			usDistance.fetchSample(usData, 0);
 			int sample = (int) (usData[0] * 100);
 			
-			if(sample > 0) {
+			if(sample > 0 && sample < 255) {
 				switch(getPollingState()) {
 				case LOCALISATION:
 					ultrasonicLocalisationData.processData(sample);
@@ -119,8 +119,10 @@ public class UltrasonicPoller implements Runnable {
 	
 	/**
 	 * Spawns a thread that starts polling and processes data accordingly to its polling state.
+	 * @param newPollingState  The state in which the poller will opperate.
 	 */
-	public void startPolling() {
+	public void startPolling(UltrasonicPollingState newPollingState) {
+		setPollingState(newPollingState);
 		new Thread(this).start();
 	}
 	

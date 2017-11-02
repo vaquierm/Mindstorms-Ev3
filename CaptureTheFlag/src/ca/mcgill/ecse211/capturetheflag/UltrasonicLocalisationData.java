@@ -4,6 +4,8 @@
 
 package ca.mcgill.ecse211.capturetheflag;
 
+import lejos.hardware.Sound;
+
 /**
  * The UltrasonoicLocationData class is used to process date from the
  * ultrasonic poller to detect edges
@@ -40,23 +42,27 @@ public class UltrasonicLocalisationData {
 			lastData = newVal;
 		} else {
 			if (!foundFirstEdge) {
-				if (lastData > EDGE_THRESHOLD && newVal < EDGE_THRESHOLD) {
+				if (lastData >= EDGE_THRESHOLD && newVal <= EDGE_THRESHOLD) {
 					fallingEdge = true;
 					foundFirstEdge = true;
+					localisation.setFallingEdge(fallingEdge);
+					lastData = -1;
 					localisation.resumeThread();
 					threadWait();
-				} else if (lastData < EDGE_THRESHOLD && newVal > EDGE_THRESHOLD) {
+				} else if (lastData <= EDGE_THRESHOLD && newVal >= EDGE_THRESHOLD) {
 					fallingEdge = false;
 					foundFirstEdge = true;
+					localisation.setFallingEdge(fallingEdge);
+					lastData = -1;
 					localisation.resumeThread();
 					threadWait();
 				}
 			} else {
-				if (fallingEdge && lastData > EDGE_THRESHOLD && newVal < EDGE_THRESHOLD) {
+				if (fallingEdge && lastData >= EDGE_THRESHOLD && newVal <= EDGE_THRESHOLD) {
 					localisation.resumeThread();
 					foundFirstEdge = false;
 					threadWait();
-				} else if (!fallingEdge && lastData < EDGE_THRESHOLD && newVal > EDGE_THRESHOLD) {
+				} else if (!fallingEdge && lastData <= EDGE_THRESHOLD && newVal >= EDGE_THRESHOLD) {
 					localisation.resumeThread();
 					foundFirstEdge = false;
 					threadWait();
@@ -77,6 +83,7 @@ public class UltrasonicLocalisationData {
 	 * Puts the thread to sleep for one second.
 	 */
 	private void threadWait() {
+		Sound.beep();
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {

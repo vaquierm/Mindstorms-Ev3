@@ -5,6 +5,7 @@
 package ca.mcgill.ecse211.capturetheflag;
 
 import lejos.hardware.Button;
+import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.TextLCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
@@ -26,15 +27,17 @@ import lejos.robotics.filter.MeanFilter;
  * 
  */
 public class MainController {
+	
+	private static final int TEAM_NUMBER = 20;
 
-	private static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("B"));
-	private static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("C"));
-	private static final EV3LargeRegulatedMotor armMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
-	private static final EV3MediumRegulatedMotor frontMotor = new EV3MediumRegulatedMotor(LocalEV3.get().getPort("D"));
+	private static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
+	private static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
+	private static final EV3LargeRegulatedMotor armMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("C"));
+	private static final EV3MediumRegulatedMotor frontMotor = new EV3MediumRegulatedMotor(LocalEV3.get().getPort("B"));
 
-	private static final Port colorHorizontalPort = LocalEV3.get().getPort("S1");
-	private static final Port colorVerticalPort = LocalEV3.get().getPort("S2");
-	private static final Port colorSidePort = LocalEV3.get().getPort("S3");
+	private static final Port colorHorizontalPort = LocalEV3.get().getPort("S2");
+	private static final Port colorVerticalPort = LocalEV3.get().getPort("S1");
+	//private static final Port colorSidePort = LocalEV3.get().getPort("S3");
 	private static final Port usPort = LocalEV3.get().getPort("S4");
 	
 	private static GameParameters gameParameters;
@@ -60,10 +63,11 @@ public class MainController {
 	private static UltrasonicNavigationData ultrasonicNavigationData;
 
 	//Environmental and robot constants
+	private static int startingCorner;
 	private static final double TILE = 30.48;
-	private static final int BOARD_SIZE = 12;
+	private static final int BOARD_SIZE = 8; //TODO change for competition
 	private static final double WHEEL_RADIUS = 2.1;
-	private static final double TRACK = 17;
+	private static final double TRACK = 10.5;
 
 	public static void main(String[] args) {		
 
@@ -80,11 +84,11 @@ public class MainController {
 		SampleProvider colorVerticalRedMean = new MeanFilter(colorVerticalRed, 7);
 		float[] colorVerticalRedData = new float[colorVerticalRedMean.sampleSize()];
 		
-		@SuppressWarnings("resource") 
+		/*@SuppressWarnings("resource") 
 		SensorModes colorSensorSide = new EV3ColorSensor(colorSidePort);
 		SampleProvider colorSideRed = colorSensorSide.getMode("Red");
 		SampleProvider colorSideRedMean = new MeanFilter(colorSideRed, 7);
-		float[] colorSideRedData = new float[colorSideRedMean.sampleSize()];
+		float[] colorSideRedData = new float[colorSideRedMean.sampleSize()];*/
 
 		@SuppressWarnings("resource") 
 		SensorModes usSensor = new EV3UltrasonicSensor(usPort);
@@ -93,31 +97,101 @@ public class MainController {
 		float[] usData = new float[meanFilterUs.sampleSize()];
 		
 		//Get the game parameters
-		gameParameters = WiFiGameParameters.getGameParameters(TILE);
+		//gameParameters = WiFiGameParameters.getGameParameters(TILE);
+		
+		/**
+		 * This is the hardcoded game parameters to not have to input them every time.
+		 */
+		while (Button.waitForAnyPress() != Button.ID_ENTER);
+		gameParameters = new GameParameters(1 , 20, //Team numbers
+	    		  3, 0, //Starting corners
+	    		  1, 1, //Color of flags
+	    		  new Coordinate(0 * TILE, 5 * TILE), //Red_LL
+	    		  new Coordinate(5 * TILE, 8 * TILE), //Red_UR
+	    		  new Coordinate(3 * TILE, 0 * TILE), //Green_LL
+	    		  new Coordinate(8 * TILE, 3 * TILE), //Green_UR
+	    		  new Coordinate(5 * TILE, 3 * TILE), //ZC_G
+	    		  new Coordinate(6 * TILE, 2 * TILE), //ZO_G
+	    		  new Coordinate(3 * TILE, 5 * TILE), //ZO_R
+	    		  new Coordinate(2 * TILE, 6 * TILE), //ZC_R
+	    		  new Coordinate(5 * TILE, 6 * TILE), //SH_LL
+	    		  new Coordinate(7 * TILE, 7 * TILE), //SH_UR
+	    		  new Coordinate(6 * TILE, 3 * TILE), //SV_LL
+	    		  new Coordinate(7 * TILE, 7 * TILE), //SV_UR
+	    		  new Coordinate(1 * TILE, 5 * TILE), //SR_LL
+	    		  new Coordinate(3 * TILE, 6 * TILE), //SR_UR
+	    		  new Coordinate(3 * TILE, 0 * TILE), //SG_LL
+	    		  new Coordinate(5 * TILE, 1 * TILE) //SG_UR
+	    		  );
+		
+		determineStartingCorner();
 		
 		final TextLCD t = LocalEV3.get().getTextLCD();
 		odometer = new Odometer(leftMotor, rightMotor, WHEEL_RADIUS, TRACK);
+		setEstimateInitialPosition();
 		Display odometryDisplay = new Display(odometer, t);
+		odometryDisplay.start();
+		new Thread(odometer).start();
 		
 		colorLocalisationData = new ColorLocalisationData();
 		ziplineLightData = new ZiplineLightData();
 		ultrasonicLocalisationData = new UltrasonicLocalisationData();
 		ultrasonicNavigationData = new UltrasonicNavigationData(rightMotor, leftMotor, TILE, BOARD_SIZE);
 		
-		colorPoller = new ColorPoller(colorVerticalRedMean, colorVerticalRedData, colorHorizontalRedMean, colorHorizontalRedData, colorSideRedMean, colorSideRedData, colorLocalisationData, ziplineLightData);
+		colorPoller = new ColorPoller(colorVerticalRedMean, colorVerticalRedData, colorHorizontalRedMean, colorHorizontalRedData,colorHorizontalRedMean, colorHorizontalRedData, /*colorSideRedMean, colorSideRedData,*/ colorLocalisationData, ziplineLightData);
 		ultrasonicPoller = new UltrasonicPoller(meanFilterUs, usData, ultrasonicLocalisationData, ultrasonicNavigationData);
 		
 		navigation = new Navigation(odometer, rightMotor, leftMotor, WHEEL_RADIUS, TRACK);
-		localisation = new Localisation(odometer, navigation, ultrasonicPoller, colorPoller, rightMotor, leftMotor, TILE, 0); //TODO startingCorner
+		localisation = new Localisation(odometer, navigation, ultrasonicPoller, colorPoller, rightMotor, leftMotor, TILE, startingCorner);
 		
 		navigationController = new NavigationController(rightMotor, leftMotor, frontMotor, odometer, navigation, ultrasonicPoller, gameParameters);
-		localisationController = new LocalisationController(localisation, navigation, TILE, 0, BOARD_SIZE); //TODO startingCorner
+		localisationController = new LocalisationController(localisation, navigation, TILE, startingCorner, BOARD_SIZE);
 		ziplineController = new ZiplineController(odometer, colorPoller, rightMotor, leftMotor, armMotor, gameParameters);
 		
-
+		localisationController.initialLocalisationRoutine();
 
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE)
 			;
 		System.exit(0);
+	}
+	
+	/**
+	 * Gets the game parameters to determine which is the starting corner of the system based
+	 * on the team number
+	 */
+	private static void determineStartingCorner() {
+		if (gameParameters.GreenTeam == TEAM_NUMBER)
+			startingCorner = gameParameters.GreenCorner;
+		else if (gameParameters.GreenTeam == TEAM_NUMBER)
+			startingCorner = gameParameters.RedCorner;
+		else
+			startingCorner = 0;
+	}
+	
+	/**
+	 * Sets the estimate initial position of the robot in the odometer depending on the
+	 * game parameters.
+	 */
+	private static void setEstimateInitialPosition() {
+		switch (startingCorner) {
+		case 0:
+			odometer.setX(20);
+			odometer.setY(20);
+			break;
+		case 1:
+			odometer.setX((BOARD_SIZE * TILE) - 20);
+			odometer.setY(20);
+			break;
+		case 2:
+			odometer.setX((BOARD_SIZE * TILE) - 20);
+			odometer.setY((BOARD_SIZE * TILE) - 20);
+			break;
+		case 3:
+			odometer.setX(20);
+			odometer.setY((BOARD_SIZE * TILE) - 20);
+			break;
+		default:
+			break;
+		}
 	}
 }
