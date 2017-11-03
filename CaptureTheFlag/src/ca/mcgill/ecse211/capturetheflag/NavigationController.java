@@ -4,6 +4,7 @@
 
 package ca.mcgill.ecse211.capturetheflag;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import ca.mcgill.ecse211.capturetheflag.UltrasonicPoller.UltrasonicPollingState;
@@ -26,7 +27,7 @@ public class NavigationController {
 	// Locks used for threading
 	private static Object stateLock = new Object();
 
-	private List<Coordinate> coordinateList;
+	private List<Coordinate> coordinateList = new LinkedList<Coordinate>();
 	private volatile boolean objectDetection = false;
 	private static NavigationState state = NavigationState.READY;
 	
@@ -43,6 +44,11 @@ public class NavigationController {
 	private EV3LargeRegulatedMotor rightMotor;
 	private EV3LargeRegulatedMotor leftMotor;
 	private EV3MediumRegulatedMotor frontMotor;
+	
+	/**
+	 * Represents the tolerated error in heading as a percentage of the distance left to travel.
+	 */
+	private static final double NAVIGATION_HEADING_ERROR_TOLERENCE = 0.05;
 
 	/**
 	 * This enumeration defines the states in which the navigation controller can be in.
@@ -104,10 +110,21 @@ public class NavigationController {
 				double x = odometer.getX();
 				double y = odometer.getY();
 
-				if (!rightMotor.isMoving() && !leftMotor.isMoving()
-						&& Math.sqrt(Math.pow(x - point.x, 2) + Math.pow(y - point.y, 2)) < 5) { 
+				if (!rightMotor.isMoving() && !leftMotor.isMoving()) { 
 					coordinateList.remove(0);
 					setNavigationState(NavigationState.READY);
+				} else {
+					/*double nextHeadingRadError = odometer.getTheta() - Math.atan2(point.x - x, point.y - y);
+					if (nextHeadingRadError < 0)
+						nextHeadingRadError += 2 * Math.PI;
+					double distance = Math.sqrt(Math.pow(x - point.x, 2) + Math.pow(y - point.y, 2));
+					System.out.println("distanca" + distance);
+					System.out.println("headingerror" +nextHeadingRadError);
+					if (distance * nextHeadingRadError < distance * NAVIGATION_HEADING_ERROR_TOLERENCE) {
+						rightMotor.stop(true);
+						leftMotor.stop();
+						navigation.travelTo(point.x, point.y, true);
+					}*/
 				}
 
 				break;
@@ -139,7 +156,6 @@ public class NavigationController {
 	 * @param wayPoints List of Coordinates to be modified
 	 */
 	private void changeToRectangularPath(List<Coordinate> wayPoints) {
-		// TODO
 		double midx = (gameParameters.SV_UR.x + gameParameters.SV_LL.x) / 2;
 		double midy = (gameParameters.SH_UR.x + gameParameters.SH_LL.x) / 2;
 		Coordinate bridgemid = new Coordinate(midx, midy);
@@ -165,6 +181,7 @@ public class NavigationController {
                 		}    	
                 		else{		
                 			wayPoints.add(i+1,bridgemid);
+                			i = i - 1;
                 		}             		
                 	}
                 }
@@ -183,6 +200,7 @@ public class NavigationController {
                 		}    	
                 		else{		
                 			wayPoints.add(i+1, bridgemid);
+                			i = i - 1;
                 		}             		
                 	}
                 }
@@ -190,6 +208,7 @@ public class NavigationController {
                 else 
                 {
                 	wayPoints.add(i+1, bridgemid);
+                	i = i - 1;
 				}
                 
 			}
@@ -232,7 +251,7 @@ public class NavigationController {
 	
 	/**
 	 * Sets a new list of wayPoints to travel to.
-	 * @param coordinates
+	 * @param coordinates  New list of wayPoits
 	 */
 	public void setCoordinateList(List<Coordinate> coordinates) {
 		this.coordinateList = coordinates;
@@ -240,7 +259,7 @@ public class NavigationController {
 	
 	/**
 	 * Adds a way point at the end of the current list.
-	 * @param newPoint
+	 * @param newPoint  Coordinate to be added to the list
 	 */
 	public void addWayPoint(Coordinate newPoint) {
 		coordinateList.add(newPoint);
@@ -249,7 +268,7 @@ public class NavigationController {
 	/**
 	 * This method rotates the front motor where the sensors are attached to a specific angle
 	 * and returns the thread immediately
-	 * @param angle
+	 * @param angle  Angle to which the front motor has to be turned
 	 */
 	public void turnFrontMotor(int angle) {
 		frontMotor.rotateTo(angle, true);
@@ -257,7 +276,7 @@ public class NavigationController {
 	
 	/**
 	 * This method should be called before running the navigation to determine of the system should be looking for objects to avoid or not.
-	 * @param b
+	 * @param b  Navigation will avoid objects if true
 	 */
 	public void setObjectAvoidance(boolean b) {
 		objectDetection = b;
@@ -265,7 +284,7 @@ public class NavigationController {
 
 	/**
 	 * Returns the current navigation state of the robot.
-	 * @return
+	 * @return  The current navigation state
 	 */
 	public static NavigationState getNavigationState() {
 		synchronized (stateLock) {
@@ -275,7 +294,7 @@ public class NavigationController {
 	
 	/**
 	 * Sets the navigationState of the robot.
-	 * @param navState
+	 * @param navState  The new navigation state to be set
 	 */
 	public static void setNavigationState(NavigationState navState) {
 		synchronized (stateLock) {

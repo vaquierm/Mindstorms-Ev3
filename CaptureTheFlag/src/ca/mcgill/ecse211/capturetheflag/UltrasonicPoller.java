@@ -59,10 +59,11 @@ public class UltrasonicPoller implements Runnable {
 			usDistance.fetchSample(usData, 0);
 			int sample = (int) (usData[0] * 100);
 			
-			if(sample > 0 && sample < 255) {
+			if(sample > 0) {
 				switch(getPollingState()) {
 				case LOCALISATION:
-					ultrasonicLocalisationData.processData(sample);
+					if(sample < 255)
+						ultrasonicLocalisationData.processData(sample);
 					break;
 				case NAVIGATION:
 					ultrasonicNavigationData.processData(sample);

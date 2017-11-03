@@ -96,6 +96,8 @@ public class MainController {
 		SampleProvider meanFilterUs = new MeanFilter(usDistance, 7);
 		float[] usData = new float[meanFilterUs.sampleSize()];
 		
+		final TextLCD t = LocalEV3.get().getTextLCD();
+		t.drawString("  READY  ", 0, 0);
 		//Get the game parameters
 		//gameParameters = WiFiGameParameters.getGameParameters(TILE);
 		
@@ -126,7 +128,6 @@ public class MainController {
 		
 		determineStartingCorner();
 		
-		final TextLCD t = LocalEV3.get().getTextLCD();
 		odometer = new Odometer(leftMotor, rightMotor, WHEEL_RADIUS, TRACK);
 		setEstimateInitialPosition();
 		Display odometryDisplay = new Display(odometer, t);
@@ -148,10 +149,23 @@ public class MainController {
 		localisationController = new LocalisationController(localisation, navigation, TILE, startingCorner, BOARD_SIZE);
 		ziplineController = new ZiplineController(odometer, colorPoller, rightMotor, leftMotor, armMotor, gameParameters);
 		
+		
+		/*
+		 * Here is the flow of tasks to run.
+		 */
 		localisationController.initialLocalisationRoutine();
+		navigation.travelTo(TILE, TILE, false);
+		navigation.turnTo(0);
+		while (Button.waitForAnyPress() != Button.ID_ENTER);
+		navigationController.addWayPoint(new Coordinate(1*TILE, 3*TILE));
+		navigationController.addWayPoint(new Coordinate(2*TILE, 2*TILE));
+		navigationController.addWayPoint(new Coordinate(2*TILE, 1*TILE));
+		navigationController.addWayPoint(new Coordinate(3*TILE, 3*TILE));
+		navigationController.setObjectAvoidance(false);
+		navigationController.runNavigationTask();
+		navigation.turnTo(0);
 
-		while (Button.waitForAnyPress() != Button.ID_ESCAPE)
-			;
+		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		System.exit(0);
 	}
 	
@@ -193,5 +207,15 @@ public class MainController {
 		default:
 			break;
 		}
+	}
+	
+	/**
+	 * This method is used as a test to determine if the wheelbase of the robot is set to the right value
+	 */
+	private static void wheelbaseTestRoutine() {
+		navigation.turnTo(90);
+		navigation.turnTo(180);
+		navigation.turnTo(270);
+		navigation.turnTo(0);
 	}
 }

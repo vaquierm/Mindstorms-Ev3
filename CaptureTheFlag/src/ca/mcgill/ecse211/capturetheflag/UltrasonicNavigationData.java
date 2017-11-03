@@ -17,7 +17,7 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
 public class UltrasonicNavigationData {
 	
-	private static final int OBSTACLE_THRESHOLD = 18;
+	private static final int OBSTACLE_THRESHOLD = 10;
 	
 	
 	//Motors
@@ -79,9 +79,9 @@ public class UltrasonicNavigationData {
 	    	  if(distance < OBSTACLE_THRESHOLD) { //an object was detected in front of  the robot, turn sensor towards the wall as the robot rotates
 	        	  followingLeftWall = whichDirectionInterruption();
 	    		  if (followingLeftWall) {
-	    			  navigationController.turnFrontMotor(-290);
-	    		  } else {
 	    			  navigationController.turnFrontMotor(70);
+	    		  } else {
+	    			  navigationController.turnFrontMotor(-70);
 	    		  }
 	        	  navigation.interruptNav(followingLeftWall);
 	        	  NavigationController.setNavigationState(NavigationState.AVOIDING);
