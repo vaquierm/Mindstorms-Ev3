@@ -68,6 +68,7 @@ public class UltrasonicLocalisationData {
 					threadWait();
 				}
 			}
+			lastData = newVal;
 		}
 	}
 	

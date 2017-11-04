@@ -67,7 +67,7 @@ public class MainController {
 	private static final double TILE = 30.48;
 	private static final int BOARD_SIZE = 8; //TODO change for competition
 	private static final double WHEEL_RADIUS = 2.1;
-	private static final double TRACK = 10.5;
+	private static final double TRACK = 10.2;
 
 	public static void main(String[] args) {		
 
@@ -154,7 +154,7 @@ public class MainController {
 		 * Here is the flow of tasks to run.
 		 */
 		localisationController.initialLocalisationRoutine();
-		navigation.travelTo(TILE, TILE, false);
+		localisationController.navigateToInitialIntersection();
 		navigation.turnTo(0);
 		while (Button.waitForAnyPress() != Button.ID_ENTER);
 		navigationController.addWayPoint(new Coordinate(1*TILE, 3*TILE));

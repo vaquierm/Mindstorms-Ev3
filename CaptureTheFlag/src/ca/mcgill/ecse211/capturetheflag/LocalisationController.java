@@ -54,7 +54,7 @@ public class LocalisationController {
 	/**
 	 * Makes the robot navigate to the closest intersection point from its starting position.
 	 */
-	private void navigateToInitialIntersection() {
+	public void navigateToInitialIntersection() {
 		switch(startingCorner) {
 		case 0:
 			navigation.travelTo(tile, tile, false);

@@ -46,9 +46,9 @@ public class NavigationController {
 	private EV3MediumRegulatedMotor frontMotor;
 	
 	/**
-	 * Represents the tolerated error in heading as a percentage of the distance left to travel.
+	 * Represents the tolerated error in cm.
 	 */
-	private static final double NAVIGATION_HEADING_ERROR_TOLERENCE = 0.05;
+	private static final double NAVIGATION_HEADING_ERROR_TOLERENCE = 3;
 
 	/**
 	 * This enumeration defines the states in which the navigation controller can be in.
@@ -114,17 +114,17 @@ public class NavigationController {
 					coordinateList.remove(0);
 					setNavigationState(NavigationState.READY);
 				} else {
-					/*double nextHeadingRadError = odometer.getTheta() - Math.atan2(point.x - x, point.y - y);
-					if (nextHeadingRadError < 0)
-						nextHeadingRadError += 2 * Math.PI;
+					double nextHeadingError = odometer.getThetaDegrees() - Math.toDegrees(Math.atan2(point.x - x, point.y - y));
+					if (nextHeadingError < 0)
+						nextHeadingError += 360;
 					double distance = Math.sqrt(Math.pow(x - point.x, 2) + Math.pow(y - point.y, 2));
 					System.out.println("distanca" + distance);
-					System.out.println("headingerror" +nextHeadingRadError);
-					if (distance * nextHeadingRadError < distance * NAVIGATION_HEADING_ERROR_TOLERENCE) {
+					System.out.println("headingerror" +nextHeadingError);
+					if (distance * nextHeadingError < NAVIGATION_HEADING_ERROR_TOLERENCE) {
 						rightMotor.stop(true);
 						leftMotor.stop();
 						navigation.travelTo(point.x, point.y, true);
-					}*/
+					}
 				}
 
 				break;
