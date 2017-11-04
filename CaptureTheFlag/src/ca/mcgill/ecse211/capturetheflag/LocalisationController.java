@@ -77,7 +77,7 @@ public class LocalisationController {
 	 * Performs a localisation routine with the assumption that the robot's center of rotation in on or close to the intersection
 	 * of two line
 	 */
-	private void colorLocalisationRoutine() {
+	public void colorLocalisationRoutine() {
 		localisation.colorLocalisation();
 	}
 	

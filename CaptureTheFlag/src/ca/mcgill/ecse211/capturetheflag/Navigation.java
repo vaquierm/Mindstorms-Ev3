@@ -19,8 +19,8 @@ public class Navigation {
 	private static final int FORWARD_SPEED = 150;
 	private static final int ROTATE_SPEED = 120;
 
-	private static final int SLOW_ACCEL = 250;
-	private static final int FAST_ACCEL = 500;
+	private static final int SLOW_ACCEL = 200;
+	private static final int FAST_ACCEL = 300;
 	
 	private double interruptedTheta = -1;
 	
@@ -121,6 +121,8 @@ public class Navigation {
 	public void forward(double distance, boolean returnThread) {
 		leftMotor.setSpeed(FORWARD_SPEED);
 	    rightMotor.setSpeed(FORWARD_SPEED);
+	    rightMotor.setAcceleration(FAST_ACCEL);
+		leftMotor.setAcceleration(FAST_ACCEL);
 		leftMotor.rotate(convertDistance(WHEEL_RADIUS, distance), true);
 	    rightMotor.rotate(convertDistance(WHEEL_RADIUS, distance), returnThread);
 	}

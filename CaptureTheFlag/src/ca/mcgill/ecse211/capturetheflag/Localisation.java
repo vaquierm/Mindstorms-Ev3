@@ -19,6 +19,8 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor;
 public class Localisation {
 	
 	private static final int ROTATION_SPEED = 90;
+	private static final int FAST_ACCEL = 3000;
+	private static final int COLOR_ANGLE_BIAS = 12;
 	private static final double COLOR_SENSOR_OFFSET = 12.5;
 	
 	private boolean fallingEdge = false;
@@ -146,15 +148,21 @@ public class Localisation {
 		pauseThread();
 		
 		lines[referenceHeadingCode] = odometer.getThetaDegrees();	//Once a line has been found add to lines array
-		leftMotor.stop(true);	//Four lines have now been detected. Stop spinning
-		rightMotor.stop();
 		
+		rightMotor.setAcceleration(FAST_ACCEL);
+		leftMotor.setAcceleration(FAST_ACCEL);
 		colorPoller.stopPolling();	//No longer need color sensor. Turn off.
+		double newT = computeThetaColor(referenceHeadingCode);
+		newT -= COLOR_ANGLE_BIAS;
+		if (newT < 0) {
+			newT += 360;
+		}
+		odometer.setTheta(Math.toRadians(newT));
 		odometer.setX(computeX(currentX));	//Use ComputeX() and ComputeY() to correct odometer's position
 		odometer.setY(computeY(currentY));
-		double newT = computeThetaColor(referenceHeadingCode);
-
-		odometer.setTheta(Math.toRadians(newT));
+		
+		leftMotor.stop(true);	//Four lines have now been detected. Stop spinning
+		rightMotor.stop();
 	}
 
 

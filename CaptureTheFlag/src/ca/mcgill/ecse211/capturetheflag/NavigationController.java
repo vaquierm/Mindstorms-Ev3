@@ -118,8 +118,6 @@ public class NavigationController {
 					if (nextHeadingError < 0)
 						nextHeadingError += 360;
 					double distance = Math.sqrt(Math.pow(x - point.x, 2) + Math.pow(y - point.y, 2));
-					System.out.println("distanca" + distance);
-					System.out.println("headingerror" +nextHeadingError);
 					if (distance * nextHeadingError < NAVIGATION_HEADING_ERROR_TOLERENCE) {
 						rightMotor.stop(true);
 						leftMotor.stop();

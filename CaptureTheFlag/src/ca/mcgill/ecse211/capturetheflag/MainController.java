@@ -158,11 +158,13 @@ public class MainController {
 		navigation.turnTo(0);
 		while (Button.waitForAnyPress() != Button.ID_ENTER);
 		navigationController.addWayPoint(new Coordinate(1*TILE, 3*TILE));
-		navigationController.addWayPoint(new Coordinate(2*TILE, 2*TILE));
-		navigationController.addWayPoint(new Coordinate(2*TILE, 1*TILE));
+		//navigationController.addWayPoint(new Coordinate(2*TILE, 2*TILE));
+		//navigationController.addWayPoint(new Coordinate(2*TILE, 1*TILE));
 		navigationController.addWayPoint(new Coordinate(3*TILE, 2*TILE));
 		navigationController.setObjectAvoidance(false);
 		navigationController.runNavigationTask();
+		localisationController.colorLocalisationRoutine();
+		navigation.travelTo(3*TILE, 2*TILE, false);
 		navigation.turnTo(0);
 
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
