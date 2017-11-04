@@ -160,7 +160,7 @@ public class MainController {
 		navigationController.addWayPoint(new Coordinate(1*TILE, 3*TILE));
 		navigationController.addWayPoint(new Coordinate(2*TILE, 2*TILE));
 		navigationController.addWayPoint(new Coordinate(2*TILE, 1*TILE));
-		navigationController.addWayPoint(new Coordinate(3*TILE, 3*TILE));
+		navigationController.addWayPoint(new Coordinate(3*TILE, 2*TILE));
 		navigationController.setObjectAvoidance(false);
 		navigationController.runNavigationTask();
 		navigation.turnTo(0);
