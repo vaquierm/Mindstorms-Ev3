@@ -71,9 +71,16 @@ public class ZiplineController {
 		leftMotor.forward();
 		topMotor.forward();
 		pauseThread();
+		rightMotor.stop(true);
+		leftMotor.stop(true);
+		pauseThread();
+		topMotor.stop(true);
+		pauseThread();
 		colorPoller.stopPolling();
-		
-		//TODO Update the odometer depending on where the end of the zipline is.
+		topMotor.rotate(700, false);
+		odometer.setTheta(Math.atan2(gameParameters.ZC_R.x - gameParameters.ZO_R.x, gameParameters.ZC_R.y - gameParameters.ZO_R.y));
+		odometer.setX(gameParameters.ZC_R.x);
+		odometer.setY(gameParameters.ZC_R.y);
 	}
 
 	
