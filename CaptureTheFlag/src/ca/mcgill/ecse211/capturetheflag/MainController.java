@@ -157,11 +157,12 @@ public class MainController {
 		 */
 		localisationController.initialLocalisationRoutine();
 		localisationController.navigateToInitialIntersection();
-		navigation.travelTo(3 * TILE, 1 * TILE , false);
+		navigation.travelTo(2 * TILE, 1 * TILE , false);
 		localisationController.colorLocalisationRoutine();
-		navigation.travelTo(3 * TILE, 1 * TILE , false);
+		navigation.travelTo(2 * TILE, 1 * TILE , false);
 		navigation.turnTo(0);
 		ziplineController.runZiplineTask();
+		odometer.setTheta(0);
 		navigation.travelTo(gameParameters.ZC_R.x , gameParameters.ZC_R.y + TILE , false);
 		localisationController.colorLocalisationRoutine();
 		navigation.travelTo(gameParameters.ZC_R.x , gameParameters.ZC_R.y + TILE , false);

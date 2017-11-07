@@ -60,6 +60,7 @@ public class UltrasonicPoller implements Runnable {
 			int sample = (int) (usData[0] * 100);
 			
 			if(sample > 0) {
+				System.out.println(sample);
 				switch(getPollingState()) {
 				case LOCALISATION:
 					if(sample < 255)
