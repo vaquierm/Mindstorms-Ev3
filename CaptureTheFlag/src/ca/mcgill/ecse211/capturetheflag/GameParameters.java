@@ -162,10 +162,10 @@ public class GameParameters {
 		this.Red_UR = Red_UR;
 		this.Green_LL = Green_LL;
 		this.Green_UR = Green_UR;
+		this.ZC_R = ZC_R;
+		this.ZO_R = ZO_R;
 		this.ZC_G = ZC_G;
 		this.ZO_G = ZO_G;
-		this.ZC_R = ZC_G;
-		this.ZO_R = ZO_R;
 		this.SH_LL = SH_LL;
 		this.SH_UR = SH_UR;
 		this.SV_LL = SV_LL;

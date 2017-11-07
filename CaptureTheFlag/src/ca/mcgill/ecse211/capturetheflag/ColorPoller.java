@@ -26,6 +26,7 @@ public class ColorPoller implements Runnable {
 	//data processing classes
 	private ColorLocalisationData colorLocalisationData;
 	private ZiplineLightData ziplineLightData;
+	private BlockSearchingData blockSearchingData;
 	
 	//Pollers
 	private SampleProvider colorRedFront;
@@ -39,6 +40,7 @@ public class ColorPoller implements Runnable {
 	 * Creates a CollorPoller object.
 	 * @param colorLocalisationData  Data processing instance for color localisation
 	 * @param ziplineLightData  Data processing instance for zipline landing
+	 * @param blockSearchingData  Data processing instance for confirming the color of the block
 	 * @param colorRedBack  Back color sensor
 	 * @param colorRedDataBack  Back color sensor data fetching array
 	 * @param colorRedFront  Front color sensor
@@ -47,7 +49,7 @@ public class ColorPoller implements Runnable {
 	 * @param colorRedDataSide  Side color sensor data fetching array
 	 */
 	public ColorPoller(SampleProvider colorRedBack, float[] colorRedDataBack, SampleProvider colorRedFront, float[] colorRedDataFront, SampleProvider colorRedSide, float[] colorRedDataSide,
-			ColorLocalisationData colorLocalisationData, ZiplineLightData ziplineLightData) {
+			ColorLocalisationData colorLocalisationData, ZiplineLightData ziplineLightData, BlockSearchingData blockSearchingData) {
 		this.colorRedFront = colorRedFront;
 		this.colorRedDataFront = colorRedDataFront;
 		this.colorRedBack = colorRedBack;
@@ -57,6 +59,7 @@ public class ColorPoller implements Runnable {
 		
 		this.colorLocalisationData = colorLocalisationData;
 		this.ziplineLightData = ziplineLightData;
+		this.blockSearchingData = blockSearchingData;
 	}
 	
 	/**
@@ -95,10 +98,8 @@ public class ColorPoller implements Runnable {
 	 * Polls the front Color sensor and send the data to the blockColorData association to be processed
 	 */
 	private void processBlockSearching() {
-		// TODO 
-		//colorRed.fetchSample(colorRedData, 0);
-		//int sample = (int) (colorRedData[0] * 100);
-		
+		colorRedFront.fetchSample(colorRedDataFront, 0);
+		blockSearchingData.processData(colorRedDataBack);
 	}
 
 	/**
@@ -142,6 +143,14 @@ public class ColorPoller implements Runnable {
 	 */
 	public ZiplineLightData getZiplineLightData() {
 		return ziplineLightData;
+	}
+	
+	/**
+	 * This method returns the association to the BlockSearchingData instance
+	 * @return  The BlockSearchingData association
+	 */
+	public BlockSearchingData getBlockSearchingData() {
+		return blockSearchingData;
 	}
 	
 	/**

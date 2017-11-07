@@ -20,7 +20,7 @@ public class Localisation {
 	
 	private static final int ROTATION_SPEED = 90;
 	private static final int FAST_ACCEL = 3000;
-	private static final int COLOR_ANGLE_BIAS = 12;
+	private static final double COLOR_ANGLE_BIAS = 12.5;
 	private static final double COLOR_SENSOR_OFFSET = 12.5;
 	
 	private boolean fallingEdge = false;
@@ -120,10 +120,10 @@ public class Localisation {
 			referenceHeadingCode = 2;
 			break;
 		case 225:
-			referenceHeadingCode = 0;
+			referenceHeadingCode = 1;
 			break;
 		case 315:
-			referenceHeadingCode = 1;
+			referenceHeadingCode = 0;
 		}
 		
 		
@@ -148,7 +148,6 @@ public class Localisation {
 		pauseThread();
 		
 		lines[referenceHeadingCode] = odometer.getThetaDegrees();	//Once a line has been found add to lines array
-		
 		rightMotor.setAcceleration(FAST_ACCEL);
 		leftMotor.setAcceleration(FAST_ACCEL);
 		colorPoller.stopPolling();	//No longer need color sensor. Turn off.
@@ -160,7 +159,6 @@ public class Localisation {
 		odometer.setTheta(Math.toRadians(newT));
 		odometer.setX(computeX(currentX));	//Use ComputeX() and ComputeY() to correct odometer's position
 		odometer.setY(computeY(currentY));
-		
 		leftMotor.stop(true);	//Four lines have now been detected. Stop spinning
 		rightMotor.stop();
 	}
@@ -228,14 +226,14 @@ public class Localisation {
 				delta /= 2;
 				out = 180 - delta;
 				break;
-			case 0:
+			case 1:
 				delta = lines[1] - lines[3];
 				if(delta < 0)
 					delta += 360;
 				delta /= 2;
 				out = 180 + delta;
 				break;
-			case 1:
+			case 0:
 				delta = lines[0] - lines[2];
 				if(delta < 0)
 					delta += 360;

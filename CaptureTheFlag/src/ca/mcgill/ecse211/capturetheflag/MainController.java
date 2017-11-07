@@ -50,7 +50,7 @@ public class MainController {
 	private static NavigationController navigationController;
 	private static LocalisationController localisationController;
 	private static ZiplineController ziplineController;
-	//	private static final FlagSearchingController flagSearchingController;
+	private static BlockSearchingController blockSearchingController;
 	
 	//Pollers
 	private static UltrasonicPoller ultrasonicPoller;
@@ -61,6 +61,7 @@ public class MainController {
 	private static ZiplineLightData ziplineLightData;
 	private static UltrasonicLocalisationData ultrasonicLocalisationData;
 	private static UltrasonicNavigationData ultrasonicNavigationData;
+	private static BlockSearchingData blockSearchingData;
 
 	//Environmental and robot constants
 	private static int startingCorner;
@@ -74,7 +75,7 @@ public class MainController {
 		//Instantiate sensors
 		@SuppressWarnings("resource") 
 		SensorModes colorSensorHorizontal = new EV3ColorSensor(colorHorizontalPort);
-		SampleProvider colorHorizontalRed = colorSensorHorizontal.getMode("Red");
+		SampleProvider colorHorizontalRed = colorSensorHorizontal.getMode("RGB");
 		SampleProvider colorHorizontalRedMean = new MeanFilter(colorHorizontalRed, 7);
 		float[] colorHorizontalRedData = new float[colorHorizontalRedMean.sampleSize()];
 		
@@ -112,10 +113,10 @@ public class MainController {
 	    		  new Coordinate(5 * TILE, 8 * TILE), //Red_UR
 	    		  new Coordinate(3 * TILE, 0 * TILE), //Green_LL
 	    		  new Coordinate(8 * TILE, 3 * TILE), //Green_UR
+	    		  new Coordinate(3 * TILE, 5 * TILE), //ZC_R
+	    		  new Coordinate(2 * TILE, 6 * TILE), //ZO_R
 	    		  new Coordinate(5 * TILE, 3 * TILE), //ZC_G
 	    		  new Coordinate(6 * TILE, 2 * TILE), //ZO_G
-	    		  new Coordinate(3 * TILE, 5 * TILE), //ZO_R
-	    		  new Coordinate(2 * TILE, 6 * TILE), //ZC_R
 	    		  new Coordinate(5 * TILE, 6 * TILE), //SH_LL
 	    		  new Coordinate(7 * TILE, 7 * TILE), //SH_UR
 	    		  new Coordinate(6 * TILE, 3 * TILE), //SV_LL
@@ -138,8 +139,9 @@ public class MainController {
 		ziplineLightData = new ZiplineLightData();
 		ultrasonicLocalisationData = new UltrasonicLocalisationData();
 		ultrasonicNavigationData = new UltrasonicNavigationData(rightMotor, leftMotor, TILE, BOARD_SIZE);
+		blockSearchingData = new BlockSearchingData(gameParameters);
 		
-		colorPoller = new ColorPoller(colorVerticalRedMean, colorVerticalRedData, colorHorizontalRedMean, colorHorizontalRedData,colorHorizontalRedMean, colorHorizontalRedData, /*colorSideRedMean, colorSideRedData,*/ colorLocalisationData, ziplineLightData);
+		colorPoller = new ColorPoller(colorVerticalRedMean, colorVerticalRedData, colorHorizontalRedMean, colorHorizontalRedData,colorHorizontalRedMean, colorHorizontalRedData, /*colorSideRedMean, colorSideRedData,*/ colorLocalisationData, ziplineLightData, blockSearchingData);
 		ultrasonicPoller = new UltrasonicPoller(meanFilterUs, usData, ultrasonicLocalisationData, ultrasonicNavigationData);
 		
 		navigation = new Navigation(odometer, rightMotor, leftMotor, WHEEL_RADIUS, TRACK);
@@ -155,23 +157,16 @@ public class MainController {
 		 */
 		localisationController.initialLocalisationRoutine();
 		localisationController.navigateToInitialIntersection();
-		navigation.turnTo(0);
-		while (Button.waitForAnyPress() != Button.ID_ENTER);
-		//navigationController.addWayPoint(new Coordinate(1*TILE, 3*TILE));
-		//navigationController.addWayPoint(new Coordinate(2*TILE, 2*TILE));
-		//navigationController.addWayPoint(new Coordinate(2*TILE, 1*TILE));
-		//navigationController.addWayPoint(new Coordinate(3*TILE, 2*TILE));
-		//navigationController.setObjectAvoidance(false);
-		//navigationController.runNavigationTask();
-		//localisationController.colorLocalisationRoutine();
-		//navigation.travelTo(3*TILE, 2*TILE, false);
-		//navigation.turnTo(0);
-		ziplineController.runZiplineTask();
-		navigation.travelTo(gameParameters.ZC_R.x, gameParameters.ZC_R.y, false);
+		navigation.travelTo(3 * TILE, 1 * TILE , false);
 		localisationController.colorLocalisationRoutine();
-		navigation.travelTo(gameParameters.ZC_R.x, gameParameters.ZC_R.y, false);
+		navigation.travelTo(3 * TILE, 1 * TILE , false);
 		navigation.turnTo(0);
-
+		ziplineController.runZiplineTask();
+		navigation.travelTo(gameParameters.ZC_R.x , gameParameters.ZC_R.y + TILE , false);
+		localisationController.colorLocalisationRoutine();
+		navigation.travelTo(gameParameters.ZC_R.x , gameParameters.ZC_R.y + TILE , false);
+		navigation.turnTo(0);
+		
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		System.exit(0);
 	}

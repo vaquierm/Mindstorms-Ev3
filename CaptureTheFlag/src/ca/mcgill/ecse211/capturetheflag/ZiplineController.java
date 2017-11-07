@@ -23,6 +23,10 @@ public class ZiplineController {
 	
 	private static final int DRIVE_SPEED = 200;
 	private static final int PULLEY_SPEED = 200;
+	private static final int PULLEY__FAST_SPEED = 300;
+	private static final int PULLEY_FAST_ACCEL = 3000;
+	private static final int PULLEY_SLOW_ACCEL = 200;
+	
 	
 	private GameParameters gameParameters;
 	
@@ -67,18 +71,21 @@ public class ZiplineController {
 		rightMotor.setSpeed(DRIVE_SPEED);
 		leftMotor.setSpeed(DRIVE_SPEED);
 		topMotor.setSpeed(PULLEY_SPEED);
+		topMotor.setAcceleration(PULLEY_FAST_ACCEL);
 		rightMotor.forward();
 		leftMotor.forward();
 		topMotor.forward();
 		pauseThread();
 		rightMotor.stop(true);
 		leftMotor.stop(true);
+		topMotor.setAcceleration(PULLEY_SLOW_ACCEL);
+		topMotor.setSpeed(PULLEY__FAST_SPEED);
 		pauseThread();
+		topMotor.setSpeed(PULLEY_SPEED);
 		topMotor.stop(true);
-		pauseThread();
 		colorPoller.stopPolling();
-		topMotor.rotate(700, false);
-		odometer.setTheta(Math.atan2(gameParameters.ZC_R.x - gameParameters.ZO_R.x, gameParameters.ZC_R.y - gameParameters.ZO_R.y));
+		topMotor.rotate(600, false);
+		odometer.setTheta(Math.atan2(gameParameters.ZO_R.x - gameParameters.ZC_R.x, gameParameters.ZO_R.y - gameParameters.ZC_R.y));
 		odometer.setX(gameParameters.ZC_R.x);
 		odometer.setY(gameParameters.ZC_R.y);
 	}
