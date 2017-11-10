@@ -5,6 +5,8 @@
 package ca.mcgill.ecse211.capturetheflag;
 
 import lejos.robotics.SampleProvider;
+import lejos.utility.Timer;
+import lejos.utility.TimerListener;
 
 /**
  * The ColorPoller class is used to periodically poll one or multiple color sensors
@@ -14,11 +16,7 @@ import lejos.robotics.SampleProvider;
  *
  */
 
-public class ColorPoller implements Runnable {
-	
-	private volatile boolean polling = false;
-	
-	private static final int POLLING_PERIOD = 10;
+public class ColorPoller implements Runnable, TimerListener {
 	
 	private ColorPollingState state = ColorPollingState.LOCALISATION;
 	private Object stateLock = new Object();
@@ -35,6 +33,13 @@ public class ColorPoller implements Runnable {
 	private float[] colorRedDataBack;
 	private SampleProvider colorRedSide;
 	private float[] colorRedDataSide;
+	
+	//timer and synchronization
+	private Timer timer = null;
+	private volatile boolean polling = false;
+	private static final int POLLING_PERIOD = 10;
+	private boolean timerMode;
+	private boolean running = false;
 	
 	/**
 	 * Creates a CollorPoller object.
@@ -70,20 +75,7 @@ public class ColorPoller implements Runnable {
 		polling = true;
 		while (polling) {
 			correctionStart = System.currentTimeMillis();
-
-			switch(getPollingState()) {
-			case LOCALISATION:
-				processLocalisation();
-				break;
-			case ZIPLINING:
-				processZiplining();
-				break;
-			case BLOCK_SEARCHING:
-				processBlockSearching();
-				break;
-			}
-
-
+			colorPollerProcess();
 			correctionEnd = System.currentTimeMillis();
 			if (correctionEnd - correctionStart < POLLING_PERIOD) {
 				try {
@@ -95,11 +87,35 @@ public class ColorPoller implements Runnable {
 	}
 	
 	/**
+	 * Interrupt service routine called when the poller is running in timer mode.
+	 */
+	public void timedOut() {
+		colorPollerProcess();
+	}
+	
+	/**
+	 * holds the logic of one iteration of the color poller.
+	 */
+	private void colorPollerProcess() {
+		switch(getPollingState()) {
+		case LOCALISATION:
+			processLocalisation();
+			break;
+		case ZIPLINING:
+			processZiplining();
+			break;
+		case BLOCK_SEARCHING:
+			processBlockSearching();
+			break;
+		}
+	}
+	
+	/**
 	 * Polls the front Color sensor and send the data to the blockColorData association to be processed
 	 */
 	private void processBlockSearching() {
 		colorRedFront.fetchSample(colorRedDataFront, 0);
-		blockSearchingData.processData(colorRedDataBack);
+		blockSearchingData.processData(colorRedDataFront);
 	}
 
 	/**
@@ -167,16 +183,50 @@ public class ColorPoller implements Runnable {
 	 * This method can be will spawn a new thread and start the polling
 	 */
 	public void startPolling(ColorPollingState state) {
-		setPollingState(state);
-		new Thread(this).start();
+		if (!running) {
+			setPollingState(state);
+			new Thread(this).start();
+			timerMode = false;
+			running = true;
+		} else if (running && timerMode) {
+			stopPolling();
+			startPolling(state);
+		}
+	}
+	
+	/**
+	 * This method creates a timer and starts the polling process of the light sensor.
+	 * @param state 
+	 */
+	public void startPollingTimer(ColorPollingState state) {
+		if(!running) {
+			if(timer == null) {
+				timer = new Timer(POLLING_PERIOD, this);
+			}
+			setPollingState(state);
+			timer.start();
+			timerMode = true;
+			running = true;
+		} else if (running && !timerMode) {
+			stopPolling();
+			startPollingTimer(state);
+		}
 	}
 	
 	/**
 	 * This method will stop the polling of the poller thread and will let it terminate itself.
 	 */
 	public void stopPolling() {
-		polling = false;
+		if(running) {
+			if(timerMode) {
+				timer.stop();
+			} else {
+				polling = false;
+			}
+			running = false;
+		}
 	}
+	
 	
 	/**
 	 * This enumeration defines the states in which the ColorPoller can be in.

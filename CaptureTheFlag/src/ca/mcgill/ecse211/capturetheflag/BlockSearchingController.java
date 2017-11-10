@@ -4,6 +4,8 @@
 
 package ca.mcgill.ecse211.capturetheflag;
 
+import ca.mcgill.ecse211.capturetheflag.ColorPoller.ColorPollingState;
+
 /**
  * BlockSearchingController is the subtask involving finding a block of a specific
  * Color in a specified search area
@@ -34,6 +36,7 @@ public class BlockSearchingController {
 	 */
 	public void runBlockSearchingTask() {
 		//TODO this is the method that contains the logic for block searching
+		colorPoller.startPolling(ColorPollingState.BLOCK_SEARCHING);
 	}
 
 }

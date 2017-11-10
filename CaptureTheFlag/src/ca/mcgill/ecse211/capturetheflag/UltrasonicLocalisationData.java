@@ -4,6 +4,8 @@
 
 package ca.mcgill.ecse211.capturetheflag;
 
+import java.util.Arrays;
+
 import lejos.hardware.Sound;
 
 /**
@@ -21,14 +23,18 @@ public class UltrasonicLocalisationData {
 	private boolean fallingEdge = false;
 	private boolean foundFirstEdge = false;
 	
-	private int lastData = -1;
-	
+	private int[] samplePoints;
+	private double lastAverage = -1;
+	private static final int SAMPLE_POINTS = 5;
+	private int counter = 0;
 	private static final int EDGE_THRESHOLD = 50;
 	
 	/**
 	 * Constructs an UltrasonicLocalisationData object.
 	 */
 	public UltrasonicLocalisationData() {
+		samplePoints = new int[SAMPLE_POINTS];
+		Arrays.fill(samplePoints, -1);
 	}
 	
 	/**
@@ -38,38 +44,46 @@ public class UltrasonicLocalisationData {
 	 * @param newVal  New value read from the Ultrasonic sensor
 	 */
 	public void processData(int newVal) {
-		if (lastData < 0) {
-			lastData = newVal;
+		if(samplePoints[counter] < 0) {
+			samplePoints[counter] = newVal;
+			lastAverage = newVal;
 		} else {
+			double newAverage = lastAverage + ((newVal - samplePoints[counter]) / SAMPLE_POINTS);
+			System.out.print(", " + newAverage + ", " + lastAverage);
 			if (!foundFirstEdge) {
-				if (lastData >= EDGE_THRESHOLD && newVal <= EDGE_THRESHOLD) {
+				if (lastAverage >= EDGE_THRESHOLD && newAverage <= EDGE_THRESHOLD) {
 					fallingEdge = true;
 					foundFirstEdge = true;
 					localisation.setFallingEdge(fallingEdge);
-					lastData = -1;
+					Arrays.fill(samplePoints, -1);
 					localisation.resumeThread();
 					threadWait();
-				} else if (lastData <= EDGE_THRESHOLD && newVal >= EDGE_THRESHOLD) {
+				} else if (lastAverage <= EDGE_THRESHOLD && newAverage >= EDGE_THRESHOLD) {
 					fallingEdge = false;
 					foundFirstEdge = true;
 					localisation.setFallingEdge(fallingEdge);
-					lastData = -1;
+					Arrays.fill(samplePoints, -1);
 					localisation.resumeThread();
 					threadWait();
 				}
 			} else {
-				if (fallingEdge && lastData >= EDGE_THRESHOLD && newVal <= EDGE_THRESHOLD) {
+				if (fallingEdge && lastAverage >= EDGE_THRESHOLD && newAverage <= EDGE_THRESHOLD) {
 					localisation.resumeThread();
+					Arrays.fill(samplePoints, -1);
 					foundFirstEdge = false;
 					threadWait();
-				} else if (!fallingEdge && lastData <= EDGE_THRESHOLD && newVal >= EDGE_THRESHOLD) {
+				} else if (!fallingEdge && lastAverage <= EDGE_THRESHOLD && newAverage >= EDGE_THRESHOLD) {
 					localisation.resumeThread();
+					Arrays.fill(samplePoints, -1);
 					foundFirstEdge = false;
 					threadWait();
 				}
 			}
-			lastData = newVal;
+			
+			samplePoints[counter] = newVal;
+			lastAverage = newAverage;
 		}
+		counter = (counter + 1) % SAMPLE_POINTS;
 	}
 	
 	/**

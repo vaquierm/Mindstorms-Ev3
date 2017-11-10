@@ -5,6 +5,8 @@
 package ca.mcgill.ecse211.capturetheflag;
 
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import lejos.utility.Timer;
+import lejos.utility.TimerListener;
 
 /**
  * 
@@ -14,7 +16,7 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor;
  * @author Michael Vaquier
  * @author Oliver Clark
  */
-public class Odometer implements Runnable {
+public class Odometer implements Runnable, TimerListener {
 	// robot position
 	private double x;
 	private double y;
@@ -30,9 +32,17 @@ public class Odometer implements Runnable {
 	//Robot constants
 	private final double WHEEL_RADIUS;
 	private final double TRACK;
-
-
+	
+	//timer and synchronization
+	private Timer timer = null;
+	private boolean timerMode;
+	private boolean running = false;
+	private volatile boolean polling = false;
 	private static final long ODOMETER_PERIOD = 15; 
+	
+	//variables used for rapid computation
+	private double distL, distR, deltaD, deltaT, dX, dY;
+	private int nowTachoR, nowTachoL;
 
 	private Object lock; /* lock object for mutual exclusion */
 
@@ -56,34 +66,17 @@ public class Odometer implements Runnable {
 		this.rightMotorTachoCount = 0;
 		lock = new Object();
 	}
-
+	
 	/**
 	 * Runs the odometer, to periodically poll the tachocount of the wheels
 	 * to update the current position of the robot.
 	 */
 	public void run() {
 		long updateStart, updateEnd;
-
-		while (true) {
+		polling = true;
+		while (polling) {
 			updateStart = System.currentTimeMillis();
-			double distL, distR, deltaD, deltaT, dX, dY;
-			int nowTachoL = leftMotor.getTachoCount();
-			int nowTachoR = rightMotor.getTachoCount();
-			distL = Math.PI * WHEEL_RADIUS * (nowTachoL - leftMotorTachoCount) / 180;
-			distR = Math.PI * WHEEL_RADIUS * (nowTachoR - rightMotorTachoCount) / 180;
-			leftMotorTachoCount = nowTachoL;
-			rightMotorTachoCount = nowTachoR;
-			deltaD = 0.5 * (distL + distR);
-			deltaT = (distL - distR) / TRACK;
-
-			synchronized (lock) {
-				setTheta(theta + deltaT);
-				dX = deltaD * Math.sin(theta);
-				dY = deltaD * Math.cos(theta);
-				x = x + dX;
-				y = y + dY;
-			}
-
+			odometerProcess();
 			// this ensures that the odometer only runs once every period
 			updateEnd = System.currentTimeMillis();
 			if (updateEnd - updateStart < ODOMETER_PERIOD) {
@@ -93,6 +86,37 @@ public class Odometer implements Runnable {
 					
 				}
 			}
+		}
+	}
+	
+	
+	/**
+	 * This method is the interrupt service routine which is processed every period that the
+	 * odometer is refreshed.
+	 */
+	public void timedOut() {	
+		odometerProcess();
+	}
+	
+	/**
+	 * Executes the data processing of one iteration of the odometer.
+	 */
+	private void odometerProcess() {
+		nowTachoL = leftMotor.getTachoCount();
+		nowTachoR = rightMotor.getTachoCount();
+		distL = Math.PI * WHEEL_RADIUS * (nowTachoL - leftMotorTachoCount) / 180;
+		distR = Math.PI * WHEEL_RADIUS * (nowTachoR - rightMotorTachoCount) / 180;
+		leftMotorTachoCount = nowTachoL;
+		rightMotorTachoCount = nowTachoR;
+		deltaD = 0.5 * (distL + distR);
+		deltaT = (distL - distR) / TRACK;
+
+		synchronized (lock) {
+			setTheta(theta + deltaT);
+			dX = deltaD * Math.sin(theta);
+			dY = deltaD * Math.cos(theta);
+			x = x + dX;
+			y = y + dY;
 		}
 	}
 
@@ -278,4 +302,50 @@ public class Odometer implements Runnable {
 			this.rightMotorTachoCount = rightMotorTachoCount;
 		}
 	}
+	
+	/**
+	 * Starts the creates a new thread and runs the odometer task.
+	 */
+	public void startOdometer() {
+		if (!running) {
+			new Thread(this).start();
+			timerMode = false;
+			running = true;
+		} else if (running && timerMode) {
+			stopOdometer();
+			startOdometer();
+		}
+	}
+	
+	/**
+	 * This method creates a timer and starts the odometer.
+	 */
+	public void startOdometerTimer() {
+		if(!running) {
+			if (timer == null) {
+				timer = new Timer((int) ODOMETER_PERIOD, this);
+			}
+			timer.start();
+			timerMode = true;
+			running = true;
+		} else if (running && !timerMode) {
+			stopOdometer();
+			startOdometerTimer();
+		}
+	}
+	
+	/**
+	 * Stops the odometer no matter its mode
+	 */
+	public void stopOdometer() {
+		if(running) {
+			if(timerMode) {
+				timer.stop();
+			} else {
+				polling = false;
+			}
+			running = false;
+		}
+	}
+	
 }

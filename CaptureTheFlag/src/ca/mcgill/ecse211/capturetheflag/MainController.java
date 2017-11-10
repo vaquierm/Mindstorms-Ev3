@@ -69,6 +69,32 @@ public class MainController {
 	private static final int BOARD_SIZE = 8; //TODO change for competition
 	private static final double WHEEL_RADIUS = 2.1;
 	private static final double TRACK = 10.2;
+	
+	
+	//This code can be used to find the timing of threads.
+	/*
+	private static Object lock = new Object();
+	
+	private static int T1 = 0;
+	private static int T2 = 0;
+	
+	public static void toggleT1() {
+		synchronized(lock) {
+			long time = System.currentTimeMillis();
+			System.out.println(time + ", " + T1 +", "+ T2 );
+			T1 = (T1 == 0) ? 1 : 0;
+			System.out.println(time+1 + ", " + T1 +", "+T2 );
+		}
+	}
+	
+	public static void toggleT2() {
+		synchronized(lock) {
+			long time = System.currentTimeMillis();
+			System.out.println(time + ", " + T1 +", "+ T2 );
+			T2 = (T2 == 0) ? 1 : 0;
+			System.out.println(time+1 + ", " + T1 +", "+ T2 );
+		}
+	}*/
 
 	public static void main(String[] args) {		
 
@@ -133,7 +159,7 @@ public class MainController {
 		setEstimateInitialPosition();
 		Display odometryDisplay = new Display(odometer, t);
 		odometryDisplay.start();
-		new Thread(odometer).start();
+		odometer.startOdometerTimer();
 		
 		colorLocalisationData = new ColorLocalisationData();
 		ziplineLightData = new ZiplineLightData();
@@ -142,7 +168,7 @@ public class MainController {
 		blockSearchingData = new BlockSearchingData(gameParameters);
 		
 		colorPoller = new ColorPoller(colorVerticalRedMean, colorVerticalRedData, colorHorizontalRedMean, colorHorizontalRedData,colorHorizontalRedMean, colorHorizontalRedData, /*colorSideRedMean, colorSideRedData,*/ colorLocalisationData, ziplineLightData, blockSearchingData);
-		ultrasonicPoller = new UltrasonicPoller(meanFilterUs, usData, ultrasonicLocalisationData, ultrasonicNavigationData);
+		ultrasonicPoller = new UltrasonicPoller(/*meanFilterUs*/ usDistance, usData, ultrasonicLocalisationData, ultrasonicNavigationData);
 		
 		navigation = new Navigation(odometer, rightMotor, leftMotor, WHEEL_RADIUS, TRACK);
 		localisation = new Localisation(odometer, navigation, ultrasonicPoller, colorPoller, rightMotor, leftMotor, TILE, startingCorner);
@@ -150,6 +176,7 @@ public class MainController {
 		navigationController = new NavigationController(rightMotor, leftMotor, frontMotor, odometer, navigation, ultrasonicPoller, gameParameters);
 		localisationController = new LocalisationController(localisation, navigation, TILE, startingCorner, BOARD_SIZE);
 		ziplineController = new ZiplineController(odometer, colorPoller, rightMotor, leftMotor, armMotor, gameParameters);
+		blockSearchingController = new BlockSearchingController(colorPoller, gameParameters);
 		
 		
 		/*
@@ -161,12 +188,16 @@ public class MainController {
 		localisationController.colorLocalisationRoutine();
 		navigation.travelTo(2 * TILE, 1 * TILE , false);
 		navigation.turnTo(0);
+		while (Button.waitForAnyPress() != Button.ID_ENTER);
 		ziplineController.runZiplineTask();
 		odometer.setTheta(0);
 		navigation.travelTo(gameParameters.ZC_R.x , gameParameters.ZC_R.y + TILE , false);
 		localisationController.colorLocalisationRoutine();
 		navigation.travelTo(gameParameters.ZC_R.x , gameParameters.ZC_R.y + TILE , false);
 		navigation.turnTo(0);
+		
+		//while (Button.waitForAnyPress() != Button.ID_ENTER);
+		//blockSearchingController.runBlockSearchingTask();
 		
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		System.exit(0);

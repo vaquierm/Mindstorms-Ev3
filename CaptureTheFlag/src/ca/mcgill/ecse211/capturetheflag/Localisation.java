@@ -128,7 +128,8 @@ public class Localisation {
 		
 		
 		referenceHeadingCode = (referenceHeadingCode + 1) % lines.length;
-		colorPoller.startPolling(ColorPollingState.LOCALISATION); 	//Need to detect lines, turn on color sensor
+		odometer.startOdometer(); // change the odometer to polling mode
+		colorPoller.startPollingTimer(ColorPollingState.LOCALISATION); 	//Need to detect lines, turn on color sensor
 		leftMotor.setSpeed(ROTATION_SPEED);	//Start spinning in place
 		rightMotor.setSpeed(ROTATION_SPEED);
 		leftMotor.backward();
@@ -151,6 +152,7 @@ public class Localisation {
 		rightMotor.setAcceleration(FAST_ACCEL);
 		leftMotor.setAcceleration(FAST_ACCEL);
 		colorPoller.stopPolling();	//No longer need color sensor. Turn off.
+		odometer.startOdometerTimer(); //change odometer back to timer mode
 		double newT = computeThetaColor(referenceHeadingCode);
 		newT -= COLOR_ANGLE_BIAS;
 		if (newT < 0) {

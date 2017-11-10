@@ -52,27 +52,24 @@ public class UltrasonicPoller implements Runnable {
 	public void run() {
 		long correctionStart, correctionEnd;
 		polling = true;
-
+		long startTime = System.currentTimeMillis();
 		while (polling) {
 			correctionStart = System.currentTimeMillis();
-
 			usDistance.fetchSample(usData, 0);
 			int sample = (int) (usData[0] * 100);
-			
 			if(sample > 0) {
-				System.out.println(sample);
 				switch(getPollingState()) {
 				case LOCALISATION:
-					if(sample < 255)
-						ultrasonicLocalisationData.processData(sample);
+					if(sample > 255)
+						sample = 255;
+					System.out.println((correctionStart - startTime) + ", " +sample);
+					ultrasonicLocalisationData.processData(sample);
 					break;
 				case NAVIGATION:
 					ultrasonicNavigationData.processData(sample);
 					break;
 				}
 			}
-
-
 			correctionEnd = System.currentTimeMillis();
 			if (correctionEnd - correctionStart < POLLING_PERIOD) {
 				try {

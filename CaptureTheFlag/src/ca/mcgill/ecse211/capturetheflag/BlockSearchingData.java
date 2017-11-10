@@ -35,6 +35,9 @@ public class BlockSearchingData {
 		rgbData[0] = (int) (rgb[0] * 100);
 		rgbData[1] = (int) (rgb[1] * 100);
 		rgbData[2] = (int) (rgb[2] * 100);
+		System.out.println(rgbData[0]+", "+rgbData[1]+", "+rgbData[2]);
+
+		
 		//TODO this will take a length 3 array and process the data to determine if its a block
 	}
 	
