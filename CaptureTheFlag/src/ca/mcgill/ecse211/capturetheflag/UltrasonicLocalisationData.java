@@ -49,7 +49,7 @@ public class UltrasonicLocalisationData {
 			lastAverage = newVal;
 		} else {
 			double newAverage = lastAverage + ((newVal - samplePoints[counter]) / SAMPLE_POINTS);
-			System.out.print(", " + newAverage + ", " + lastAverage);
+			//System.out.print(", " + newAverage + ", " + lastAverage); //TODO
 			if (!foundFirstEdge) {
 				if (lastAverage >= EDGE_THRESHOLD && newAverage <= EDGE_THRESHOLD) {
 					fallingEdge = true;
