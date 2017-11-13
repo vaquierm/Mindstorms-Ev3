@@ -31,12 +31,14 @@ public class NavigationController {
 	private volatile boolean objectDetection = false;
 	private static NavigationState state = NavigationState.READY;
 	
+	private static int RELOCALISATION_CONSTANT = 4;
 	private final GameParameters gameParameters;
 	private final double TILE;
 
 	// Associations
 	private Odometer odometer;
 	private Navigation navigation;
+	private Localisation localisation;
 	
 	//Poller
 	private UltrasonicPoller ultrasonicPoller;
@@ -72,7 +74,7 @@ public class NavigationController {
 	 * @param TILE  The  tile length of the game board
 	 */
 	public NavigationController(EV3LargeRegulatedMotor rightMotor, EV3LargeRegulatedMotor leftMotor, EV3MediumRegulatedMotor frontMotor,
-			Odometer odometer, Navigation navigation, UltrasonicPoller ultrasonicPoller, GameParameters gameParameters, double TILE) {
+			Odometer odometer, Navigation navigation, Localisation localisation, UltrasonicPoller ultrasonicPoller, GameParameters gameParameters, double TILE) {
 		this.rightMotor = rightMotor;
 		this.leftMotor = leftMotor;
 		this.frontMotor = frontMotor;
@@ -81,6 +83,8 @@ public class NavigationController {
 
 		this.odometer = odometer;
 		this.navigation = navigation;
+		this.localisation = localisation;
+		
 		this.ultrasonicPoller = ultrasonicPoller;
 		
 		this.gameParameters = gameParameters;
@@ -98,7 +102,6 @@ public class NavigationController {
 	public void runNavigationTask(boolean rectangularPath) {
 
 		if (rectangularPath) {
-			//TODO add to list at index 0 the closest intersection
 			recursivePath(0);
 		}
 		if (objectDetection) {
@@ -129,6 +132,19 @@ public class NavigationController {
 						rightMotor.stop(true);
 						leftMotor.stop();
 						navigation.travelTo(point.x, point.y, true);
+					} else if (odometer.getDistanceSinceLastLocalisation() > TILE * RELOCALISATION_CONSTANT) {
+						Coordinate closestIntersection = closestIntersection();
+						String zoneOfIntersection = mapPoint(closestIntersection);
+						if (!zoneOfIntersection.equals("river") && !zoneOfIntersection.equals("bridge")) {
+							rightMotor.stop(true);
+							leftMotor.stop();
+							navigation.travelTo(closestIntersection.x, closestIntersection.y, false);
+							localisation.colorLocalisation();
+							if(rectangularPath) {
+								recursivePath(0);
+							}
+							setNavigationState(NavigationState.READY);
+						}
 					}
 				}
 
@@ -153,14 +169,28 @@ public class NavigationController {
 		}
 		ultrasonicPoller.stopPolling();
 	}
+	
+	/**
+	 * Returns the coordinate of the closest intersection from the robot from its odometer values.
+	 * @return  The closest intersection Coordinate from the robot
+	 */
+	private Coordinate closestIntersection() {
+		return new Coordinate(localisation.getClosestMultiple(odometer.getX()), localisation.getClosestMultiple(odometer.getY()));
+	}
 
 	
 	/**
 	 * This method takes as input a list of Coordinates and modifies the object such
 	 * that the new path is rectangular and avoids physical features on the board
+	 * @param i  The index at which the path modification should start
+	 * 
+	 * @author Michael Vaquier
+	 * @author Yujing Duan
 	 */
 	public boolean recursivePath(int i) {
-		List<Coordinate> a = coordinateList;
+		if(i == 0) {
+			coordinateList.add(0, closestIntersection());
+		}
 		if(i == coordinateList.size() - 1) {
 			return true;
 		}
@@ -174,14 +204,18 @@ public class NavigationController {
 				} else {
 					Coordinate option1 = new Coordinate(ithCoordinate.x, ithCoordinate.y + TILE);
 					Coordinate option2 = new Coordinate(ithCoordinate.x, ithCoordinate.y - TILE);
-					if (!mapPoint(option1).equals("river")) {
+					Coordinate previous = null;
+					if(i > 0) {
+						previous = coordinateList.get(i - 1);
+					}
+					if (!mapPoint(option1).equals("river") && !mapPoint(option1).equals("bridge") && !option1.equals(previous)) {
 						coordinateList.add(i + 1, option1);
 						if (recursivePath(i + 1)) {
 							return true;
 						}
 						coordinateList.remove(i + 1);
 					}
-					if (!mapPoint(option2).equals("river")) {
+					if (!mapPoint(option2).equals("river") && !mapPoint(option2).equals("bridge") && !option2.equals(previous)) {
 						coordinateList.add(i + 1, option2);
 						if (recursivePath(i + 1)) {
 							return true;
@@ -208,14 +242,18 @@ public class NavigationController {
 				} else {
 					Coordinate option1 = new Coordinate(ithCoordinate.x + TILE, ithCoordinate.y);
 					Coordinate option2 = new Coordinate(ithCoordinate.x - TILE, ithCoordinate.y);
-					if (!mapPoint(option1).equals("river")) {
+					Coordinate previous = null;
+					if(i > 0) {
+						previous = coordinateList.get(i - 1);
+					}
+					if (!mapPoint(option1).equals("river") && !mapPoint(option1).equals("bridge") && !option1.equals(previous)) {
 						coordinateList.add(i + 1, option1);
 						if (recursivePath(i + 1)) {
 							return true;
 						}
 						coordinateList.remove(i + 1);
 					}
-					if (!mapPoint(option2).equals("river")) {
+					if (!mapPoint(option2).equals("river") && !mapPoint(option2).equals("bridge") && !option2.equals(previous)) {
 						coordinateList.add(i + 1, option2);
 						if (recursivePath(i + 1)) {
 							return true;
@@ -239,14 +277,14 @@ public class NavigationController {
 			if (mapPoint(ithCoordinate).equals(mapPoint(nextCoordinate)) || mapPoint(nextCoordinate).equals("bridge") || mapPoint(ithCoordinate).equals("bridge")) {
 				Coordinate midVH = new Coordinate(ithCoordinate.x, nextCoordinate.y);
 				Coordinate midHV = new Coordinate(nextCoordinate.x, ithCoordinate.y);
-				if (!mapPoint(midVH).equals("river") && obstacleCheck(ithCoordinate, midVH) && obstacleCheck(midVH, nextCoordinate)) {
+				if (!mapPoint(midVH).equals("river") && !mapPoint(midVH).equals("bridge") && obstacleCheck(ithCoordinate, midVH) && obstacleCheck(midVH, nextCoordinate)) {
 					coordinateList.add(i + 1, midVH);
 					if (recursivePath(i + 1)) {
 						return true;
 					}
 					coordinateList.remove(i + 1);
 				}
-				if (!mapPoint(midHV).equals("river") && obstacleCheck(ithCoordinate, midHV) && obstacleCheck(midHV, nextCoordinate)) {
+				if (!mapPoint(midHV).equals("river") && !mapPoint(midHV).equals("bridge") && obstacleCheck(ithCoordinate, midHV) && obstacleCheck(midHV, nextCoordinate)) {
 					coordinateList.add(i + 1, midHV);
 					if (recursivePath(i + 1)) {
 						return true;
@@ -254,7 +292,11 @@ public class NavigationController {
 					coordinateList.remove(i + 1);
 				}
 				Coordinate option = new Coordinate(ithCoordinate.x + TILE, ithCoordinate.y);
-				if (!mapPoint(option).equals("river") && obstacleCheck(ithCoordinate, option) && obstacleCheck(option, nextCoordinate)) {
+				Coordinate previous = null;
+				if(i > 0) {
+					previous = coordinateList.get(i - 1);
+				}
+				if (!mapPoint(option).equals("river") && !mapPoint(option).equals("bridge") && !option.equals(previous) && obstacleCheck(ithCoordinate, option) && obstacleCheck(option, nextCoordinate)) {
 					coordinateList.add(i + 1, option);
 					if (recursivePath(i + 1)) {
 						return true;
@@ -262,7 +304,7 @@ public class NavigationController {
 					coordinateList.remove(i + 1);
 				}
 				option = new Coordinate(ithCoordinate.x - TILE, ithCoordinate.y);
-				if (!mapPoint(option).equals("river") && obstacleCheck(ithCoordinate, option) && obstacleCheck(option, nextCoordinate)) {
+				if (!mapPoint(option).equals("river") && !mapPoint(option).equals("bridge") && !option.equals(previous) && obstacleCheck(ithCoordinate, option) && obstacleCheck(option, nextCoordinate)) {
 					coordinateList.add(i + 1, option);
 					if (recursivePath(i + 1)) {
 						return true;
@@ -270,7 +312,7 @@ public class NavigationController {
 					coordinateList.remove(i + 1);
 				}
 				option = new Coordinate(ithCoordinate.x, ithCoordinate.y + TILE);
-				if (!mapPoint(option).equals("river") && obstacleCheck(ithCoordinate, option) && obstacleCheck(option, nextCoordinate)) {
+				if (!mapPoint(option).equals("river") && !mapPoint(option).equals("bridge") && !option.equals(previous) && obstacleCheck(ithCoordinate, option) && obstacleCheck(option, nextCoordinate)) {
 					coordinateList.add(i + 1, option);
 					if (recursivePath(i + 1)) {
 						return true;
@@ -278,7 +320,7 @@ public class NavigationController {
 					coordinateList.remove(i + 1);
 				}
 				option = new Coordinate(ithCoordinate.x, ithCoordinate.y - TILE);
-				if (!mapPoint(option).equals("river") && obstacleCheck(ithCoordinate, option) && obstacleCheck(option, nextCoordinate)) {
+				if (!mapPoint(option).equals("river") && !mapPoint(option).equals("bridge") && !option.equals(previous) && obstacleCheck(ithCoordinate, option) && obstacleCheck(option, nextCoordinate)) {
 					coordinateList.add(i + 1, option);
 					if (recursivePath(i + 1)) {
 						return true;
@@ -335,11 +377,6 @@ public class NavigationController {
 	 * @return  True if no obstacles are present
 	 */
 	private boolean obstacleCheck(Coordinate a, Coordinate b) {
-		/*if (a.y == b.y && (a.y == gameParameters.ZC_R.y && ((a.x <= gameParameters.ZC_R.x && b.x >= gameParameters.ZC_R.x) || (a.x >= gameParameters.ZC_R.x && b.x <= gameParameters.ZC_R.x)) || ((a.x <= gameParameters.ZC_G.x && b.x >= gameParameters.ZC_G.x) || (a.x >= gameParameters.ZC_G.x && b.x <= gameParameters.ZC_G.x)))) {
-			return false;
-		} else if (a.x == b.x && (a.x == gameParameters.ZC_R.x && ((a.y <= gameParameters.ZC_R.y && b.y >= gameParameters.ZC_R.y) || (a.y >= gameParameters.ZC_R.y && b.y <= gameParameters.ZC_R.y)) || ((a.y <= gameParameters.ZC_G.y && b.y >= gameParameters.ZC_G.y) || (a.y >= gameParameters.ZC_G.y && b.y <= gameParameters.ZC_G.y)))) {
-			return false;
-		}*/
 		if (a.y == b.y) {
 			if (a.y == gameParameters.ZC_R.y) {
 				if ((a.x <= gameParameters.ZC_R.x && b.x >= gameParameters.ZC_R.x) || (a.x >= gameParameters.ZC_R.x && b.x <= gameParameters.ZC_R.x)) {
@@ -381,6 +418,15 @@ public class NavigationController {
 	 */
 	public void addWayPoint(Coordinate newPoint) {
 		coordinateList.add(newPoint);
+	}
+	
+	/**
+	 * Adds a way point at the end of the current list.
+	 * @param x  The X value of the wayPoint to be added
+	 * @param y  The Y value of the wayPoint to be added
+	 */
+	public void addWayPoint(double x, double y) {
+		coordinateList.add(new Coordinate(x, y));
 	}
 	
 	/**

@@ -32,5 +32,17 @@ public class Coordinate {
 		this.x = x;
 		this.y = y;
 	}
+	
+	/**
+	 * Compares two coordinates
+	 * @param other  The other coordinate
+	 * @return  Returns true if the two coordinates are the same.
+	 */
+	public boolean equals(Coordinate other) {
+		if (other == null) {
+			return false;
+		}
+		return (this.x == other.x) && (this.y == other.y);
+	}
 
 }

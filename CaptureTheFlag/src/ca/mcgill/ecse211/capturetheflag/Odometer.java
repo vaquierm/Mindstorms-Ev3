@@ -41,7 +41,7 @@ public class Odometer implements Runnable, TimerListener {
 	private static final long ODOMETER_PERIOD = 15; 
 	
 	//variables used for rapid computation
-	private double distL, distR, deltaD, deltaT, dX, dY;
+	private double distL, distR, deltaD, deltaT, dX, dY, distanceSinceLastLocalisation;
 	private int nowTachoR, nowTachoL;
 
 	private Object lock; /* lock object for mutual exclusion */
@@ -64,6 +64,7 @@ public class Odometer implements Runnable, TimerListener {
 		this.thetaDegree = 0.0;
 		this.leftMotorTachoCount = 0;
 		this.rightMotorTachoCount = 0;
+		this.distanceSinceLastLocalisation = 0;
 		lock = new Object();
 	}
 	
@@ -117,6 +118,7 @@ public class Odometer implements Runnable, TimerListener {
 			dY = deltaD * Math.cos(theta);
 			x = x + dX;
 			y = y + dY;
+			distanceSinceLastLocalisation += deltaD;
 		}
 	}
 
@@ -198,6 +200,30 @@ public class Odometer implements Runnable, TimerListener {
 		}
 
 		return result;
+	}
+	
+	/**
+	 * Returns the distance since the last localisation performed
+	 * @return  Distance traveled since the last localisation routine was performed.
+	 */
+	public double getDistanceSinceLastLocalisation() {
+		double result;
+
+		synchronized (lock) {
+			result = distanceSinceLastLocalisation;
+		}
+
+		return result;
+	}
+	
+	
+	/**
+	 * Resets the distance since the last localisation routine.
+	 */
+	public void restetDistanceSinceLastLocalisation() {
+		synchronized (lock) {
+			distanceSinceLastLocalisation = 0;
+		}
 	}
 
 	

@@ -163,6 +163,7 @@ public class Localisation {
 		odometer.setY(computeY(currentY));
 		leftMotor.stop(true);	//Four lines have now been detected. Stop spinning
 		rightMotor.stop();
+		odometer.restetDistanceSinceLastLocalisation();
 	}
 
 
@@ -330,7 +331,7 @@ public class Localisation {
 	 * @param val  Any value
 	 * @return  The closest multiple of a tile length
 	 */
-	private double getClosestMultiple(double val) {
+	public double getClosestMultiple(double val) {
 		double mod = val % tile;
 		int intDiv = (int) (val / tile);
 		if (mod < tile / 2) {

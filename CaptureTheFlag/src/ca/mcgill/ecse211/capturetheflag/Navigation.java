@@ -22,6 +22,8 @@ public class Navigation {
 	private static final int SLOW_ACCEL = 200;
 	private static final int FAST_ACCEL = 300;
 	
+	private final GameParameters gameParameters;
+	
 	private double interruptedTheta = -1;
 	
 	//Motors
@@ -43,13 +45,14 @@ public class Navigation {
 	 * @param wheelRadius  Radius of the wheels of the robot (cm)
 	 * @param track  Radius of the wheelbase of the robot (cm)
 	 */
-	public Navigation(Odometer odometer, EV3LargeRegulatedMotor rightMotor, EV3LargeRegulatedMotor leftMotor, double wheelRadius, double track) {
+	public Navigation(Odometer odometer, EV3LargeRegulatedMotor rightMotor, EV3LargeRegulatedMotor leftMotor, double wheelRadius, double track, GameParameters gameParameters) {
 		this.rightMotor = rightMotor;
 		this.leftMotor = leftMotor;
 		this.odometer = odometer;
 		
 		this.WHEEL_RADIUS = wheelRadius;
 		this.TRACK = track;
+		this.gameParameters = gameParameters;
 	}
 
 	/**
@@ -110,6 +113,13 @@ public class Navigation {
 		}
 		rightMotor.setAcceleration(FAST_ACCEL);
 		leftMotor.setAcceleration(FAST_ACCEL);
+	}
+	
+	/**
+	 * Makes the robot face the zipline
+	 */
+	public void faceZipline() {
+		turnTo(Math.toDegrees(Math.atan2(gameParameters.ZC_G.x - gameParameters.ZO_G.x ,  gameParameters.ZC_G.y - gameParameters.ZO_G.y)));
 	}
 	
 	/**

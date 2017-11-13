@@ -131,7 +131,7 @@ public class MainController {
 		/**
 		 * This is the hardcoded game parameters to not have to input them every time.
 		 */
-		while (Button.waitForAnyPress() != Button.ID_ENTER);
+		while (Button.waitForAnyPress() != Button.ID_ENTER); //TODO delete for beta
 		gameParameters = new GameParameters(1 , 20, //Team numbers
 	    		  3, 0, //Starting corners
 	    		  1, 1, //Color of flags
@@ -170,10 +170,10 @@ public class MainController {
 		colorPoller = new ColorPoller(colorVerticalRedMean, colorVerticalRedData, colorHorizontalRedMean, colorHorizontalRedData,colorHorizontalRedMean, colorHorizontalRedData, /*colorSideRedMean, colorSideRedData,*/ colorLocalisationData, ziplineLightData, blockSearchingData);
 		ultrasonicPoller = new UltrasonicPoller(/*meanFilterUs*/ usDistance, usData, ultrasonicLocalisationData, ultrasonicNavigationData);
 		
-		navigation = new Navigation(odometer, rightMotor, leftMotor, WHEEL_RADIUS, TRACK);
+		navigation = new Navigation(odometer, rightMotor, leftMotor, WHEEL_RADIUS, TRACK, gameParameters);
 		localisation = new Localisation(odometer, navigation, ultrasonicPoller, colorPoller, rightMotor, leftMotor, TILE, startingCorner);
 		
-		navigationController = new NavigationController(rightMotor, leftMotor, frontMotor, odometer, navigation, ultrasonicPoller, gameParameters, TILE);
+		navigationController = new NavigationController(rightMotor, leftMotor, frontMotor, odometer, navigation, localisation, ultrasonicPoller, gameParameters, TILE);
 		localisationController = new LocalisationController(localisation, navigation, TILE, startingCorner, BOARD_SIZE);
 		ziplineController = new ZiplineController(odometer, colorPoller, rightMotor, leftMotor, armMotor, gameParameters);
 		blockSearchingController = new BlockSearchingController(colorPoller, gameParameters);
@@ -184,25 +184,14 @@ public class MainController {
 		 */
 		//wheelbaseTestRoutine();
 		localisationController.initialLocalisationRoutine();
-		localisationController.navigateToInitialIntersection();
-		navigation.travelTo(2 * TILE, 1 * TILE , false);
-		localisationController.colorLocalisationRoutine();
-		navigation.travelTo(2 * TILE, 1 * TILE , false);
-		navigation.turnTo(0);
-		while (Button.waitForAnyPress() != Button.ID_ENTER);
-		ziplineController.runZiplineTask();
-		odometer.setTheta(0);
-		navigation.travelTo(gameParameters.ZC_R.x , gameParameters.ZC_R.y + TILE , false);
-		localisationController.colorLocalisationRoutine();
-		navigation.travelTo(gameParameters.ZC_R.x , gameParameters.ZC_R.y + TILE , false);
-		navigation.turnTo(0);
-		
-		//while (Button.waitForAnyPress() != Button.ID_ENTER);
-		//blockSearchingController.runBlockSearchingTask();
-		
-		navigationController.addWayPoint(new Coordinate(2 * TILE, 2* TILE));
-		navigationController.addWayPoint(new Coordinate(3 * TILE, 1* TILE));
+		navigationController.addWayPoint(gameParameters.ZO_G.x, gameParameters.ZO_G.y);
 		navigationController.runNavigationTask(true);
+		navigation.faceZipline();
+		ziplineController.runZiplineTask();
+		navigation.travelTo(gameParameters.ZO_R.x, gameParameters.ZO_R.y, false);
+		localisationController.colorLocalisationRoutine();
+		navigation.travelTo(gameParameters.ZO_R.x, gameParameters.ZO_R.y, false);
+		navigation.faceZipline();
 		
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		System.exit(0);
