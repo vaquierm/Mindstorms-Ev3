@@ -32,6 +32,8 @@ public class ZiplineLightData {
 	private double lastAverage = -1;
 	private boolean tookOff = false;
 	
+	private long startTime = -1;
+	
 	/**
 	 * Constructs an instance of the ZiplineLightData class.
 	 */
@@ -55,7 +57,7 @@ public class ZiplineLightData {
 			samplePoints[counter] = newVal;
 			lastAverage = newAverage;
 			if(tookOff) {
-				if(difference > DIFFERENCE_THRESHOLD) {
+				if(difference > DIFFERENCE_THRESHOLD || System.currentTimeMillis() - startTime > 16000) {
 					//The robot is landing
 					Sound.beep();
 					ziplineController.resumeThread();
@@ -72,6 +74,7 @@ public class ZiplineLightData {
 					//The robot is now in the air.
 					Sound.beep();
 					tookOff = true;
+					startTime = System.currentTimeMillis();
 					ziplineController.resumeThread();
 					Arrays.fill(samplePoints, -1);
 					try {

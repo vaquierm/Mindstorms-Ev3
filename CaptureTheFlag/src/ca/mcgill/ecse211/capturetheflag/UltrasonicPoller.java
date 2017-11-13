@@ -62,7 +62,6 @@ public class UltrasonicPoller implements Runnable {
 				case LOCALISATION:
 					if(sample > 255)
 						sample = 255;
-					//System.out.println((correctionStart - startTime) + ", " +sample); //TODO
 					ultrasonicLocalisationData.processData(sample);
 					break;
 				case NAVIGATION:

@@ -32,6 +32,7 @@ public class NavigationController {
 	private static NavigationState state = NavigationState.READY;
 	
 	private final GameParameters gameParameters;
+	private final double TILE;
 
 	// Associations
 	private Odometer odometer;
@@ -68,9 +69,10 @@ public class NavigationController {
 	 * @param navigation  Association to a Navigation instance
 	 * @param ultrasonicPoller  Association to an UltrasonicPoller
 	 * @param gameParameters  Game parameters for this round
+	 * @param TILE  The  tile length of the game board
 	 */
 	public NavigationController(EV3LargeRegulatedMotor rightMotor, EV3LargeRegulatedMotor leftMotor, EV3MediumRegulatedMotor frontMotor,
-			Odometer odometer, Navigation navigation, UltrasonicPoller ultrasonicPoller, GameParameters gameParameters) {
+			Odometer odometer, Navigation navigation, UltrasonicPoller ultrasonicPoller, GameParameters gameParameters, double TILE) {
 		this.rightMotor = rightMotor;
 		this.leftMotor = leftMotor;
 		this.frontMotor = frontMotor;
@@ -82,6 +84,7 @@ public class NavigationController {
 		this.ultrasonicPoller = ultrasonicPoller;
 		
 		this.gameParameters = gameParameters;
+		this.TILE = TILE;
 		
 		ultrasonicPoller.getUltrasonicNavigationData().setNavigation(navigation);
 		ultrasonicPoller.getUltrasonicNavigationData().setNavigationController(this);
@@ -92,8 +95,12 @@ public class NavigationController {
 	 * Runs the navigation task, and constantly checks if the heading at which the robot is traveling to
 	 * is consistent with the next wayPoint
 	 */
-	public void runNavigationTask() {
+	public void runNavigationTask(boolean rectangularPath) {
 
+		if (rectangularPath) {
+			//TODO add to list at index 0 the closest intersection
+			recursivePath(0);
+		}
 		if (objectDetection) {
 			ultrasonicPoller.startPolling(UltrasonicPollingState.NAVIGATION);
 		}
@@ -151,75 +158,149 @@ public class NavigationController {
 	/**
 	 * This method takes as input a list of Coordinates and modifies the object such
 	 * that the new path is rectangular and avoids physical features on the board
-	 * @param wayPoints List of Coordinates to be modified
 	 */
-	private void changeToRectangularPath(List<Coordinate> wayPoints) {
-		double midx = (gameParameters.SV_UR.x + gameParameters.SV_LL.x) / 2;
-		double midy = (gameParameters.SH_UR.x + gameParameters.SH_LL.x) / 2;
-		Coordinate bridgemid = new Coordinate(midx, midy);
+	public boolean recursivePath(int i) {
+		List<Coordinate> a = coordinateList;
+		if(i == coordinateList.size() - 1) {
+			return true;
+		}
+		Coordinate ithCoordinate = coordinateList.get(i);
+		Coordinate nextCoordinate = coordinateList.get(i + 1);
+		Coordinate bridgeMid = new Coordinate((gameParameters.SV_UR.x + gameParameters.SV_LL.x) / 2, (gameParameters.SH_UR.y + gameParameters.SH_LL.y) / 2);
+		if (ithCoordinate.y == nextCoordinate.y && obstacleCheck(ithCoordinate, nextCoordinate)) {
+			if (mapPoint(ithCoordinate).equals(mapPoint(nextCoordinate)) || mapPoint(nextCoordinate).equals("bridge") || mapPoint(ithCoordinate).equals("bridge")) {
+				if (recursivePath(i + 1)) {
+					return true;
+				} else {
+					Coordinate option1 = new Coordinate(ithCoordinate.x, ithCoordinate.y + TILE);
+					Coordinate option2 = new Coordinate(ithCoordinate.x, ithCoordinate.y - TILE);
+					if (!mapPoint(option1).equals("river")) {
+						coordinateList.add(i + 1, option1);
+						if (recursivePath(i + 1)) {
+							return true;
+						}
+						coordinateList.remove(i + 1);
+					}
+					if (!mapPoint(option2).equals("river")) {
+						coordinateList.add(i + 1, option2);
+						if (recursivePath(i + 1)) {
+							return true;
+						}
+						coordinateList.remove(i + 1);
+					}
+					return false;
+				}
+			}
+			else {
+				coordinateList.add(i + 1, bridgeMid);
+				if (recursivePath(i)) {
+					return true;
+				}
+				coordinateList.remove(i + 1);
+				return false;
+			}
+		}
 		
-		for(int i = 0 ; i < (wayPoints.size() - 1) ; i++)
-		{
-			if(wayPoints.get(i).x != wayPoints.get(i+1).x && wayPoints.get(i).y != wayPoints.get(i+1).y)
-			{
-				Coordinate midVH = new Coordinate(wayPoints.get(i).x, wayPoints.get(i+1).y);
-				Coordinate midHV = new Coordinate(wayPoints.get(i+1).x, wayPoints.get(i).y);
-				
-                if(!mapPoint(midHV).equals("river"))
-                {
-                	if(mapPoint(wayPoints.get(i)).equals(mapPoint(midHV)))
-                	{
-                		wayPoints.add(i+1, midHV);
-                	}
-                	else
-                	{
-                		if(mapPoint(wayPoints.get(i)).equals("bridge"))
-                		{
-                			wayPoints.add(i+1, midHV);
-                		}    	
-                		else{		
-                			wayPoints.add(i+1,bridgemid);
-                			i = i - 1;
-                		}             		
-                	}
-                }
-                
-                else if(mapPoint(midHV).equals("river") && !mapPoint(midVH).equals("river"))
-                {
-                	if(mapPoint(wayPoints.get(i)).equals(mapPoint(midVH)))
-                	{
-                		wayPoints.add(i+1, midVH);
-                	}
-                	else
-                	{
-                		if(mapPoint(wayPoints.get(i)).equals("bridge"))
-                		{
-                			wayPoints.add(i+1, midVH);
-                		}    	
-                		else{		
-                			wayPoints.add(i+1, bridgemid);
-                			i = i - 1;
-                		}             		
-                	}
-                }
-                
-                else 
-                {
-                	wayPoints.add(i+1, bridgemid);
-                	i = i - 1;
-				}
-                
-			}
-			else
-			{
-				if(!mapPoint(wayPoints.get(i)).equals(mapPoint(wayPoints.get(i+1))))
-				{
-					wayPoints.add(i+1, bridgemid);
+		else if (ithCoordinate.x == nextCoordinate.x && obstacleCheck(ithCoordinate, nextCoordinate)) {
+			if (mapPoint(ithCoordinate).equals(mapPoint(nextCoordinate)) || mapPoint(nextCoordinate).equals("bridge") || mapPoint(ithCoordinate).equals("bridge")) {
+				if (recursivePath(i + 1)) {
+					return true;
+				} else {
+					Coordinate option1 = new Coordinate(ithCoordinate.x + TILE, ithCoordinate.y);
+					Coordinate option2 = new Coordinate(ithCoordinate.x - TILE, ithCoordinate.y);
+					if (!mapPoint(option1).equals("river")) {
+						coordinateList.add(i + 1, option1);
+						if (recursivePath(i + 1)) {
+							return true;
+						}
+						coordinateList.remove(i + 1);
+					}
+					if (!mapPoint(option2).equals("river")) {
+						coordinateList.add(i + 1, option2);
+						if (recursivePath(i + 1)) {
+							return true;
+						}
+						coordinateList.remove(i + 1);
+					}
+					return false;
 				}
 			}
-
+			else {
+				coordinateList.add(i + 1, bridgeMid);
+				if (recursivePath(i)) {
+					return true;
+				}
+				coordinateList.remove(i + 1);
+				return false;
+			}
+		}
+		
+		else {
+			if (mapPoint(ithCoordinate).equals(mapPoint(nextCoordinate)) || mapPoint(nextCoordinate).equals("bridge") || mapPoint(ithCoordinate).equals("bridge")) {
+				Coordinate midVH = new Coordinate(ithCoordinate.x, nextCoordinate.y);
+				Coordinate midHV = new Coordinate(nextCoordinate.x, ithCoordinate.y);
+				if (!mapPoint(midVH).equals("river") && obstacleCheck(ithCoordinate, midVH) && obstacleCheck(midVH, nextCoordinate)) {
+					coordinateList.add(i + 1, midVH);
+					if (recursivePath(i + 1)) {
+						return true;
+					}
+					coordinateList.remove(i + 1);
+				}
+				if (!mapPoint(midHV).equals("river") && obstacleCheck(ithCoordinate, midHV) && obstacleCheck(midHV, nextCoordinate)) {
+					coordinateList.add(i + 1, midHV);
+					if (recursivePath(i + 1)) {
+						return true;
+					}
+					coordinateList.remove(i + 1);
+				}
+				Coordinate option = new Coordinate(ithCoordinate.x + TILE, ithCoordinate.y);
+				if (!mapPoint(option).equals("river") && obstacleCheck(ithCoordinate, option) && obstacleCheck(option, nextCoordinate)) {
+					coordinateList.add(i + 1, option);
+					if (recursivePath(i + 1)) {
+						return true;
+					}
+					coordinateList.remove(i + 1);
+				}
+				option = new Coordinate(ithCoordinate.x - TILE, ithCoordinate.y);
+				if (!mapPoint(option).equals("river") && obstacleCheck(ithCoordinate, option) && obstacleCheck(option, nextCoordinate)) {
+					coordinateList.add(i + 1, option);
+					if (recursivePath(i + 1)) {
+						return true;
+					}
+					coordinateList.remove(i + 1);
+				}
+				option = new Coordinate(ithCoordinate.x, ithCoordinate.y + TILE);
+				if (!mapPoint(option).equals("river") && obstacleCheck(ithCoordinate, option) && obstacleCheck(option, nextCoordinate)) {
+					coordinateList.add(i + 1, option);
+					if (recursivePath(i + 1)) {
+						return true;
+					}
+					coordinateList.remove(i + 1);
+				}
+				option = new Coordinate(ithCoordinate.x, ithCoordinate.y - TILE);
+				if (!mapPoint(option).equals("river") && obstacleCheck(ithCoordinate, option) && obstacleCheck(option, nextCoordinate)) {
+					coordinateList.add(i + 1, option);
+					if (recursivePath(i + 1)) {
+						return true;
+					}
+					coordinateList.remove(i + 1);
+				}
+				return false;
+			}
+			else {
+				coordinateList.add(i + 1, bridgeMid);
+				if (recursivePath(i)) {
+					return true;
+				}
+				coordinateList.remove(i + 1);
+				return false;
+			}
 		}
 	}
+	
+	
+	
+	
 	
 	/**
 	 * This method takes as an input a coordinate and returns the region in which this point fits in, by looking at the gameParapeters
@@ -231,9 +312,9 @@ public class NavigationController {
 	{
 		if(node.x > gameParameters.Green_LL.x && node.x < gameParameters.Green_UR.x && node.y > gameParameters.Green_LL.y && node.y < gameParameters.Green_UR.y)
 		{
-			return "Green";
+			return "green";
 		}
-		else if(node.x > gameParameters.Red_LL.x && node.x < gameParameters.Red_UR.x && node.y > gameParameters.Red_LL.y && node.y < gameParameters.Red_LL.y)
+		else if(node.x > gameParameters.Red_LL.x && node.x < gameParameters.Red_UR.x && node.y > gameParameters.Red_LL.y && node.y < gameParameters.Red_UR.y)
 		{
 			return "red";
 		}
@@ -245,6 +326,45 @@ public class NavigationController {
 		else {
 			return "river";
 		}
+	}
+	
+	/**
+	 * Checks if there is any obstacles in the way of two coordinate on the same line
+	 * @param a  First Coordinate
+	 * @param b  Second Coordinate
+	 * @return  True if no obstacles are present
+	 */
+	private boolean obstacleCheck(Coordinate a, Coordinate b) {
+		/*if (a.y == b.y && (a.y == gameParameters.ZC_R.y && ((a.x <= gameParameters.ZC_R.x && b.x >= gameParameters.ZC_R.x) || (a.x >= gameParameters.ZC_R.x && b.x <= gameParameters.ZC_R.x)) || ((a.x <= gameParameters.ZC_G.x && b.x >= gameParameters.ZC_G.x) || (a.x >= gameParameters.ZC_G.x && b.x <= gameParameters.ZC_G.x)))) {
+			return false;
+		} else if (a.x == b.x && (a.x == gameParameters.ZC_R.x && ((a.y <= gameParameters.ZC_R.y && b.y >= gameParameters.ZC_R.y) || (a.y >= gameParameters.ZC_R.y && b.y <= gameParameters.ZC_R.y)) || ((a.y <= gameParameters.ZC_G.y && b.y >= gameParameters.ZC_G.y) || (a.y >= gameParameters.ZC_G.y && b.y <= gameParameters.ZC_G.y)))) {
+			return false;
+		}*/
+		if (a.y == b.y) {
+			if (a.y == gameParameters.ZC_R.y) {
+				if ((a.x <= gameParameters.ZC_R.x && b.x >= gameParameters.ZC_R.x) || (a.x >= gameParameters.ZC_R.x && b.x <= gameParameters.ZC_R.x)) {
+					return false;
+				}
+			}
+			if (a.y == gameParameters.ZC_G.y) {
+				if (((a.x <= gameParameters.ZC_G.x && b.x >= gameParameters.ZC_G.x) || (a.x >= gameParameters.ZC_G.x && b.x <= gameParameters.ZC_G.x))) {
+					return false;
+				}
+			}
+		}
+		if (a.x == b.x) {
+			if (a.x == gameParameters.ZC_R.x) {
+				if ((a.y <= gameParameters.ZC_R.y && b.y >= gameParameters.ZC_R.y) || (a.y >= gameParameters.ZC_R.y && b.y <= gameParameters.ZC_R.y)) {
+					return false;
+				}
+			}
+			if (a.x == gameParameters.ZC_G.x) {
+				if (((a.y <= gameParameters.ZC_G.y && b.y >= gameParameters.ZC_G.y) || (a.y >= gameParameters.ZC_G.y && b.y <= gameParameters.ZC_G.y))) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 	
 	/**

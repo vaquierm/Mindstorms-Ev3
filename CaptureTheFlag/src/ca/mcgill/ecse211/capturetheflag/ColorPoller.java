@@ -185,6 +185,8 @@ public class ColorPoller implements Runnable, TimerListener {
 	public void startPolling(ColorPollingState state) {
 		if (!running) {
 			setPollingState(state);
+			if(state == ColorPollingState.LOCALISATION)
+				colorLocalisationData.resetLastData();
 			new Thread(this).start();
 			timerMode = false;
 			running = true;
@@ -204,6 +206,8 @@ public class ColorPoller implements Runnable, TimerListener {
 				timer = new Timer(POLLING_PERIOD, this);
 			}
 			setPollingState(state);
+			if(state == ColorPollingState.LOCALISATION)
+				colorLocalisationData.resetLastData();
 			timer.start();
 			timerMode = true;
 			running = true;

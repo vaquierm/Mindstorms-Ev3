@@ -68,7 +68,7 @@ public class MainController {
 	private static final double TILE = 30.48;
 	private static final int BOARD_SIZE = 8; //TODO change for competition
 	private static final double WHEEL_RADIUS = 2.1;
-	private static final double TRACK = 10.2;
+	private static final double TRACK = 9.85;
 	
 	
 	//This code can be used to find the timing of threads.
@@ -173,7 +173,7 @@ public class MainController {
 		navigation = new Navigation(odometer, rightMotor, leftMotor, WHEEL_RADIUS, TRACK);
 		localisation = new Localisation(odometer, navigation, ultrasonicPoller, colorPoller, rightMotor, leftMotor, TILE, startingCorner);
 		
-		navigationController = new NavigationController(rightMotor, leftMotor, frontMotor, odometer, navigation, ultrasonicPoller, gameParameters);
+		navigationController = new NavigationController(rightMotor, leftMotor, frontMotor, odometer, navigation, ultrasonicPoller, gameParameters, TILE);
 		localisationController = new LocalisationController(localisation, navigation, TILE, startingCorner, BOARD_SIZE);
 		ziplineController = new ZiplineController(odometer, colorPoller, rightMotor, leftMotor, armMotor, gameParameters);
 		blockSearchingController = new BlockSearchingController(colorPoller, gameParameters);
@@ -182,6 +182,7 @@ public class MainController {
 		/*
 		 * Here is the flow of tasks to run.
 		 */
+		//wheelbaseTestRoutine();
 		localisationController.initialLocalisationRoutine();
 		localisationController.navigateToInitialIntersection();
 		navigation.travelTo(2 * TILE, 1 * TILE , false);
@@ -198,6 +199,10 @@ public class MainController {
 		
 		//while (Button.waitForAnyPress() != Button.ID_ENTER);
 		//blockSearchingController.runBlockSearchingTask();
+		
+		navigationController.addWayPoint(new Coordinate(2 * TILE, 2* TILE));
+		navigationController.addWayPoint(new Coordinate(3 * TILE, 1* TILE));
+		navigationController.runNavigationTask(true);
 		
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		System.exit(0);

@@ -66,6 +66,13 @@ public class ColorLocalisationData {
 	}
 	
 	/**
+	 * Resets the last data value to -1
+	 */
+	public void resetLastData() {
+		lastData = -1;
+	}
+	
+	/**
 	 * This method sets the association to an instance of the Localisation class.
 	 * @param localisation  The localisation instance that will be set as an association.
 	 */
