@@ -17,8 +17,8 @@ import lejos.hardware.Button;
 public class LocalisationController {
 	
 	//Associations
-	private Localisation localisation;
-	private Navigation navigation;
+	private final Localisation localisation;
+	private final Navigation navigation;
 	
 	//Game board constants
 	private final double tile;

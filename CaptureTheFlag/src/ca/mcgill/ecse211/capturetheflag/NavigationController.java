@@ -192,7 +192,7 @@ public class NavigationController {
 	 */
 	public boolean recursivePath(int i) {
 		if(i == 0) {
-			coordinateList = trajectory;
+			coordinateList = new LinkedList<Coordinate>(trajectory);
 			coordinateList.add(0, closestIntersection());
 		}
 		if(i == coordinateList.size() - 1) {

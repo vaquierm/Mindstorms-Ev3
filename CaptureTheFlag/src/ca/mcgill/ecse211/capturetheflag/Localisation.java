@@ -32,6 +32,8 @@ public class Localisation {
 	private double[] edges = {-1, -1};
 	private double[] lines = {-1, -1, -1, -1};
 	
+	private Coordinate lastColorLocalisationLocation = new Coordinate(-1, -1);
+	
 	//Game board constants
 	private final double tile;
 	private final int startingCorner;
@@ -108,6 +110,10 @@ public class Localisation {
 		int referenceHeadingCode = 0;
 		currentX = getClosestMultiple(currentX);
 		currentY = getClosestMultiple(currentY);
+		if (odometer.getDistanceSinceLastLocalisation() < tile && (lastColorLocalisationLocation.x == currentX && lastColorLocalisationLocation.y == currentY)) {
+			return;
+		}
+		lastColorLocalisationLocation = new Coordinate(currentX, currentY);
 		currentTheta = getClosestReference(currentTheta);
 		
 		navigation.turnTo(currentTheta);

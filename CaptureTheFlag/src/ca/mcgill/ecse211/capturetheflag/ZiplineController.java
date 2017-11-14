@@ -5,6 +5,7 @@
 package ca.mcgill.ecse211.capturetheflag;
 
 import ca.mcgill.ecse211.capturetheflag.ColorPoller.ColorPollingState;
+import lejos.hardware.Sound;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
 /**
@@ -90,31 +91,28 @@ public class ZiplineController {
 		if (newTheta < 0)
 			newTheta += 360;
 		newTheta = Math.round(newTheta);
-		if ( newTheta % 45 == 0) {
 			
-			switch ((int) newTheta) {
-			case 45:
-				odometer.setX(gameParameters.ZC_R.x - 10);
-				odometer.setY(gameParameters.ZC_R.y - 10);
-				break;
-			case 135:
-				odometer.setX(gameParameters.ZC_R.x - 10);
-				odometer.setY(gameParameters.ZC_R.y + 10);
-				break;
-			case 225:
-				odometer.setX(gameParameters.ZC_R.x + 10);
-				odometer.setY(gameParameters.ZC_R.y + 10);
-				break;
-			case 315:
-				odometer.setX(gameParameters.ZC_R.x + 10);
-				odometer.setY(gameParameters.ZC_R.y - 10);
-				break;
-			default:
-				break;
-			}
-		} else {
+		switch ((int) newTheta) {
+		case 45:
+			odometer.setX(gameParameters.ZC_R.x - 10);
+			odometer.setY(gameParameters.ZC_R.y - 10);
+			break;
+		case 135:
+			odometer.setX(gameParameters.ZC_R.x - 10);
+			odometer.setY(gameParameters.ZC_R.y + 10);
+			break;
+		case 225:
+			odometer.setX(gameParameters.ZC_R.x + 10);
+			odometer.setY(gameParameters.ZC_R.y + 10);
+			break;
+		case 315:
+			odometer.setX(gameParameters.ZC_R.x + 10);
+			odometer.setY(gameParameters.ZC_R.y - 10);
+			break;
+		default:
 			odometer.setX(gameParameters.ZC_R.x);
 			odometer.setY(gameParameters.ZC_R.y);
+			break;
 		}
 		odometer.setTheta(Math.toRadians(newTheta));
 	}

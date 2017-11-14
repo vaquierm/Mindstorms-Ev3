@@ -67,8 +67,8 @@ public class MainController {
 	private static int startingCorner;
 	private static final double TILE = 30.48;
 	private static final int BOARD_SIZE = 8; //TODO change for competition
-	private static final double WHEEL_RADIUS = 2.1;
-	private static final double TRACK = 9.9;
+	private static final double WHEEL_RADIUS = 2.08;
+	private static final double TRACK = 9.92;
 	
 	
 	//This code can be used to find the timing of threads.
@@ -126,12 +126,12 @@ public class MainController {
 		final TextLCD t = LocalEV3.get().getTextLCD();
 		//t.drawString("  READY  ", 0, 0);
 		//Get the game parameters
-		//gameParameters = WiFiGameParameters.getGameParameters(TILE);
+		gameParameters = WiFiGameParameters.getGameParameters(TILE);
 		
 		/**
 		 * This is the hardcoded game parameters to not have to input them every time.
 		 */
-		while (Button.waitForAnyPress() != Button.ID_ENTER); //TODO delete for beta
+		/*while (Button.waitForAnyPress() != Button.ID_ENTER); //TODO delete for beta
 		gameParameters = new GameParameters(1 , 20, //Team numbers
 	    		  1, 1, //Starting corners
 	    		  1, 1, //Color of flags
@@ -151,7 +151,7 @@ public class MainController {
 	    		  new Coordinate(3 * TILE, 6 * TILE), //SR_UR
 	    		  new Coordinate(3 * TILE, 0 * TILE), //SG_LL
 	    		  new Coordinate(5 * TILE, 1 * TILE) //SG_UR
-	    		  );
+	    		  );*/
 		
 		determineStartingCorner();
 		
@@ -183,6 +183,9 @@ public class MainController {
 		 * Here is the flow of tasks to run.
 		 */
 		//wheelbaseTestRoutine();
+		
+		//while (Button.waitForAnyPress() != Button.ID_ESCAPE);
+		//navigation.forward(TILE, false);
 		//while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		localisationController.initialLocalisationRoutine();
 		//localisationController.navigateToInitialIntersection();
@@ -196,9 +199,11 @@ public class MainController {
 		ziplineController.runZiplineTask();
 		navigation.travelTo(gameParameters.ZO_R.x, gameParameters.ZO_R.y, false);
 		localisationController.colorLocalisationRoutine();
-		navigationController.addWayPoint(30, 30);
+		navigationController.addWayPoint(gameParameters.SR_LL.x, gameParameters.SR_LL.y);
 		navigationController.runNavigationTask(true);
 		localisationController.colorLocalisationRoutine();
+		navigation.travelTo(gameParameters.SR_LL.x, gameParameters.SR_LL.y, false);
+		navigation.turnTo(0);
 		
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		System.exit(0);
