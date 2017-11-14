@@ -28,6 +28,7 @@ public class NavigationController {
 	private static Object stateLock = new Object();
 
 	private List<Coordinate> coordinateList = new LinkedList<Coordinate>();
+	private List<Coordinate> trajectory = new LinkedList<Coordinate>();
 	private volatile boolean objectDetection = false;
 	private static NavigationState state = NavigationState.READY;
 	
@@ -120,10 +121,12 @@ public class NavigationController {
 				double x = odometer.getX();
 				double y = odometer.getY();
 
-				if (!rightMotor.isMoving() && !leftMotor.isMoving()) { 
+				if (!rightMotor.isMoving() && !leftMotor.isMoving()) {
+					if (coordinateList.get(0).equals(trajectory.get(0)))
+						trajectory.remove(0);
 					coordinateList.remove(0);
 					setNavigationState(NavigationState.READY);
-				} else {
+				} else { //TODO needs deleting
 					/*double nextHeadingError = odometer.getThetaDegrees() - Math.toDegrees(Math.atan2(point.x - x, point.y - y));
 					if (nextHeadingError < 0)
 						nextHeadingError += 360;
@@ -137,7 +140,7 @@ public class NavigationController {
 						String zoneOfIntersection = mapPoint(closestIntersection);
 						if (!zoneOfIntersection.equals("river") && !zoneOfIntersection.equals("bridge")) {
 							rightMotor.stop(true);
-							leftMotor.stop();
+							leftMotor.stop(); //TODO maybe dont wait
 							navigation.travelTo(closestIntersection.x, closestIntersection.y, false);
 							localisation.colorLocalisation();
 							if(rectangularPath) {
@@ -189,6 +192,7 @@ public class NavigationController {
 	 */
 	public boolean recursivePath(int i) {
 		if(i == 0) {
+			coordinateList = trajectory;
 			coordinateList.add(0, closestIntersection());
 		}
 		if(i == coordinateList.size() - 1) {
@@ -409,7 +413,7 @@ public class NavigationController {
 	 * @param coordinates  New list of wayPoits
 	 */
 	public void setCoordinateList(List<Coordinate> coordinates) {
-		this.coordinateList = coordinates;
+		this.trajectory = coordinates;
 	}
 	
 	/**
@@ -417,7 +421,7 @@ public class NavigationController {
 	 * @param newPoint  Coordinate to be added to the list
 	 */
 	public void addWayPoint(Coordinate newPoint) {
-		coordinateList.add(newPoint);
+		trajectory.add(newPoint);
 	}
 	
 	/**
@@ -426,7 +430,7 @@ public class NavigationController {
 	 * @param y  The Y value of the wayPoint to be added
 	 */
 	public void addWayPoint(double x, double y) {
-		coordinateList.add(new Coordinate(x, y));
+		trajectory.add(new Coordinate(x, y));
 	}
 	
 	/**
