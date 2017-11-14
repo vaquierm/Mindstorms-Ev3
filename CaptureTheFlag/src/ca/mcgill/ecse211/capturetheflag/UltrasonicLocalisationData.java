@@ -27,7 +27,7 @@ public class UltrasonicLocalisationData {
 	private double lastAverage = -1;
 	private static final int SAMPLE_POINTS = 5;
 	private int counter = 0;
-	private static final int EDGE_THRESHOLD = 100;
+	private static final int EDGE_THRESHOLD = 50;
 	
 	/**
 	 * Constructs an UltrasonicLocalisationData object.
@@ -50,14 +50,14 @@ public class UltrasonicLocalisationData {
 		} else {
 			double newAverage = lastAverage + ((newVal - samplePoints[counter]) / SAMPLE_POINTS);
 			if (!foundFirstEdge) {
-				if (lastAverage >= EDGE_THRESHOLD && newAverage <= EDGE_THRESHOLD) {
+				/*if (lastAverage >= EDGE_THRESHOLD && newAverage <= EDGE_THRESHOLD) { //TODO fix for comp
 					fallingEdge = true;
 					foundFirstEdge = true;
 					localisation.setFallingEdge(fallingEdge);
 					Arrays.fill(samplePoints, -1);
 					localisation.resumeThread();
 					threadWait();
-				} else if (lastAverage <= EDGE_THRESHOLD && newAverage >= EDGE_THRESHOLD) {
+				} else */if (lastAverage <= EDGE_THRESHOLD && newAverage >= EDGE_THRESHOLD) {
 					fallingEdge = false;
 					foundFirstEdge = true;
 					localisation.setFallingEdge(fallingEdge);
@@ -66,8 +66,6 @@ public class UltrasonicLocalisationData {
 					threadWait();
 				}
 			} else {
-				if(fallingEdge)
-					System.out.println(lastAverage+ " "+ newAverage);
 				if (fallingEdge && lastAverage >= EDGE_THRESHOLD && newAverage <= EDGE_THRESHOLD) {
 					localisation.resumeThread();
 					Arrays.fill(samplePoints, -1);

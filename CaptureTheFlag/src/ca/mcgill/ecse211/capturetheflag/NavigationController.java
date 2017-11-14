@@ -31,7 +31,7 @@ public class NavigationController {
 	private volatile boolean objectDetection = false;
 	private static NavigationState state = NavigationState.READY;
 	
-	private static int RELOCALISATION_CONSTANT = 4;
+	private static int RELOCALISATION_CONSTANT = 3;
 	private final GameParameters gameParameters;
 	private final double TILE;
 
@@ -124,7 +124,7 @@ public class NavigationController {
 					coordinateList.remove(0);
 					setNavigationState(NavigationState.READY);
 				} else {
-					double nextHeadingError = odometer.getThetaDegrees() - Math.toDegrees(Math.atan2(point.x - x, point.y - y));
+					/*double nextHeadingError = odometer.getThetaDegrees() - Math.toDegrees(Math.atan2(point.x - x, point.y - y));
 					if (nextHeadingError < 0)
 						nextHeadingError += 360;
 					double distance = Math.sqrt(Math.pow(x - point.x, 2) + Math.pow(y - point.y, 2));
@@ -132,7 +132,7 @@ public class NavigationController {
 						rightMotor.stop(true);
 						leftMotor.stop();
 						navigation.travelTo(point.x, point.y, true);
-					} else if (odometer.getDistanceSinceLastLocalisation() > TILE * RELOCALISATION_CONSTANT) {
+					} else*/ if (odometer.getDistanceSinceLastLocalisation() > TILE * RELOCALISATION_CONSTANT) {
 						Coordinate closestIntersection = closestIntersection();
 						String zoneOfIntersection = mapPoint(closestIntersection);
 						if (!zoneOfIntersection.equals("river") && !zoneOfIntersection.equals("bridge")) {

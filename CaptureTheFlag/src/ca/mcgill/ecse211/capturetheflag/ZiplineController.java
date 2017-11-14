@@ -84,10 +84,39 @@ public class ZiplineController {
 		topMotor.setSpeed(PULLEY_SPEED);
 		topMotor.stop(true);
 		colorPoller.stopPolling();
-		topMotor.rotate(600, false);
-		odometer.setTheta(Math.atan2(gameParameters.ZO_R.x - gameParameters.ZC_R.x, gameParameters.ZO_R.y - gameParameters.ZC_R.y));
-		odometer.setX(gameParameters.ZC_R.x);
-		odometer.setY(gameParameters.ZC_R.y);
+		topMotor.rotate(300, false);
+		double newTheta = Math.toDegrees(Math.atan2(gameParameters.ZO_R.x - gameParameters.ZC_R.x, gameParameters.ZO_R.y - gameParameters.ZC_R.y));
+		
+		if (newTheta < 0)
+			newTheta += 360;
+		newTheta = Math.round(newTheta);
+		if ( newTheta % 45 == 0) {
+			
+			switch ((int) newTheta) {
+			case 45:
+				odometer.setX(gameParameters.ZC_R.x - 10);
+				odometer.setY(gameParameters.ZC_R.y - 10);
+				break;
+			case 135:
+				odometer.setX(gameParameters.ZC_R.x - 10);
+				odometer.setY(gameParameters.ZC_R.y + 10);
+				break;
+			case 225:
+				odometer.setX(gameParameters.ZC_R.x + 10);
+				odometer.setY(gameParameters.ZC_R.y + 10);
+				break;
+			case 315:
+				odometer.setX(gameParameters.ZC_R.x + 10);
+				odometer.setY(gameParameters.ZC_R.y - 10);
+				break;
+			default:
+				break;
+			}
+		} else {
+			odometer.setX(gameParameters.ZC_R.x);
+			odometer.setY(gameParameters.ZC_R.y);
+		}
+		odometer.setTheta(Math.toRadians(newTheta));
 	}
 
 	

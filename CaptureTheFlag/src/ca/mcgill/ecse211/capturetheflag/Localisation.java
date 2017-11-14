@@ -20,8 +20,8 @@ public class Localisation {
 	
 	private static final int ROTATION_SPEED = 90;
 	private static final int FAST_ACCEL = 3000;
-	private static final double COLOR_ANGLE_BIAS = 12.5;
-	private static final double COLOR_SENSOR_OFFSET = 12.5;
+	private static final double COLOR_ANGLE_BIAS = 12;
+	private static final double COLOR_SENSOR_OFFSET = 13.6;
 	
 	private boolean fallingEdge = false;
 	private double edgeDifference = -1;

@@ -68,7 +68,7 @@ public class MainController {
 	private static final double TILE = 30.48;
 	private static final int BOARD_SIZE = 8; //TODO change for competition
 	private static final double WHEEL_RADIUS = 2.1;
-	private static final double TRACK = 9.85;
+	private static final double TRACK = 9.9;
 	
 	
 	//This code can be used to find the timing of threads.
@@ -124,7 +124,7 @@ public class MainController {
 		float[] usData = new float[meanFilterUs.sampleSize()];
 		
 		final TextLCD t = LocalEV3.get().getTextLCD();
-		t.drawString("  READY  ", 0, 0);
+		//t.drawString("  READY  ", 0, 0);
 		//Get the game parameters
 		//gameParameters = WiFiGameParameters.getGameParameters(TILE);
 		
@@ -133,20 +133,20 @@ public class MainController {
 		 */
 		while (Button.waitForAnyPress() != Button.ID_ENTER); //TODO delete for beta
 		gameParameters = new GameParameters(1 , 20, //Team numbers
-	    		  3, 0, //Starting corners
+	    		  1, 1, //Starting corners
 	    		  1, 1, //Color of flags
 	    		  new Coordinate(0 * TILE, 5 * TILE), //Red_LL
-	    		  new Coordinate(5 * TILE, 8 * TILE), //Red_UR
-	    		  new Coordinate(3 * TILE, 0 * TILE), //Green_LL
+	    		  new Coordinate(8 * TILE, 8 * TILE), //Red_UR
+	    		  new Coordinate(0 * TILE, 0 * TILE), //Green_LL
 	    		  new Coordinate(8 * TILE, 3 * TILE), //Green_UR
-	    		  new Coordinate(3 * TILE, 5 * TILE), //ZC_R
-	    		  new Coordinate(2 * TILE, 6 * TILE), //ZO_R
+	    		  new Coordinate(2 * TILE, 6 * TILE), //ZC_R
+	    		  new Coordinate(1 * TILE, 7 * TILE), //ZO_R
 	    		  new Coordinate(5 * TILE, 3 * TILE), //ZC_G
 	    		  new Coordinate(6 * TILE, 2 * TILE), //ZO_G
-	    		  new Coordinate(5 * TILE, 6 * TILE), //SH_LL
-	    		  new Coordinate(7 * TILE, 7 * TILE), //SH_UR
-	    		  new Coordinate(6 * TILE, 3 * TILE), //SV_LL
-	    		  new Coordinate(7 * TILE, 7 * TILE), //SV_UR
+	    		  new Coordinate(1 * TILE, 3 * TILE), //SH_LL
+	    		  new Coordinate(2 * TILE, 5 * TILE), //SH_UR
+	    		  new Coordinate(1 * TILE, 3 * TILE), //SV_LL
+	    		  new Coordinate(2 * TILE, 5 * TILE), //SV_UR
 	    		  new Coordinate(1 * TILE, 5 * TILE), //SR_LL
 	    		  new Coordinate(3 * TILE, 6 * TILE), //SR_UR
 	    		  new Coordinate(3 * TILE, 0 * TILE), //SG_LL
@@ -183,15 +183,22 @@ public class MainController {
 		 * Here is the flow of tasks to run.
 		 */
 		//wheelbaseTestRoutine();
+		//while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		localisationController.initialLocalisationRoutine();
+		//localisationController.navigateToInitialIntersection();
+		//navigation.turnTo(0);
+		//while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		navigationController.addWayPoint(gameParameters.ZO_G.x, gameParameters.ZO_G.y);
 		navigationController.runNavigationTask(true);
+		localisationController.colorLocalisationRoutine();
+		navigation.travelTo(gameParameters.ZO_G.x, gameParameters.ZO_G.y, false);
 		navigation.faceZipline();
 		ziplineController.runZiplineTask();
 		navigation.travelTo(gameParameters.ZO_R.x, gameParameters.ZO_R.y, false);
 		localisationController.colorLocalisationRoutine();
-		navigation.travelTo(gameParameters.ZO_R.x, gameParameters.ZO_R.y, false);
-		navigation.faceZipline();
+		navigationController.addWayPoint(30, 30);
+		navigationController.runNavigationTask(true);
+		localisationController.colorLocalisationRoutine();
 		
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		System.exit(0);
