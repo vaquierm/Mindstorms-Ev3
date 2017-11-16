@@ -175,5 +175,12 @@ public class GameParameters {
 		this.SG_LL = SG_LL;
 		this.SG_UR = SG_UR;
 	}
+	
+	/**
+	 * This enumeration represent all the zone delimited in the play board
+	 * @author Michael Vaquier
+	 *
+	 */
+	public enum Zone {GREEN, RED, BRIDGE, RIVER}
 
 }

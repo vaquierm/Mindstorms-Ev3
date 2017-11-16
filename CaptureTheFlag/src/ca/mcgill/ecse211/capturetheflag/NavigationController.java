@@ -7,6 +7,7 @@ package ca.mcgill.ecse211.capturetheflag;
 import java.util.LinkedList;
 import java.util.List;
 
+import ca.mcgill.ecse211.capturetheflag.GameParameters.Zone;
 import ca.mcgill.ecse211.capturetheflag.UltrasonicPoller.UltrasonicPollingState;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.motor.EV3MediumRegulatedMotor;
@@ -28,7 +29,6 @@ public class NavigationController {
 	private static Object stateLock = new Object();
 
 	private List<Coordinate> coordinateList = new LinkedList<Coordinate>();
-	private List<Coordinate> trajectory = new LinkedList<Coordinate>();
 	private volatile boolean objectDetection = false;
 	private static NavigationState state = NavigationState.READY;
 	
@@ -48,11 +48,6 @@ public class NavigationController {
 	private EV3LargeRegulatedMotor rightMotor;
 	private EV3LargeRegulatedMotor leftMotor;
 	private EV3MediumRegulatedMotor frontMotor;
-	
-	/**
-	 * Represents the tolerated error in cm.
-	 */
-	private static final double NAVIGATION_HEADING_ERROR_TOLERENCE = 3;
 
 	/**
 	 * This enumeration defines the states in which the navigation controller can be in.
@@ -109,7 +104,7 @@ public class NavigationController {
 			ultrasonicPoller.startPolling(UltrasonicPollingState.NAVIGATION);
 		}
 
-		while (coordinateList.size() > 0) {
+		while (!coordinateList.isEmpty()) {
 			Coordinate point = coordinateList.get(0);
 			switch (getNavigationState()) {
 			case READY:
@@ -117,28 +112,15 @@ public class NavigationController {
 				setNavigationState(NavigationState.NAVIGATING);
 				break;
 			case NAVIGATING:
-
-				double x = odometer.getX();
-				double y = odometer.getY();
-
 				if (!rightMotor.isMoving() && !leftMotor.isMoving()) {
-					if (coordinateList.get(0).equals(trajectory.get(0)))
-						trajectory.remove(0);
-					coordinateList.remove(0);
+					if (!coordinateList.isEmpty())
+						coordinateList.remove(0);
 					setNavigationState(NavigationState.READY);
-				} else { //TODO needs deleting
-					/*double nextHeadingError = odometer.getThetaDegrees() - Math.toDegrees(Math.atan2(point.x - x, point.y - y));
-					if (nextHeadingError < 0)
-						nextHeadingError += 360;
-					double distance = Math.sqrt(Math.pow(x - point.x, 2) + Math.pow(y - point.y, 2));
-					if (distance * nextHeadingError < NAVIGATION_HEADING_ERROR_TOLERENCE) {
-						rightMotor.stop(true);
-						leftMotor.stop();
-						navigation.travelTo(point.x, point.y, true);
-					} else*/ if (odometer.getDistanceSinceLastLocalisation() > TILE * RELOCALISATION_CONSTANT) {
+				} else {
+					if (odometer.getDistanceSinceLastLocalisation() > TILE * RELOCALISATION_CONSTANT) {
 						Coordinate closestIntersection = closestIntersection();
-						String zoneOfIntersection = mapPoint(closestIntersection);
-						if (!zoneOfIntersection.equals("river") && !zoneOfIntersection.equals("bridge")) {
+						Zone zoneOfIntersection = mapPoint(closestIntersection);
+						if (zoneOfIntersection != Zone.RIVER && zoneOfIntersection != Zone.BRIDGE) {
 							rightMotor.stop(true);
 							leftMotor.stop(); //TODO maybe dont wait
 							navigation.travelTo(closestIntersection.x, closestIntersection.y, false);
@@ -177,7 +159,7 @@ public class NavigationController {
 	 * Returns the coordinate of the closest intersection from the robot from its odometer values.
 	 * @return  The closest intersection Coordinate from the robot
 	 */
-	private Coordinate closestIntersection() {
+	public Coordinate closestIntersection() {
 		return new Coordinate(localisation.getClosestMultiple(odometer.getX()), localisation.getClosestMultiple(odometer.getY()));
 	}
 
@@ -192,7 +174,6 @@ public class NavigationController {
 	 */
 	public boolean recursivePath(int i) {
 		if(i == 0) {
-			coordinateList = new LinkedList<Coordinate>(trajectory);
 			coordinateList.add(0, closestIntersection());
 		}
 		if(i == coordinateList.size() - 1) {
@@ -202,7 +183,7 @@ public class NavigationController {
 		Coordinate nextCoordinate = coordinateList.get(i + 1);
 		Coordinate bridgeMid = new Coordinate((gameParameters.SV_UR.x + gameParameters.SV_LL.x) / 2, (gameParameters.SH_UR.y + gameParameters.SH_LL.y) / 2);
 		if (ithCoordinate.y == nextCoordinate.y && obstacleCheck(ithCoordinate, nextCoordinate)) {
-			if (mapPoint(ithCoordinate).equals(mapPoint(nextCoordinate)) || mapPoint(nextCoordinate).equals("bridge") || mapPoint(ithCoordinate).equals("bridge")) {
+			if (mapPoint(ithCoordinate) == mapPoint(nextCoordinate) || mapPoint(nextCoordinate) == Zone.BRIDGE || mapPoint(ithCoordinate) == Zone.BRIDGE) {
 				if (recursivePath(i + 1)) {
 					return true;
 				} else {
@@ -212,14 +193,14 @@ public class NavigationController {
 					if(i > 0) {
 						previous = coordinateList.get(i - 1);
 					}
-					if (!mapPoint(option1).equals("river") && !mapPoint(option1).equals("bridge") && !option1.equals(previous)) {
+					if (mapPoint(option1) != Zone.RIVER && mapPoint(option1) != Zone.BRIDGE && !option1.equals(previous)) {
 						coordinateList.add(i + 1, option1);
 						if (recursivePath(i + 1)) {
 							return true;
 						}
 						coordinateList.remove(i + 1);
 					}
-					if (!mapPoint(option2).equals("river") && !mapPoint(option2).equals("bridge") && !option2.equals(previous)) {
+					if (mapPoint(option2) != Zone.RIVER && mapPoint(option2) != Zone.BRIDGE && !option2.equals(previous)) {
 						coordinateList.add(i + 1, option2);
 						if (recursivePath(i + 1)) {
 							return true;
@@ -240,7 +221,7 @@ public class NavigationController {
 		}
 		
 		else if (ithCoordinate.x == nextCoordinate.x && obstacleCheck(ithCoordinate, nextCoordinate)) {
-			if (mapPoint(ithCoordinate).equals(mapPoint(nextCoordinate)) || mapPoint(nextCoordinate).equals("bridge") || mapPoint(ithCoordinate).equals("bridge")) {
+			if (mapPoint(ithCoordinate) == mapPoint(nextCoordinate) || mapPoint(nextCoordinate) == Zone.BRIDGE || mapPoint(ithCoordinate) == Zone.BRIDGE) {
 				if (recursivePath(i + 1)) {
 					return true;
 				} else {
@@ -250,14 +231,14 @@ public class NavigationController {
 					if(i > 0) {
 						previous = coordinateList.get(i - 1);
 					}
-					if (!mapPoint(option1).equals("river") && !mapPoint(option1).equals("bridge") && !option1.equals(previous)) {
+					if (mapPoint(option1) != Zone.RIVER && mapPoint(option1) != Zone.BRIDGE && !option1.equals(previous)) {
 						coordinateList.add(i + 1, option1);
 						if (recursivePath(i + 1)) {
 							return true;
 						}
 						coordinateList.remove(i + 1);
 					}
-					if (!mapPoint(option2).equals("river") && !mapPoint(option2).equals("bridge") && !option2.equals(previous)) {
+					if (mapPoint(option2) != Zone.RIVER && mapPoint(option2) != Zone.BRIDGE && !option2.equals(previous)) {
 						coordinateList.add(i + 1, option2);
 						if (recursivePath(i + 1)) {
 							return true;
@@ -278,17 +259,17 @@ public class NavigationController {
 		}
 		
 		else {
-			if (mapPoint(ithCoordinate).equals(mapPoint(nextCoordinate)) || mapPoint(nextCoordinate).equals("bridge") || mapPoint(ithCoordinate).equals("bridge")) {
+			if (mapPoint(ithCoordinate) == mapPoint(nextCoordinate) || mapPoint(nextCoordinate) == Zone.BRIDGE || mapPoint(ithCoordinate) == Zone.BRIDGE) {
 				Coordinate midVH = new Coordinate(ithCoordinate.x, nextCoordinate.y);
 				Coordinate midHV = new Coordinate(nextCoordinate.x, ithCoordinate.y);
-				if (!mapPoint(midVH).equals("river") && !mapPoint(midVH).equals("bridge") && obstacleCheck(ithCoordinate, midVH) && obstacleCheck(midVH, nextCoordinate)) {
+				if (mapPoint(midVH) != Zone.RIVER && mapPoint(midVH) != Zone.BRIDGE && obstacleCheck(ithCoordinate, midVH) && obstacleCheck(midVH, nextCoordinate)) {
 					coordinateList.add(i + 1, midVH);
 					if (recursivePath(i + 1)) {
 						return true;
 					}
 					coordinateList.remove(i + 1);
 				}
-				if (!mapPoint(midHV).equals("river") && !mapPoint(midHV).equals("bridge") && obstacleCheck(ithCoordinate, midHV) && obstacleCheck(midHV, nextCoordinate)) {
+				if (mapPoint(midHV) != Zone.RIVER && mapPoint(midHV) != Zone.BRIDGE && obstacleCheck(ithCoordinate, midHV) && obstacleCheck(midHV, nextCoordinate)) {
 					coordinateList.add(i + 1, midHV);
 					if (recursivePath(i + 1)) {
 						return true;
@@ -300,7 +281,7 @@ public class NavigationController {
 				if(i > 0) {
 					previous = coordinateList.get(i - 1);
 				}
-				if (!mapPoint(option).equals("river") && !mapPoint(option).equals("bridge") && !option.equals(previous) && obstacleCheck(ithCoordinate, option) && obstacleCheck(option, nextCoordinate)) {
+				if (mapPoint(option) != Zone.RIVER && mapPoint(option) != Zone.BRIDGE && !option.equals(previous) && obstacleCheck(ithCoordinate, option) && obstacleCheck(option, nextCoordinate)) {
 					coordinateList.add(i + 1, option);
 					if (recursivePath(i + 1)) {
 						return true;
@@ -308,7 +289,7 @@ public class NavigationController {
 					coordinateList.remove(i + 1);
 				}
 				option = new Coordinate(ithCoordinate.x - TILE, ithCoordinate.y);
-				if (!mapPoint(option).equals("river") && !mapPoint(option).equals("bridge") && !option.equals(previous) && obstacleCheck(ithCoordinate, option) && obstacleCheck(option, nextCoordinate)) {
+				if (mapPoint(option) != Zone.RIVER && mapPoint(option) != Zone.BRIDGE && !option.equals(previous) && obstacleCheck(ithCoordinate, option) && obstacleCheck(option, nextCoordinate)) {
 					coordinateList.add(i + 1, option);
 					if (recursivePath(i + 1)) {
 						return true;
@@ -316,7 +297,7 @@ public class NavigationController {
 					coordinateList.remove(i + 1);
 				}
 				option = new Coordinate(ithCoordinate.x, ithCoordinate.y + TILE);
-				if (!mapPoint(option).equals("river") && !mapPoint(option).equals("bridge") && !option.equals(previous) && obstacleCheck(ithCoordinate, option) && obstacleCheck(option, nextCoordinate)) {
+				if (mapPoint(option) != Zone.RIVER && mapPoint(option) != Zone.BRIDGE && !option.equals(previous) && obstacleCheck(ithCoordinate, option) && obstacleCheck(option, nextCoordinate)) {
 					coordinateList.add(i + 1, option);
 					if (recursivePath(i + 1)) {
 						return true;
@@ -324,7 +305,7 @@ public class NavigationController {
 					coordinateList.remove(i + 1);
 				}
 				option = new Coordinate(ithCoordinate.x, ithCoordinate.y - TILE);
-				if (!mapPoint(option).equals("river") && !mapPoint(option).equals("bridge") && !option.equals(previous) && obstacleCheck(ithCoordinate, option) && obstacleCheck(option, nextCoordinate)) {
+				if (mapPoint(option) != Zone.RIVER && mapPoint(option) != Zone.BRIDGE && !option.equals(previous) && obstacleCheck(ithCoordinate, option) && obstacleCheck(option, nextCoordinate)) {
 					coordinateList.add(i + 1, option);
 					if (recursivePath(i + 1)) {
 						return true;
@@ -354,23 +335,51 @@ public class NavigationController {
 	 * @param node  Coordinate checked for which zone it is in
 	 * @return  The zone in which the Coordinate falls in
 	 */
-	private String mapPoint(Coordinate node)
+	public Zone mapPoint(Coordinate node)
 	{
 		if(node.x > gameParameters.Green_LL.x && node.x < gameParameters.Green_UR.x && node.y > gameParameters.Green_LL.y && node.y < gameParameters.Green_UR.y)
 		{
-			return "green";
+			return Zone.GREEN;
 		}
 		else if(node.x > gameParameters.Red_LL.x && node.x < gameParameters.Red_UR.x && node.y > gameParameters.Red_LL.y && node.y < gameParameters.Red_UR.y)
 		{
-			return "red";
+			return Zone.RED;
 		}
 		else if((node.x > gameParameters.SV_LL.x && node.x < gameParameters.SV_UR.x && node.y > gameParameters.SV_LL.y && node.y < gameParameters.SV_UR.y)
 				||(node.x > gameParameters.SH_LL.x && node.x < gameParameters.SH_UR.x && node.y > gameParameters.SH_LL.y && node.y < gameParameters.SH_UR.y))
 		{
-			return "bridge";
+			return Zone.BRIDGE;
 		}
 		else {
-			return "river";
+			return Zone.RIVER;
+		}
+	}
+	
+	
+	/**
+	 * This method takes as an input a coordinate and returns the region in which this point fits in, by looking at the gameParapeters
+	 * association that the instance has.
+	 * @param x  The X coordinate of the node
+	 * @param y  The Y coordinate of the node
+	 * @return  The zone in which the Coordinate falls in
+	 */
+	public Zone mapPoint(double x, double y)
+	{
+		if(x > gameParameters.Green_LL.x && x < gameParameters.Green_UR.x && y > gameParameters.Green_LL.y && y < gameParameters.Green_UR.y)
+		{
+			return Zone.GREEN;
+		}
+		else if(x > gameParameters.Red_LL.x && x < gameParameters.Red_UR.x && y > gameParameters.Red_LL.y && y < gameParameters.Red_UR.y)
+		{
+			return Zone.RED;
+		}
+		else if((x > gameParameters.SV_LL.x && x < gameParameters.SV_UR.x && y > gameParameters.SV_LL.y && y < gameParameters.SV_UR.y)
+				||(x > gameParameters.SH_LL.x && x < gameParameters.SH_UR.x && y > gameParameters.SH_LL.y && y < gameParameters.SH_UR.y))
+		{
+			return Zone.BRIDGE;
+		}
+		else {
+			return Zone.RIVER;
 		}
 	}
 	
@@ -413,7 +422,7 @@ public class NavigationController {
 	 * @param coordinates  New list of wayPoits
 	 */
 	public void setCoordinateList(List<Coordinate> coordinates) {
-		this.trajectory = coordinates;
+		this.coordinateList = coordinates;
 	}
 	
 	/**
@@ -421,7 +430,7 @@ public class NavigationController {
 	 * @param newPoint  Coordinate to be added to the list
 	 */
 	public void addWayPoint(Coordinate newPoint) {
-		trajectory.add(newPoint);
+		coordinateList.add(newPoint);
 	}
 	
 	/**
@@ -430,7 +439,7 @@ public class NavigationController {
 	 * @param y  The Y value of the wayPoint to be added
 	 */
 	public void addWayPoint(double x, double y) {
-		trajectory.add(new Coordinate(x, y));
+		coordinateList.add(new Coordinate(x, y));
 	}
 	
 	/**

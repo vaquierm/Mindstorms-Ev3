@@ -115,7 +115,7 @@ public class ColorPoller implements Runnable, TimerListener {
 	 */
 	private void processBlockSearching() {
 		colorRedFront.fetchSample(colorRedDataFront, 0);
-		blockSearchingData.processData(colorRedDataFront);
+		blockSearchingData.processData((int) (colorRedDataFront[0]));
 	}
 
 	/**

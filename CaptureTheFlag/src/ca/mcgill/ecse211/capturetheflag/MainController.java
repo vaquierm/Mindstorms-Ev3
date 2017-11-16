@@ -101,7 +101,7 @@ public class MainController {
 		//Instantiate sensors
 		@SuppressWarnings("resource") 
 		SensorModes colorSensorHorizontal = new EV3ColorSensor(colorHorizontalPort);
-		SampleProvider colorHorizontalRed = colorSensorHorizontal.getMode("RGB");
+		SampleProvider colorHorizontalRed = colorSensorHorizontal.getMode("ColorID");
 		SampleProvider colorHorizontalRedMean = new MeanFilter(colorHorizontalRed, 7);
 		float[] colorHorizontalRedData = new float[colorHorizontalRedMean.sampleSize()];
 		
@@ -126,19 +126,21 @@ public class MainController {
 		final TextLCD t = LocalEV3.get().getTextLCD();
 		//t.drawString("  READY  ", 0, 0);
 		//Get the game parameters
-		gameParameters = WiFiGameParameters.getGameParameters(TILE);
+		
+
+		//gameParameters = WiFiGameParameters.getGameParameters(TILE);
 		
 		/**
 		 * This is the hardcoded game parameters to not have to input them every time.
 		 */
-		/*while (Button.waitForAnyPress() != Button.ID_ENTER); //TODO delete for beta
+		while (Button.waitForAnyPress() != Button.ID_ENTER); //TODO delete for beta
 		gameParameters = new GameParameters(1 , 20, //Team numbers
 	    		  1, 1, //Starting corners
-	    		  1, 1, //Color of flags
+	    		  1, 2, //Color of flags
 	    		  new Coordinate(0 * TILE, 5 * TILE), //Red_LL
 	    		  new Coordinate(8 * TILE, 8 * TILE), //Red_UR
 	    		  new Coordinate(0 * TILE, 0 * TILE), //Green_LL
-	    		  new Coordinate(8 * TILE, 3 * TILE), //Green_UR
+	    		  new Coordinate(8 * TILE, 5 * TILE), //Green_UR
 	    		  new Coordinate(2 * TILE, 6 * TILE), //ZC_R
 	    		  new Coordinate(1 * TILE, 7 * TILE), //ZO_R
 	    		  new Coordinate(5 * TILE, 3 * TILE), //ZC_G
@@ -147,11 +149,11 @@ public class MainController {
 	    		  new Coordinate(2 * TILE, 5 * TILE), //SH_UR
 	    		  new Coordinate(1 * TILE, 3 * TILE), //SV_LL
 	    		  new Coordinate(2 * TILE, 5 * TILE), //SV_UR
-	    		  new Coordinate(1 * TILE, 5 * TILE), //SR_LL
-	    		  new Coordinate(3 * TILE, 6 * TILE), //SR_UR
-	    		  new Coordinate(3 * TILE, 0 * TILE), //SG_LL
-	    		  new Coordinate(5 * TILE, 1 * TILE) //SG_UR
-	    		  );*/
+	    		  new Coordinate(5 * TILE, 2 * TILE), //SR_LL
+	    		  new Coordinate(6 * TILE, 4 * TILE), //SR_UR
+	    		  new Coordinate(5 * TILE, 2 * TILE), //SG_LL
+	    		  new Coordinate(6 * TILE, 4 * TILE) //SG_UR
+	    		  );
 		
 		determineStartingCorner();
 		
@@ -165,7 +167,7 @@ public class MainController {
 		ziplineLightData = new ZiplineLightData();
 		ultrasonicLocalisationData = new UltrasonicLocalisationData();
 		ultrasonicNavigationData = new UltrasonicNavigationData(rightMotor, leftMotor, TILE, BOARD_SIZE);
-		blockSearchingData = new BlockSearchingData(gameParameters);
+		blockSearchingData = new BlockSearchingData(gameParameters, TEAM_NUMBER);
 		
 		colorPoller = new ColorPoller(colorVerticalRedMean, colorVerticalRedData, colorHorizontalRedMean, colorHorizontalRedData,colorHorizontalRedMean, colorHorizontalRedData, /*colorSideRedMean, colorSideRedData,*/ colorLocalisationData, ziplineLightData, blockSearchingData);
 		ultrasonicPoller = new UltrasonicPoller(/*meanFilterUs*/ usDistance, usData, ultrasonicLocalisationData, ultrasonicNavigationData);
@@ -176,21 +178,21 @@ public class MainController {
 		navigationController = new NavigationController(rightMotor, leftMotor, frontMotor, odometer, navigation, localisation, ultrasonicPoller, gameParameters, TILE);
 		localisationController = new LocalisationController(localisation, navigation, TILE, startingCorner, BOARD_SIZE);
 		ziplineController = new ZiplineController(odometer, colorPoller, rightMotor, leftMotor, armMotor, gameParameters);
-		blockSearchingController = new BlockSearchingController(colorPoller, gameParameters);
+		blockSearchingController = new BlockSearchingController(odometer, navigationController, navigation, localisation, rightMotor, leftMotor, colorPoller, gameParameters, TILE, TEAM_NUMBER);
 		
 		
 		/*
 		 * Here is the flow of tasks to run.
 		 */
 		//wheelbaseTestRoutine();
-		
 		//while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		//navigation.forward(TILE, false);
 		//while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		localisationController.initialLocalisationRoutine();
+		blockSearchingController.runBlockSearchingTask();
 		//localisationController.navigateToInitialIntersection();
 		//navigation.turnTo(0);
-		//while (Button.waitForAnyPress() != Button.ID_ESCAPE);
+		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		navigationController.addWayPoint(gameParameters.ZO_G.x, gameParameters.ZO_G.y);
 		navigationController.runNavigationTask(true);
 		localisationController.colorLocalisationRoutine();
