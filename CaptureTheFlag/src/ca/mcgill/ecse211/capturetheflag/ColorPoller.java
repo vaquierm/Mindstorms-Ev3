@@ -20,6 +20,8 @@ public class ColorPoller implements Runnable, TimerListener {
 	
 	private ColorPollingState state = ColorPollingState.LOCALISATION;
 	private Object stateLock = new Object();
+	private ColorPollingState timerState = ColorPollingState.LOCALISATION;
+	private Object timerStateLock = new Object();
 	
 	//data processing classes
 	private ColorLocalisationData colorLocalisationData;
@@ -38,8 +40,8 @@ public class ColorPoller implements Runnable, TimerListener {
 	private Timer timer = null;
 	private volatile boolean polling = false;
 	private static final int POLLING_PERIOD = 10;
-	private boolean timerMode;
 	private boolean running = false;
+	private boolean runningTimer = false;
 	
 	/**
 	 * Creates a CollorPoller object.
@@ -75,7 +77,7 @@ public class ColorPoller implements Runnable, TimerListener {
 		polling = true;
 		while (polling) {
 			correctionStart = System.currentTimeMillis();
-			colorPollerProcess();
+			colorPollerProcess(getPollingState());
 			correctionEnd = System.currentTimeMillis();
 			if (correctionEnd - correctionStart < POLLING_PERIOD) {
 				try {
@@ -90,14 +92,15 @@ public class ColorPoller implements Runnable, TimerListener {
 	 * Interrupt service routine called when the poller is running in timer mode.
 	 */
 	public void timedOut() {
-		colorPollerProcess();
+		colorPollerProcess(getTimerPollingState());
 	}
 	
 	/**
 	 * holds the logic of one iteration of the color poller.
+	 * @param state  The state in which the data should be processed
 	 */
-	private void colorPollerProcess() {
-		switch(getPollingState()) {
+	private void colorPollerProcess(ColorPollingState state) {
+		switch(state) {
 		case LOCALISATION:
 			processLocalisation();
 			break;
@@ -106,6 +109,8 @@ public class ColorPoller implements Runnable, TimerListener {
 			break;
 		case BLOCK_SEARCHING:
 			processBlockSearching();
+			break;
+		default:
 			break;
 		}
 	}
@@ -146,6 +151,16 @@ public class ColorPoller implements Runnable, TimerListener {
 	}
 	
 	/**
+	 * Sets the polling state of the timer poller
+	 * @param state  New state to set the timer poller to
+	 */
+	public void setTimerPollingState(ColorPollingState state) {
+		synchronized (timerStateLock) {
+			this.timerState = state;
+		}
+	}
+	
+	/**
 	 * This method returns the association to the ColorLocalisationData instance
 	 * @return The ColorLocalisationData association
 	 */
@@ -180,6 +195,16 @@ public class ColorPoller implements Runnable, TimerListener {
 	}
 	
 	/**
+	 * Returns the polling state of the poller Timer
+	 * @return  Current polling state of the timer
+	 */
+	public ColorPollingState getTimerPollingState() {
+		synchronized (timerStateLock) {
+			return timerState;
+		}
+	}
+	
+	/**
 	 * This method can be will spawn a new thread and start the polling
 	 * @param state  The state in which the poller should be in for polling
 	 */
@@ -189,11 +214,9 @@ public class ColorPoller implements Runnable, TimerListener {
 			if(state == ColorPollingState.LOCALISATION)
 				colorLocalisationData.resetLastData();
 			new Thread(this).start();
-			timerMode = false;
 			running = true;
-		} else if (running && timerMode) {
-			stopPolling();
-			startPolling(state);
+		} else if (running) {
+			setPollingState(state);
 		}
 	}
 	
@@ -202,19 +225,17 @@ public class ColorPoller implements Runnable, TimerListener {
 	 * @param state  The state in which the poller should be in to process timer interrupts
 	 */
 	public void startPollingTimer(ColorPollingState state) {
-		if(!running) {
+		if(!runningTimer) {
 			if(timer == null) {
 				timer = new Timer(POLLING_PERIOD, this);
 			}
-			setPollingState(state);
+			setTimerPollingState(state);
 			if(state == ColorPollingState.LOCALISATION)
 				colorLocalisationData.resetLastData();
 			timer.start();
-			timerMode = true;
-			running = true;
-		} else if (running && !timerMode) {
-			stopPolling();
-			startPollingTimer(state);
+			runningTimer = true;
+		} else if (runningTimer) {
+			setTimerPollingState(state);
 		}
 	}
 	
@@ -223,12 +244,18 @@ public class ColorPoller implements Runnable, TimerListener {
 	 */
 	public void stopPolling() {
 		if(running) {
-			if(timerMode) {
-				timer.stop();
-			} else {
-				polling = false;
-			}
+			polling = false;
 			running = false;
+		}
+	}
+	
+	/**
+	 * This method will stop the polling of the poller timer.
+	 */
+	public void stopTimer() {
+		if(timer != null && runningTimer) {
+			timer.stop();
+			runningTimer = false;
 		}
 	}
 	

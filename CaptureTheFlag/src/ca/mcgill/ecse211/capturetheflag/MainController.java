@@ -4,6 +4,8 @@
 
 package ca.mcgill.ecse211.capturetheflag;
 
+import java.io.File;
+
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
@@ -124,12 +126,11 @@ public class MainController {
 		float[] usData = new float[meanFilterUs.sampleSize()];
 		
 		final TextLCD t = LocalEV3.get().getTextLCD();
-		//t.drawString("  READY  ", 0, 0);
+		t.drawString("  READY  ", 0, 0);
 		//Get the game parameters
 		
 
 		//gameParameters = WiFiGameParameters.getGameParameters(TILE);
-		
 		/**
 		 * This is the hardcoded game parameters to not have to input them every time.
 		 */

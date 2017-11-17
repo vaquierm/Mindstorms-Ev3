@@ -158,7 +158,7 @@ public class Localisation {
 		lines[referenceHeadingCode] = odometer.getThetaDegrees();	//Once a line has been found add to lines array
 		rightMotor.setAcceleration(FAST_ACCEL);
 		leftMotor.setAcceleration(FAST_ACCEL);
-		colorPoller.stopPolling();	//No longer need color sensor. Turn off.
+		colorPoller.stopTimer();	//No longer need color sensor. Turn off.
 		odometer.startOdometerTimer(); //change odometer back to timer mode
 		double newT = computeThetaColor(referenceHeadingCode);
 		newT -= COLOR_ANGLE_BIAS;

@@ -4,6 +4,8 @@
 
 package ca.mcgill.ecse211.capturetheflag;
 
+import java.util.Arrays;
+
 import ca.mcgill.ecse211.capturetheflag.ColorPoller.ColorPollingState;
 import ca.mcgill.ecse211.capturetheflag.GameParameters.Zone;
 import lejos.hardware.Sound;
@@ -106,7 +108,6 @@ public class BlockSearchingController {
 	 * competition.
 	 */
 	public void runBlockSearchingTask() {
-		nextSweep = closestValidPoint();
 		navigationController.addWayPoint(nextSweep);
 		navigationController.runNavigationTask(true);
 		setBlockSearchingState(BlockSearchingState.SEARCHING);
@@ -133,6 +134,7 @@ public class BlockSearchingController {
 						if (isInSearchArea(nextSweep)) {
 							navigation.travelTo(nextSweep.x, nextSweep.y, true);
 						} else {
+							localisation.colorLocalisation(true);
 							setBlockSearchingState(BlockSearchingState.ABANDON);
 						}
 					}
@@ -231,7 +233,7 @@ public class BlockSearchingController {
 			lowerLeft = gameParameters.SR_LL;
 			upperRight = gameParameters.SR_UR;
 		}
-		
+		closestValidPoint(greenTeam);
 	}
 	
 	/**
@@ -239,34 +241,114 @@ public class BlockSearchingController {
 	 * indicated from the odometer.
 	 * @return  The coordinate
 	 */
-	private Coordinate closestValidPoint() {
-		int currentX = (int) odometer.getX();
-		int currentY = (int) odometer.getY();
-		double x = (Math.abs(currentX - lowerLeft.x) > Math.abs(currentX - upperRight.x)) ? upperRight.x : lowerLeft.x;
-		double y = (Math.abs(currentY - lowerLeft.y) > Math.abs(currentY - upperRight.y)) ? upperRight.y : lowerLeft.y;
-		if (x == lowerLeft.x && y == lowerLeft.x) {
+	private void closestValidPoint(boolean greenTeam) {
+		double startX, startY;
+		if (greenTeam) {
+			startX = gameParameters.ZO_R.x;
+			startY = gameParameters.ZO_R.y;
+		} else {
+			startX = (gameParameters.SV_UR.x + gameParameters.SV_LL.x) / 2;
+			startY = (gameParameters.SH_UR.y + gameParameters.SH_LL.y) / 2;
+		}
+		double LL, LR, UL, UR;
+		LL = Math.abs(lowerLeft.x - startX) + Math.abs(lowerLeft.y - startY);
+		UR = Math.abs(upperRight.x - startX) + Math.abs(upperRight.y - startY);
+		LR = Math.abs(upperRight.x - startX) + Math.abs(lowerLeft.y - startY);
+		UL = Math.abs(lowerLeft.x - startX) + Math.abs(upperRight.y - startY);
+		
+		double[] distances = {LL, LR, UL, UR};
+		
+		Arrays.sort(distances);
+		
+		if(tryCorner(distances[0], LL, LR, UL, UR))
+			return;
+		
+		if(tryCorner(distances[2], LL, LR, UL, UR))
+			return;
+		
+		if(tryCorner(distances[3], LL, LR, UL, UR))
+			return;
+		
+		if(tryCorner(distances[4], LL, LR, UL, UR))
+			return;
+		
+		nextSweep = new Coordinate((upperRight.x - lowerLeft.x), (upperRight.y - lowerLeft.y));
+	}
+	
+	/**
+	 * Tries to initialize nextSweep as a corner of the search area
+	 * @param target  The distance target
+	 * @param LL  Distance form lower left corner
+	 * @param LR  Distance form lower right corner
+	 * @param UL  Distance form upper left corner
+	 * @param UR  Distance from upper right corner
+	 * @return  If the initialization was successful
+	 */
+	private boolean tryCorner(double target, double LL, double LR, double UL, double UR) {
+		if (target == LL) {
 			xIncrement = 1;
 			yIncrement = 1;
 			travelDir = true;
-			return lowerLeft;
-		}
-		else if (x == upperRight.x && y == upperRight.y) {
-			xIncrement = -1;
-			yIncrement = -1;
-			travelDir = true;
-			return upperRight;
-		}
-		else if (x == lowerLeft.x && y == upperRight.y) {
-			xIncrement = 1;
-			yIncrement = -1;
-			travelDir = false;
-		}
-		else if (x == upperRight.x && y == lowerLeft.y) {
+			nextSweep = lowerLeft;
+			if (navigationController.mapPoint(nextSweep) == Zone.RIVER) {
+				return tryAdjacentPoints();
+			}
+			return true;
+		} else if (target == LR) {
 			xIncrement = -1;
 			yIncrement = 1;
 			travelDir = false;
+			nextSweep = new Coordinate(upperRight.x, lowerLeft.y);
+			if (navigationController.mapPoint(nextSweep) == Zone.RIVER) {
+				return tryAdjacentPoints();
+			}
+			return true;
+		} else if (target == UL) {
+			xIncrement = 1;
+			yIncrement = -1;
+			travelDir = false;
+			nextSweep = new Coordinate(upperRight.x, lowerLeft.y);
+			if (navigationController.mapPoint(nextSweep) == Zone.RIVER) {
+				return tryAdjacentPoints();
+			}
+			return true;
+		} else {
+			xIncrement = -1;
+			yIncrement = -1;
+			travelDir = true;
+			nextSweep = upperRight;
+			if (navigationController.mapPoint(nextSweep) == Zone.RIVER) {
+				return tryAdjacentPoints();
+			}
+			return true;
 		}
-		return new Coordinate(x, y);
+	}
+	
+	/**
+	 * Tries to initialize the nextSweep as one of the adjacent point from the current corner attempt
+	 * @return  If the initialization was successful
+	 */
+	private boolean tryAdjacentPoints() {
+		if (navigationController.mapPoint(nextSweep.x, nextSweep.y + (yIncrement * tile)) != Zone.RIVER && !isCorner(nextSweep.x, nextSweep.y + (yIncrement * tile))) {
+			nextSweep = new Coordinate(nextSweep.x, nextSweep.y + (yIncrement * tile));
+			return true;
+		} else if (navigationController.mapPoint(nextSweep.x + (xIncrement * tile), nextSweep.y) != Zone.RIVER && !isCorner(nextSweep.x + (xIncrement * tile), nextSweep.y)) {
+			nextSweep = new Coordinate(nextSweep.x + (xIncrement * tile), nextSweep.y);
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * The input coordinates are one of the corners of the search area
+	 * @param x  The x coordinate to check
+	 * @param y  The y coordinate to check
+	 * @return  True if the input is one of the corners.
+	 */
+	private boolean isCorner(double x, double y) {
+		if ((x == lowerLeft.x && y == lowerLeft.y) || (x == lowerLeft.x && y == upperRight.y) || (x == upperRight.x && y == lowerLeft.y) || (x == upperRight.x && y == upperRight.y))
+			return true;
+		return false;
 	}
 	
 	/**

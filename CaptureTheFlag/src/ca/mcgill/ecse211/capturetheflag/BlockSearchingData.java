@@ -4,8 +4,6 @@
 
 package ca.mcgill.ecse211.capturetheflag;
 
-import ca.mcgill.ecse211.capturetheflag.BlockSearchingController.BlockSearchingState;
-
 /**
  * BlockSearchingData processes data coming from the color sensor to determine the color
  * of the block in front of it.
