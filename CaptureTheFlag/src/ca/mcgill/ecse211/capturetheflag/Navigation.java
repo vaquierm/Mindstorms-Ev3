@@ -44,6 +44,7 @@ public class Navigation {
 	 * @param leftMotor  Reference to the left motor
 	 * @param wheelRadius  Radius of the wheels of the robot (cm)
 	 * @param track  Radius of the wheelbase of the robot (cm)
+	 * @param gameParameters  The game parameters for this round
 	 */
 	public Navigation(Odometer odometer, EV3LargeRegulatedMotor rightMotor, EV3LargeRegulatedMotor leftMotor, double wheelRadius, double track, GameParameters gameParameters) {
 		this.rightMotor = rightMotor;

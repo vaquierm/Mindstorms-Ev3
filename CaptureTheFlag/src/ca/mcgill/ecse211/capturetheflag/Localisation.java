@@ -101,8 +101,9 @@ public class Localisation {
 	
 	/**
 	 * Performs the color localisation routine assuming the robot is positioned relatively close to an intersection of two lines
+	 * @param override  Localises no matter what if true.
 	 */
-	public void colorLocalisation() {
+	public void colorLocalisation(boolean override) {
 		
 		double currentX = odometer.getX();
 		double currentY = odometer.getY();
@@ -110,7 +111,7 @@ public class Localisation {
 		int referenceHeadingCode = 0;
 		currentX = getClosestMultiple(currentX);
 		currentY = getClosestMultiple(currentY);
-		if (odometer.getDistanceSinceLastLocalisation() < tile && (lastColorLocalisationLocation.x == currentX && lastColorLocalisationLocation.y == currentY)) {
+		if (!override && odometer.getDistanceSinceLastLocalisation() < tile && (lastColorLocalisationLocation.x == currentX && lastColorLocalisationLocation.y == currentY)) {
 			return;
 		}
 		lastColorLocalisationLocation = new Coordinate(currentX, currentY);

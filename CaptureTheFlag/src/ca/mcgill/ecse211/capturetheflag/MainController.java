@@ -140,7 +140,7 @@ public class MainController {
 	    		  new Coordinate(0 * TILE, 5 * TILE), //Red_LL
 	    		  new Coordinate(8 * TILE, 8 * TILE), //Red_UR
 	    		  new Coordinate(0 * TILE, 0 * TILE), //Green_LL
-	    		  new Coordinate(8 * TILE, 5 * TILE), //Green_UR
+	    		  new Coordinate(8 * TILE, 8 * TILE), //Green_UR
 	    		  new Coordinate(2 * TILE, 6 * TILE), //ZC_R
 	    		  new Coordinate(1 * TILE, 7 * TILE), //ZO_R
 	    		  new Coordinate(5 * TILE, 3 * TILE), //ZC_G
@@ -150,9 +150,9 @@ public class MainController {
 	    		  new Coordinate(1 * TILE, 3 * TILE), //SV_LL
 	    		  new Coordinate(2 * TILE, 5 * TILE), //SV_UR
 	    		  new Coordinate(5 * TILE, 2 * TILE), //SR_LL
-	    		  new Coordinate(6 * TILE, 4 * TILE), //SR_UR
+	    		  new Coordinate(7 * TILE, 4 * TILE), //SR_UR
 	    		  new Coordinate(5 * TILE, 2 * TILE), //SG_LL
-	    		  new Coordinate(6 * TILE, 4 * TILE) //SG_UR
+	    		  new Coordinate(7 * TILE, 5 * TILE) //SG_UR
 	    		  );
 		
 		determineStartingCorner();
@@ -195,15 +195,15 @@ public class MainController {
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		navigationController.addWayPoint(gameParameters.ZO_G.x, gameParameters.ZO_G.y);
 		navigationController.runNavigationTask(true);
-		localisationController.colorLocalisationRoutine();
+		localisationController.colorLocalisationRoutine(false);
 		navigation.travelTo(gameParameters.ZO_G.x, gameParameters.ZO_G.y, false);
 		navigation.faceZipline();
 		ziplineController.runZiplineTask();
 		navigation.travelTo(gameParameters.ZO_R.x, gameParameters.ZO_R.y, false);
-		localisationController.colorLocalisationRoutine();
+		localisationController.colorLocalisationRoutine(false);
 		navigationController.addWayPoint(gameParameters.SR_LL.x, gameParameters.SR_LL.y);
 		navigationController.runNavigationTask(true);
-		localisationController.colorLocalisationRoutine();
+		localisationController.colorLocalisationRoutine(false);
 		navigation.travelTo(gameParameters.SR_LL.x, gameParameters.SR_LL.y, false);
 		navigation.turnTo(0);
 		

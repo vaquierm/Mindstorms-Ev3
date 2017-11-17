@@ -48,7 +48,7 @@ public class LocalisationController {
 	public void initialLocalisationRoutine() {
 		localisation.usLocalisation();
 		navigateToInitialIntersection();
-		localisation.colorLocalisation();
+		localisation.colorLocalisation(true);
 	}
 	
 	/**
@@ -76,9 +76,10 @@ public class LocalisationController {
 	/**
 	 * Performs a localisation routine with the assumption that the robot's center of rotation in on or close to the intersection
 	 * of two line
+	 * @param override  Localises no matter what
 	 */
-	public void colorLocalisationRoutine() {
-		localisation.colorLocalisation();
+	public void colorLocalisationRoutine(boolean override) {
+		localisation.colorLocalisation(override);
 	}
 	
 }

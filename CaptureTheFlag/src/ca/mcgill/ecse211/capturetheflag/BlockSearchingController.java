@@ -36,8 +36,17 @@ public class BlockSearchingController {
 	private Coordinate lowerLeft;
 	private Coordinate upperRight;
 	private Coordinate nextSweep;
-	int xIncrement;
-	int yIncrement;
+	
+	private boolean firstX = true;
+	private boolean firstY = true;
+	private int xIncrement;
+	private int yIncrement;
+	private int xWidth = 0;
+	private int yWidth = 0;
+	private int xCounter = 0;
+	private int yCounter = 0;
+	private boolean travelDir;
+	private boolean firstTravel = true;
 	
 	//Motors
 	private boolean whitchMotor = true;
@@ -52,7 +61,6 @@ public class BlockSearchingController {
 	
 	private Object stateLock = new Object();
 	private BlockSearchingState blockSearchingState = BlockSearchingState.SEARCHING;
-	private boolean searchMethod;
 	
 	/**
 	 * this enumeration delimitates the states in which the block searching controller can be in.
@@ -61,7 +69,19 @@ public class BlockSearchingController {
 	 */
 	public enum BlockSearchingState {SEARCHING, FOUND, ABANDON}
 	
-	
+	/**
+	 * Constructs a BlockSearchingController instance
+	 * @param odometer  The odometer association
+	 * @param navigationController  The NavigationController association
+	 * @param navigation  The Navigation association
+	 * @param localisation  The localisation association
+	 * @param rightMotor  The reference to the right motor
+	 * @param leftMotor  The reference to the left motor
+	 * @param colorPoller  The association to the CollorPoller
+	 * @param gameParameters  The game parameters of the round
+	 * @param tile  The width of a tile in centimeters
+	 * @param teamNumber  The team number of the robot
+	 */
 	public BlockSearchingController(Odometer odometer, NavigationController navigationController, Navigation navigation, Localisation localisation, EV3LargeRegulatedMotor rightMotor, EV3LargeRegulatedMotor leftMotor, ColorPoller colorPoller, GameParameters gameParameters, double tile, int teamNumber) {
 		this.rightMotor = rightMotor;
 		this.leftMotor = leftMotor;
@@ -76,7 +96,7 @@ public class BlockSearchingController {
 		
 		this.tile = tile;
 		
-		determineSearchMethod(teamNumber);
+		inintialisation(teamNumber);
 		
 		colorPoller.getBlockSearchingData().setBlockSeachingController(this);
 	}
@@ -92,30 +112,22 @@ public class BlockSearchingController {
 		setBlockSearchingState(BlockSearchingState.SEARCHING);
 		colorPoller.startPolling(ColorPollingState.BLOCK_SEARCHING);
 		spinMethod();
-		/*if (searchMethod) {
-			contourMethod();
-		} else {
-			spinMethod();
-		}*/
 		colorPoller.stopPolling();
-	}
-	
-	/**
-	 * Search method where the robot first navigates around the search area with a color sensor towards the center, then navigating to the center to perform a sweep.
-	 */
-	private void contourMethod() {
-		
 	}
 	
 	/**
 	 * Search method where the robot navigates to every intersection of the search area and performs a localisation sweep combination.
 	 */
 	private void spinMethod() {
+		boolean localise = true;
 		while (true) {
 			switch (getBlockSearchingState()) {
 			case SEARCHING:
 				if (!rightMotor.isMoving() && !leftMotor.isMoving()) {
-					localisation.colorLocalisation();
+					if (localise) {
+						localisation.colorLocalisation(true);
+					}
+					localise = !localise;
 					if (getBlockSearchingState() == BlockSearchingState.SEARCHING) {
 						incrementNextSweep();
 						if (isInSearchArea(nextSweep)) {
@@ -124,8 +136,7 @@ public class BlockSearchingController {
 							setBlockSearchingState(BlockSearchingState.ABANDON);
 						}
 					}
-				}
-				
+				}	
 				break;
 			case FOUND:
 				Sound.twoBeeps(); //TODO replace to fun sound
@@ -211,21 +222,16 @@ public class BlockSearchingController {
 	 * Initializes the variables to determine the search area
 	 * @param teamNumber  The team number
 	 */
-	private void determineSearchMethod(int teamNumber) {
+	private void inintialisation(int teamNumber) {
 		boolean greenTeam = (gameParameters.GreenTeam == teamNumber);
 		if(greenTeam) {
-			searchMethod = navigationController.mapPoint(gameParameters.SG_LL) != Zone.RIVER && navigationController.mapPoint(gameParameters.SG_UR) != Zone.RIVER;
 			lowerLeft = gameParameters.SG_LL;
 			upperRight = gameParameters.SG_UR;
 		} else {
-			searchMethod = navigationController.mapPoint(gameParameters.SR_LL) != Zone.RIVER && navigationController.mapPoint(gameParameters.SR_UR) != Zone.RIVER;
 			lowerLeft = gameParameters.SR_LL;
 			upperRight = gameParameters.SR_UR;
 		}
 		
-		if(searchMethod && upperRight.x - lowerLeft.x > 2 * tile && upperRight.y - lowerLeft.y > 2 * tile) {
-			searchMethod = ! searchMethod;
-		}
 	}
 	
 	/**
@@ -241,20 +247,24 @@ public class BlockSearchingController {
 		if (x == lowerLeft.x && y == lowerLeft.x) {
 			xIncrement = 1;
 			yIncrement = 1;
+			travelDir = true;
 			return lowerLeft;
 		}
 		else if (x == upperRight.x && y == upperRight.y) {
 			xIncrement = -1;
 			yIncrement = -1;
+			travelDir = true;
 			return upperRight;
 		}
 		else if (x == lowerLeft.x && y == upperRight.y) {
 			xIncrement = 1;
 			yIncrement = -1;
+			travelDir = false;
 		}
 		else if (x == upperRight.x && y == lowerLeft.y) {
 			xIncrement = -1;
 			yIncrement = 1;
+			travelDir = false;
 		}
 		return new Coordinate(x, y);
 	}
@@ -264,13 +274,87 @@ public class BlockSearchingController {
 	 * and makes sure that the coordinate is valid to be accessed by the robot.
 	 */
 	private void incrementNextSweep() {
-		double newX = nextSweep.x;
-		double newY = nextSweep.y + (yIncrement * tile);
-		if (navigationController.mapPoint(newX, newY) == Zone.RIVER || !isInSearchArea(newX, newY)) {
-			yIncrement = -yIncrement;
-			newY = nextSweep.y;
-			newX = nextSweep.x + (xIncrement * tile);
+		if (!firstTravel && ((xWidth <= 0 && yWidth <=0) || (!travelDir && xWidth == 0) || (travelDir && yWidth == 0))) {
+			nextSweep = new Coordinate(-1, -1);
+			return;
 		}
+		double newX, newY;
+		if (travelDir) {
+			newX = nextSweep.x;
+			newY = nextSweep.y + (yIncrement * tile);
+			if (firstY) {
+				if (isInSearchArea(newX, newY)) {
+					yWidth++;
+				} else {
+					newX = nextSweep.x + (xIncrement * tile);
+					newY = nextSweep.y;
+					if (!isInSearchArea(newX, newY)) {
+						nextSweep = new Coordinate(-1, -1);
+						return;
+					}
+					yIncrement = -yIncrement;
+					firstY = false;
+					travelDir = false;
+					if (firstTravel) {
+						xWidth++;
+						firstTravel = !firstTravel;
+					} else {
+						xCounter++;
+						yWidth--;
+					}
+				}
+			} else {
+				yCounter++;
+				if (yCounter >= yWidth) {
+					yIncrement = -yIncrement;
+					travelDir = false;
+					yWidth--;
+					yCounter = 0;
+					if (xWidth < 0) {
+						nextSweep = new Coordinate(-1, -1);
+						return;
+					}
+				}
+			}
+		} else {
+			newX = nextSweep.x + (xIncrement * tile);
+			newY = nextSweep.y;
+			if (firstX) {
+				if (isInSearchArea(newX, newY)) {
+					xWidth++;
+				} else {
+					newX = nextSweep.x;
+					newY = nextSweep.y + (yIncrement * tile);
+					if (!isInSearchArea(newX, newY)) {
+						nextSweep = new Coordinate(-1, -1);
+						return;
+					}
+					xIncrement = -xIncrement;
+					firstX = false;
+					travelDir = true;
+					if (firstTravel) {
+						yWidth++;
+						firstTravel = !firstTravel;
+					} else {
+						yCounter++;
+						xWidth--;
+					}
+				}
+			} else {
+				xCounter++;
+				if (xCounter >= xWidth) {
+					xIncrement = -xIncrement;
+					travelDir = true;
+					xWidth--;
+					xCounter = 0;
+					if (yWidth < 0) {
+						nextSweep = new Coordinate(-1, -1);
+						return;
+					}
+				}
+			}
+		}
+		
 		nextSweep = new Coordinate(newX, newY);
 	}
 	
@@ -280,7 +364,7 @@ public class BlockSearchingController {
 	 * @return  True if the node is in the search area
 	 */
 	private boolean isInSearchArea(Coordinate node) {
-		if (node.x >= lowerLeft.x && node.x <= upperRight.x && node.y >= lowerLeft.y && node.y <= upperRight.y) {
+		if (node.x >= lowerLeft.x && node.x <= upperRight.x && node.y >= lowerLeft.y && node.y <= upperRight.y && navigationController.mapPoint(node) != Zone.RIVER) {
 			return true;
 		}
 		return false;
@@ -292,7 +376,7 @@ public class BlockSearchingController {
 	 * @return y  The Y coordinate
 	 */
 	private boolean isInSearchArea(double x, double y) {
-		if (x >= lowerLeft.x && x <= upperRight.x && y >= lowerLeft.y && y <= upperRight.y) {
+		if (x >= lowerLeft.x && x <= upperRight.x && y >= lowerLeft.y && y <= upperRight.y && navigationController.mapPoint(x, y) != Zone.RIVER) {
 			return true;
 		}
 		return false;

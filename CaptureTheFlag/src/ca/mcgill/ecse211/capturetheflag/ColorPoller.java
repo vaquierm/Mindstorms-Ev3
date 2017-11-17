@@ -181,6 +181,7 @@ public class ColorPoller implements Runnable, TimerListener {
 	
 	/**
 	 * This method can be will spawn a new thread and start the polling
+	 * @param state  The state in which the poller should be in for polling
 	 */
 	public void startPolling(ColorPollingState state) {
 		if (!running) {
@@ -198,7 +199,7 @@ public class ColorPoller implements Runnable, TimerListener {
 	
 	/**
 	 * This method creates a timer and starts the polling process of the light sensor.
-	 * @param state 
+	 * @param state  The state in which the poller should be in to process timer interrupts
 	 */
 	public void startPollingTimer(ColorPollingState state) {
 		if(!running) {

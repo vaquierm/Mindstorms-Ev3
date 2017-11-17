@@ -65,6 +65,7 @@ public class NavigationController {
 	 * @param frontMotor  Reference to the front motor
 	 * @param odometer  Association to an Odometer instance
 	 * @param navigation  Association to a Navigation instance
+	 * @param localisation  Association to a Localisation instance
 	 * @param ultrasonicPoller  Association to an UltrasonicPoller
 	 * @param gameParameters  Game parameters for this round
 	 * @param TILE  The  tile length of the game board
@@ -94,6 +95,7 @@ public class NavigationController {
 	/**
 	 * Runs the navigation task, and constantly checks if the heading at which the robot is traveling to
 	 * is consistent with the next wayPoint
+	 * @param rectangularPath  True if the navigaion should only travel in the X and Y directions
 	 */
 	public void runNavigationTask(boolean rectangularPath) {
 
@@ -124,7 +126,7 @@ public class NavigationController {
 							rightMotor.stop(true);
 							leftMotor.stop(); //TODO maybe dont wait
 							navigation.travelTo(closestIntersection.x, closestIntersection.y, false);
-							localisation.colorLocalisation();
+							localisation.colorLocalisation(false);
 							if(rectangularPath) {
 								recursivePath(0);
 							}
@@ -171,9 +173,16 @@ public class NavigationController {
 	 * 
 	 * @author Michael Vaquier
 	 * @author Yujing Duan
+	 * 
+	 * @return  Returns true if a path was found, false otherwise
 	 */
 	public boolean recursivePath(int i) {
 		if(i == 0) {
+			for(Coordinate coord : coordinateList) {
+				if (mapPoint(coord) == Zone.RIVER || coord.equals(gameParameters.ZC_R) || coord.equals(gameParameters.ZC_G)) {
+					return false;
+				}
+			}
 			coordinateList.add(0, closestIntersection());
 		}
 		if(i == coordinateList.size() - 1) {
