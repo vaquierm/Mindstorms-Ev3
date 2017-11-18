@@ -150,10 +150,10 @@ public class MainController {
 	    		  new Coordinate(6 * TILE, 5 * TILE), //SH_UR
 	    		  new Coordinate(5 * TILE, 3 * TILE), //SV_LL
 	    		  new Coordinate(6 * TILE, 5 * TILE), //SV_UR
-	    		  new Coordinate(5 * TILE, 2 * TILE), //SR_LL 
-	    		  new Coordinate(7 * TILE, 4 * TILE), //SR_UR
-	    		  new Coordinate(3 * TILE, 2 * TILE), //SG_LL
-	    		  new Coordinate(4 * TILE, 3 * TILE) //SG_UR
+	    		  new Coordinate(3 * TILE, 2 * TILE), //SR_LL 
+	    		  new Coordinate(4 * TILE, 3 * TILE), //SR_UR
+	    		  new Coordinate(3 * TILE, 6 * TILE), //SG_LL
+	    		  new Coordinate(5 * TILE, 7 * TILE) //SG_UR
 	    		  );
 		
 		determineStartingCorner();
