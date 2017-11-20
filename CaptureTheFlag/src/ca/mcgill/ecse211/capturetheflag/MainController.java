@@ -70,7 +70,7 @@ public class MainController {
 	private static final double TILE = 30.48;
 	private static final int BOARD_SIZE = 8; //TODO change for competition
 	private static final double WHEEL_RADIUS = 2.08;
-	private static final double TRACK = 9.92;
+	private static final double TRACK = 9.70; //9.92
 	
 	
 	//This code can be used to find the timing of threads.
@@ -137,23 +137,23 @@ public class MainController {
 		while (Button.waitForAnyPress() != Button.ID_ENTER); //TODO delete for beta
 		gameParameters = new GameParameters(1 , 20, //Team numbers
 	    		  1, 1, //Starting corners
-	    		  1, 2, //Color of flags
+	    		  1, 0, //Color of flags
 	    		  new Coordinate(0 * TILE, 5 * TILE), //Red_LL
-	    		  new Coordinate(8 * TILE, 8 * TILE), //Red_UR
-	    		  new Coordinate(0 * TILE, 0 * TILE), //Green_LL
-	    		  new Coordinate(8 * TILE, 8 * TILE), //Green_UR
+	    		  new Coordinate(7 * TILE, 8 * TILE), //Red_UR
+	    		  new Coordinate(1 * TILE, 0 * TILE), //Green_LL
+	    		  new Coordinate(8 * TILE, 3 * TILE), //Green_UR
 	    		  new Coordinate(2 * TILE, 6 * TILE), //ZC_R
-	    		  new Coordinate(1 * TILE, 7 * TILE), //ZO_R
-	    		  new Coordinate(5 * TILE, 3 * TILE), //ZC_G
-	    		  new Coordinate(6 * TILE, 2 * TILE), //ZO_G
-	    		  new Coordinate(1 * TILE, 3 * TILE), //SH_LL
-	    		  new Coordinate(2 * TILE, 5 * TILE), //SH_UR
-	    		  new Coordinate(1 * TILE, 3 * TILE), //SV_LL
-	    		  new Coordinate(2 * TILE, 5 * TILE), //SV_UR
-	    		  new Coordinate(5 * TILE, 2 * TILE), //SR_LL
-	    		  new Coordinate(7 * TILE, 4 * TILE), //SR_UR
-	    		  new Coordinate(5 * TILE, 2 * TILE), //SG_LL
-	    		  new Coordinate(7 * TILE, 5 * TILE) //SG_UR
+	    		  new Coordinate(2 * TILE, 7 * TILE), //ZO_R
+	    		  new Coordinate(2 * TILE, 2 * TILE), //ZC_G
+	    		  new Coordinate(2 * TILE, 1 * TILE), //ZO_G
+	    		  new Coordinate(5 * TILE, 3 * TILE), //SH_LL
+	    		  new Coordinate(6 * TILE, 5 * TILE), //SH_UR
+	    		  new Coordinate(5 * TILE, 3 * TILE), //SV_LL
+	    		  new Coordinate(6 * TILE, 5 * TILE), //SV_UR
+	    		  new Coordinate(3 * TILE, 2 * TILE), //SR_LL 
+	    		  new Coordinate(4 * TILE, 3 * TILE), //SR_UR
+	    		  new Coordinate(3 * TILE, 6 * TILE), //SG_LL
+	    		  new Coordinate(5 * TILE, 7 * TILE) //SG_UR
 	    		  );
 		
 		determineStartingCorner();
@@ -182,31 +182,42 @@ public class MainController {
 		blockSearchingController = new BlockSearchingController(odometer, navigationController, navigation, localisation, rightMotor, leftMotor, colorPoller, gameParameters, TILE, TEAM_NUMBER);
 		
 		
+		
+		
+		
 		/*
 		 * Here is the flow of tasks to run.
 		 */
 		//wheelbaseTestRoutine();
+		//navigationController.addWayPoint(7*TILE, 7*TILE);
+		//navigationController.runNavigationTask(false);
 		//while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		//navigation.forward(TILE, false);
 		//while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		localisationController.initialLocalisationRoutine();
-		blockSearchingController.runBlockSearchingTask();
+
 		//localisationController.navigateToInitialIntersection();
 		//navigation.turnTo(0);
-		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		navigationController.addWayPoint(gameParameters.ZO_G.x, gameParameters.ZO_G.y);
 		navigationController.runNavigationTask(true);
-		localisationController.colorLocalisationRoutine(false);
+		localisationController.colorLocalisationRoutine(true);
 		navigation.travelTo(gameParameters.ZO_G.x, gameParameters.ZO_G.y, false);
 		navigation.faceZipline();
 		ziplineController.runZiplineTask();
 		navigation.travelTo(gameParameters.ZO_R.x, gameParameters.ZO_R.y, false);
-		localisationController.colorLocalisationRoutine(false);
-		navigationController.addWayPoint(gameParameters.SR_LL.x, gameParameters.SR_LL.y);
+		localisationController.colorLocalisationRoutine(true);
+		blockSearchingController.runBlockSearchingTask();
+		navigationController.addWayPoint(7*TILE, 30.48);
 		navigationController.runNavigationTask(true);
 		localisationController.colorLocalisationRoutine(false);
-		navigation.travelTo(gameParameters.SR_LL.x, gameParameters.SR_LL.y, false);
+		navigation.travelTo(7*TILE, 30.48, false);
 		navigation.turnTo(0);
+		
+		//navigationController.addWayPoint(gameParameters.SR_LL.x, gameParameters.SR_LL.y);
+		//navigationController.runNavigationTask(true);
+		//localisationController.colorLocalisationRoutine(false);
+		//navigation.travelTo(gameParameters.SR_LL.x, gameParameters.SR_LL.y, false);
+		//navigation.turnTo(0);
 		
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		System.exit(0);
