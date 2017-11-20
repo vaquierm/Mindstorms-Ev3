@@ -31,6 +31,7 @@ import lejos.robotics.filter.MeanFilter;
 public class MainController {
 	
 	private static final int TEAM_NUMBER = 20;
+	private static boolean greenTeam;
 
 	private static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
 	private static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
@@ -39,7 +40,7 @@ public class MainController {
 
 	private static final Port colorHorizontalPort = LocalEV3.get().getPort("S2");
 	private static final Port colorVerticalPort = LocalEV3.get().getPort("S1");
-	//private static final Port colorSidePort = LocalEV3.get().getPort("S3");
+	private static final Port colorSidePort = LocalEV3.get().getPort("S3");
 	private static final Port usPort = LocalEV3.get().getPort("S4");
 	
 	private static GameParameters gameParameters;
@@ -113,11 +114,11 @@ public class MainController {
 		SampleProvider colorVerticalRedMean = new MeanFilter(colorVerticalRed, 7);
 		float[] colorVerticalRedData = new float[colorVerticalRedMean.sampleSize()];
 		
-		/*@SuppressWarnings("resource") 
+		@SuppressWarnings("resource") 
 		SensorModes colorSensorSide = new EV3ColorSensor(colorSidePort);
-		SampleProvider colorSideRed = colorSensorSide.getMode("Red");
+		SampleProvider colorSideRed = colorSensorSide.getMode("ColorID");
 		SampleProvider colorSideRedMean = new MeanFilter(colorSideRed, 7);
-		float[] colorSideRedData = new float[colorSideRedMean.sampleSize()];*/
+		float[] colorSideRedData = new float[colorSideRedMean.sampleSize()];
 
 		@SuppressWarnings("resource") 
 		SensorModes usSensor = new EV3UltrasonicSensor(usPort);
@@ -139,21 +140,21 @@ public class MainController {
 	    		  1, 1, //Starting corners
 	    		  1, 0, //Color of flags
 	    		  new Coordinate(0 * TILE, 5 * TILE), //Red_LL
-	    		  new Coordinate(7 * TILE, 8 * TILE), //Red_UR
-	    		  new Coordinate(1 * TILE, 0 * TILE), //Green_LL
+	    		  new Coordinate(5 * TILE, 8 * TILE), //Red_UR
+	    		  new Coordinate(3 * TILE, 0 * TILE), //Green_LL
 	    		  new Coordinate(8 * TILE, 3 * TILE), //Green_UR
 	    		  new Coordinate(2 * TILE, 6 * TILE), //ZC_R
-	    		  new Coordinate(2 * TILE, 7 * TILE), //ZO_R
-	    		  new Coordinate(2 * TILE, 2 * TILE), //ZC_G
-	    		  new Coordinate(2 * TILE, 1 * TILE), //ZO_G
-	    		  new Coordinate(5 * TILE, 3 * TILE), //SH_LL
-	    		  new Coordinate(6 * TILE, 5 * TILE), //SH_UR
-	    		  new Coordinate(5 * TILE, 3 * TILE), //SV_LL
-	    		  new Coordinate(6 * TILE, 5 * TILE), //SV_UR
-	    		  new Coordinate(3 * TILE, 2 * TILE), //SR_LL 
-	    		  new Coordinate(4 * TILE, 3 * TILE), //SR_UR
-	    		  new Coordinate(3 * TILE, 6 * TILE), //SG_LL
-	    		  new Coordinate(5 * TILE, 7 * TILE) //SG_UR
+	    		  new Coordinate(1 * TILE, 7 * TILE), //ZO_R
+	    		  new Coordinate(5 * TILE, 3 * TILE), //ZC_G
+	    		  new Coordinate(6 * TILE, 2 * TILE), //ZO_G
+	    		  new Coordinate(5 * TILE, 6 * TILE), //SH_LL
+	    		  new Coordinate(7 * TILE, 7 * TILE), //SH_UR
+	    		  new Coordinate(6 * TILE, 3 * TILE), //SV_LL
+	    		  new Coordinate(7 * TILE, 7 * TILE), //SV_UR
+	    		  new Coordinate(3 * TILE, 7 * TILE), //SR_LL 
+	    		  new Coordinate(5 * TILE, 8 * TILE), //SR_UR
+	    		  new Coordinate(3 * TILE, 0 * TILE), //SG_LL
+	    		  new Coordinate(5 * TILE, 1 * TILE) //SG_UR
 	    		  );
 		
 		determineStartingCorner();
@@ -170,7 +171,7 @@ public class MainController {
 		ultrasonicNavigationData = new UltrasonicNavigationData(rightMotor, leftMotor, TILE, BOARD_SIZE);
 		blockSearchingData = new BlockSearchingData(gameParameters, TEAM_NUMBER);
 		
-		colorPoller = new ColorPoller(colorVerticalRedMean, colorVerticalRedData, colorHorizontalRedMean, colorHorizontalRedData,colorHorizontalRedMean, colorHorizontalRedData, /*colorSideRedMean, colorSideRedData,*/ colorLocalisationData, ziplineLightData, blockSearchingData);
+		colorPoller = new ColorPoller(colorVerticalRedMean, colorVerticalRedData, colorHorizontalRedMean, colorHorizontalRedData, colorSideRedMean, colorSideRedData, colorLocalisationData, ziplineLightData, blockSearchingData);
 		ultrasonicPoller = new UltrasonicPoller(/*meanFilterUs*/ usDistance, usData, ultrasonicLocalisationData, ultrasonicNavigationData);
 		
 		navigation = new Navigation(odometer, rightMotor, leftMotor, WHEEL_RADIUS, TRACK, gameParameters);
@@ -188,39 +189,72 @@ public class MainController {
 		/*
 		 * Here is the flow of tasks to run.
 		 */
-		//wheelbaseTestRoutine();
-		//navigationController.addWayPoint(7*TILE, 7*TILE);
-		//navigationController.runNavigationTask(false);
-		//while (Button.waitForAnyPress() != Button.ID_ESCAPE);
-		//navigation.forward(TILE, false);
-		//while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		localisationController.initialLocalisationRoutine();
-
-		//localisationController.navigateToInitialIntersection();
-		//navigation.turnTo(0);
-		navigationController.addWayPoint(gameParameters.ZO_G.x, gameParameters.ZO_G.y);
-		navigationController.runNavigationTask(true);
-		localisationController.colorLocalisationRoutine(true);
-		navigation.travelTo(gameParameters.ZO_G.x, gameParameters.ZO_G.y, false);
-		navigation.faceZipline();
-		ziplineController.runZiplineTask();
-		navigation.travelTo(gameParameters.ZO_R.x, gameParameters.ZO_R.y, false);
-		localisationController.colorLocalisationRoutine(true);
-		blockSearchingController.runBlockSearchingTask();
-		navigationController.addWayPoint(7*TILE, 30.48);
-		navigationController.runNavigationTask(true);
-		localisationController.colorLocalisationRoutine(false);
-		navigation.travelTo(7*TILE, 30.48, false);
-		navigation.turnTo(0);
 		
-		//navigationController.addWayPoint(gameParameters.SR_LL.x, gameParameters.SR_LL.y);
-		//navigationController.runNavigationTask(true);
-		//localisationController.colorLocalisationRoutine(false);
-		//navigation.travelTo(gameParameters.SR_LL.x, gameParameters.SR_LL.y, false);
-		//navigation.turnTo(0);
+		if(greenTeam) {
+			//Travel to zipline
+			navigationController.addWayPoint(gameParameters.ZO_G.x, gameParameters.ZO_G.y);
+			navigationController.runNavigationTask(true);
+			localisationController.colorLocalisationRoutine(true);
+			
+			//Zipline
+			navigation.travelTo(gameParameters.ZO_G.x, gameParameters.ZO_G.y, false);
+			navigation.faceZipline();
+			ziplineController.runZiplineTask();
+			navigation.travelTo(gameParameters.ZO_R.x, gameParameters.ZO_R.y, false);
+			localisationController.colorLocalisationRoutine(true);
+			
+			//BlockSearch
+			blockSearchingController.runBlockSearchingTask();
+			
+			//Travel back
+			returnToStartingCorner();
+		} else {
+			//BlockSearch
+			blockSearchingController.runBlockSearchingTask();
+			
+			//Travel to zipline
+			navigationController.addWayPoint(gameParameters.ZO_G.x, gameParameters.ZO_G.y);
+			navigationController.runNavigationTask(true);
+			localisationController.colorLocalisationRoutine(true);
+			
+			//Zipline
+			navigation.travelTo(gameParameters.ZO_G.x, gameParameters.ZO_G.y, false);
+			navigation.faceZipline();
+			ziplineController.runZiplineTask();
+			navigation.travelTo(gameParameters.ZO_R.x, gameParameters.ZO_R.y, false);
+			localisationController.colorLocalisationRoutine(true);
+			
+			//Travel back
+			returnToStartingCorner();
+		}
+		
 		
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		System.exit(0);
+	}
+	
+	/**
+	 * Makes the robot navigate back to its starting corner
+	 */
+	private static void returnToStartingCorner() {
+		switch (startingCorner) {
+		case 0:
+			navigationController.addWayPoint(TILE, TILE);
+			break;
+		case 1:
+			navigationController.addWayPoint(((BOARD_SIZE - 1) * TILE), TILE);
+			break;
+		case 2:
+			navigationController.addWayPoint(((BOARD_SIZE - 1) * TILE), ((BOARD_SIZE - 1) * TILE));
+			break;
+		case 3:
+			navigationController.addWayPoint(TILE, ((BOARD_SIZE - 1) * TILE));
+			break;
+		default:
+			break;
+		}
+		navigationController.runNavigationTask(true);
 	}
 	
 	/**
@@ -228,10 +262,14 @@ public class MainController {
 	 * on the team number
 	 */
 	private static void determineStartingCorner() {
-		if (gameParameters.GreenTeam == TEAM_NUMBER)
+		if (gameParameters.GreenTeam == TEAM_NUMBER) {
 			startingCorner = gameParameters.GreenCorner;
-		else if (gameParameters.GreenTeam == TEAM_NUMBER)
+			greenTeam = true;
+		}
+		else if (gameParameters.GreenTeam == TEAM_NUMBER) {
 			startingCorner = gameParameters.RedCorner;
+			greenTeam = false;			
+		}
 		else
 			startingCorner = 0;
 	}

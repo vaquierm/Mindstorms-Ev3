@@ -4,6 +4,7 @@
 
 package ca.mcgill.ecse211.capturetheflag;
 
+import java.io.File;
 import java.util.Arrays;
 
 import ca.mcgill.ecse211.capturetheflag.ColorPoller.ColorPollingState;
@@ -141,7 +142,7 @@ public class BlockSearchingController {
 				}	
 				break;
 			case FOUND:
-				Sound.twoBeeps(); //TODO replace to fun sound
+				Sound.playSample(new File("MarioCourseClearSound2.wav"));
 				rightMotor.stop(true);
 				leftMotor.stop();
 				return;
@@ -227,11 +228,11 @@ public class BlockSearchingController {
 	private void inintialisation(int teamNumber) {
 		boolean greenTeam = (gameParameters.GreenTeam == teamNumber);
 		if(greenTeam) {
-			lowerLeft = gameParameters.SG_LL;
-			upperRight = gameParameters.SG_UR;
-		} else {
 			lowerLeft = gameParameters.SR_LL;
 			upperRight = gameParameters.SR_UR;
+		} else {
+			lowerLeft = gameParameters.SG_LL;
+			upperRight = gameParameters.SG_UR;
 		}
 		closestValidPoint(greenTeam);
 	}

@@ -37,8 +37,13 @@ public class BlockSearchingData {
 		determineTargetColor();
 	}
 	
-	public void processData(int data) {
-		if(data == target) {
+	/**
+	 * Sends an interrupt to the blockSearchingController if the block is found.
+	 * @param dataFront
+	 * @param dataSide
+	 */
+	public void processData(int dataFront, int dataSide) {
+		if(dataFront == target || dataSide == target) {
 			blockSearchingController.resumeThread();
 		}
 	}
