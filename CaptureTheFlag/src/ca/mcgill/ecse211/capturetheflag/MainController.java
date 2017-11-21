@@ -70,8 +70,8 @@ public class MainController {
 	private static int startingCorner;
 	private static final double TILE = 30.48;
 	private static final int BOARD_SIZE = 8; //TODO change for competition
-	private static final double WHEEL_RADIUS = 2.08;
-	private static final double TRACK = 9.70; //9.92
+	private static final double WHEEL_RADIUS = 2.1;
+	private static final double TRACK = 9.71; //9.92
 	
 	
 	//This code can be used to find the timing of threads.
@@ -131,11 +131,11 @@ public class MainController {
 		//Get the game parameters
 		
 
-		//gameParameters = WiFiGameParameters.getGameParameters(TILE);
+		gameParameters = WiFiGameParameters.getGameParameters(TILE);
 		/**
 		 * This is the hardcoded game parameters to not have to input them every time.
 		 */
-		while (Button.waitForAnyPress() != Button.ID_ENTER); //TODO delete for beta
+		/*while (Button.waitForAnyPress() != Button.ID_ENTER); //TODO delete for beta
 		gameParameters = new GameParameters(1 , 20, //Team numbers
 	    		  1, 1, //Starting corners
 	    		  1, 0, //Color of flags
@@ -155,7 +155,7 @@ public class MainController {
 	    		  new Coordinate(5 * TILE, 8 * TILE), //SR_UR
 	    		  new Coordinate(3 * TILE, 0 * TILE), //SG_LL
 	    		  new Coordinate(5 * TILE, 1 * TILE) //SG_UR
-	    		  );
+	    		  );*/
 		
 		determineStartingCorner();
 		
@@ -183,9 +183,10 @@ public class MainController {
 		blockSearchingController = new BlockSearchingController(odometer, navigationController, navigation, localisation, rightMotor, leftMotor, colorPoller, gameParameters, TILE, TEAM_NUMBER);
 		
 		
-		
-		
-		
+		/*wheelbaseTestRoutine();
+		while(Button.waitForAnyEvent() != Button .ID_ENTER);
+		navigation.forward(TILE, false);
+		while(Button.waitForAnyEvent() != Button .ID_ENTER);*/
 		/*
 		 * Here is the flow of tasks to run.
 		 */

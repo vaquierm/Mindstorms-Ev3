@@ -191,26 +191,26 @@ public class NavigationController {
 		Coordinate ithCoordinate = coordinateList.get(i);
 		Coordinate nextCoordinate = coordinateList.get(i + 1);
 		Coordinate bridgeMid = new Coordinate((gameParameters.SV_UR.x + gameParameters.SV_LL.x) / 2, (gameParameters.SH_UR.y + gameParameters.SH_LL.y) / 2);
-		if (ithCoordinate.y == nextCoordinate.y && obstacleCheck(ithCoordinate, nextCoordinate)) {
+		if (ithCoordinate.y == nextCoordinate.y) {
 			if (mapPoint(ithCoordinate) == mapPoint(nextCoordinate) || mapPoint(nextCoordinate) == Zone.BRIDGE || mapPoint(ithCoordinate) == Zone.BRIDGE) {
-				if (recursivePath(i + 1)) {
+				if (obstacleCheck(ithCoordinate, nextCoordinate) && recursivePath(i + 1)) {
 					return true;
 				} else {
-					Coordinate option1 = new Coordinate(ithCoordinate.x, ithCoordinate.y + TILE);
-					Coordinate option2 = new Coordinate(ithCoordinate.x, ithCoordinate.y - TILE);
+					Coordinate option = new Coordinate(ithCoordinate.x, ithCoordinate.y + TILE);
 					Coordinate previous = null;
 					if(i > 0) {
 						previous = coordinateList.get(i - 1);
 					}
-					if (mapPoint(option1) != Zone.RIVER && mapPoint(option1) != Zone.BRIDGE && !option1.equals(previous)) {
-						coordinateList.add(i + 1, option1);
+					if (mapPoint(option) != Zone.RIVER && mapPoint(option) != Zone.BRIDGE && !option.equals(previous)) {
+						coordinateList.add(i + 1, option);
 						if (recursivePath(i + 1)) {
 							return true;
 						}
 						coordinateList.remove(i + 1);
 					}
-					if (mapPoint(option2) != Zone.RIVER && mapPoint(option2) != Zone.BRIDGE && !option2.equals(previous)) {
-						coordinateList.add(i + 1, option2);
+					option = new Coordinate(ithCoordinate.x, ithCoordinate.y - TILE);
+					if (mapPoint(option) != Zone.RIVER && mapPoint(option) != Zone.BRIDGE && !option.equals(previous)) {
+						coordinateList.add(i + 1, option);
 						if (recursivePath(i + 1)) {
 							return true;
 						}
@@ -229,26 +229,26 @@ public class NavigationController {
 			}
 		}
 		
-		else if (ithCoordinate.x == nextCoordinate.x && obstacleCheck(ithCoordinate, nextCoordinate)) {
+		else if (ithCoordinate.x == nextCoordinate.x) {
 			if (mapPoint(ithCoordinate) == mapPoint(nextCoordinate) || mapPoint(nextCoordinate) == Zone.BRIDGE || mapPoint(ithCoordinate) == Zone.BRIDGE) {
-				if (recursivePath(i + 1)) {
+				if (obstacleCheck(ithCoordinate, nextCoordinate) && recursivePath(i + 1)) {
 					return true;
 				} else {
-					Coordinate option1 = new Coordinate(ithCoordinate.x + TILE, ithCoordinate.y);
-					Coordinate option2 = new Coordinate(ithCoordinate.x - TILE, ithCoordinate.y);
+					Coordinate option = new Coordinate(ithCoordinate.x + TILE, ithCoordinate.y);
 					Coordinate previous = null;
 					if(i > 0) {
 						previous = coordinateList.get(i - 1);
 					}
-					if (mapPoint(option1) != Zone.RIVER && mapPoint(option1) != Zone.BRIDGE && !option1.equals(previous)) {
-						coordinateList.add(i + 1, option1);
+					if (mapPoint(option) != Zone.RIVER && mapPoint(option) != Zone.BRIDGE && !option.equals(previous)) {
+						coordinateList.add(i + 1, option);
 						if (recursivePath(i + 1)) {
 							return true;
 						}
 						coordinateList.remove(i + 1);
 					}
-					if (mapPoint(option2) != Zone.RIVER && mapPoint(option2) != Zone.BRIDGE && !option2.equals(previous)) {
-						coordinateList.add(i + 1, option2);
+					option = new Coordinate(ithCoordinate.x - TILE, ithCoordinate.y);
+					if (mapPoint(option) != Zone.RIVER && mapPoint(option) != Zone.BRIDGE && !option.equals(previous)) {
+						coordinateList.add(i + 1, option);
 						if (recursivePath(i + 1)) {
 							return true;
 						}
@@ -271,14 +271,15 @@ public class NavigationController {
 			if (mapPoint(ithCoordinate) == mapPoint(nextCoordinate) || mapPoint(nextCoordinate) == Zone.BRIDGE || mapPoint(ithCoordinate) == Zone.BRIDGE) {
 				Coordinate midVH = new Coordinate(ithCoordinate.x, nextCoordinate.y);
 				Coordinate midHV = new Coordinate(nextCoordinate.x, ithCoordinate.y);
-				if (mapPoint(midVH) != Zone.RIVER && mapPoint(midVH) != Zone.BRIDGE && obstacleCheck(ithCoordinate, midVH) && obstacleCheck(midVH, nextCoordinate)) {
+				if (mapPoint(midVH) != Zone.RIVER && mapPoint(midVH) != Zone.BRIDGE && (mapPoint(ithCoordinate) != Zone.BRIDGE || mapPoint(midVH) == mapPoint(nextCoordinate)) && obstacleCheck(ithCoordinate, midVH) /*&& obstacleCheck(midVH, nextCoordinate)*/
+						&& !(mapPoint(midHV) != Zone.RIVER && mapPoint(midHV) != Zone.BRIDGE && (mapPoint(ithCoordinate) != Zone.BRIDGE || mapPoint(midHV) == mapPoint(nextCoordinate)) && obstacleCheck(ithCoordinate, midHV) && obstacleCheck(midHV, nextCoordinate))) {
 					coordinateList.add(i + 1, midVH);
 					if (recursivePath(i + 1)) {
 						return true;
 					}
 					coordinateList.remove(i + 1);
 				}
-				if (mapPoint(midHV) != Zone.RIVER && mapPoint(midHV) != Zone.BRIDGE && obstacleCheck(ithCoordinate, midHV) && obstacleCheck(midHV, nextCoordinate)) {
+				if (mapPoint(midHV) != Zone.RIVER && mapPoint(midHV) != Zone.BRIDGE && (mapPoint(ithCoordinate) != Zone.BRIDGE || mapPoint(midHV) == mapPoint(nextCoordinate)) && obstacleCheck(ithCoordinate, midHV) /*&& obstacleCheck(midHV, nextCoordinate)*/) {
 					coordinateList.add(i + 1, midHV);
 					if (recursivePath(i + 1)) {
 						return true;
