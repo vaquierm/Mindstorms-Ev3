@@ -530,6 +530,31 @@ public class NavigationController {
 				}
 			}
 		}
+		if (gameParameters.ZC_G.x != gameParameters.ZC_R.x && gameParameters.ZC_G.y != gameParameters.ZC_R.y) {
+			double slope;
+			double yIntercept;
+			double lineXIntercept;
+			double lineYIntercept;
+			if (gameParameters.ZC_R.x > gameParameters.ZC_G.x) {
+				slope = (gameParameters.ZC_R.y - gameParameters.ZC_G.y) / (gameParameters.ZC_R.x - gameParameters.ZC_G.x);				
+			} else {
+				slope = (gameParameters.ZC_G.y - gameParameters.ZC_R.y) / (gameParameters.ZC_G.x - gameParameters.ZC_R.x);
+			}
+			yIntercept = (slope * gameParameters.ZC_G.x) - gameParameters.ZC_G.y;
+			if (a.x == b.x && ((a.x <= gameParameters.ZC_G.x && a.x >= gameParameters.ZC_R.x) || (a.x >= gameParameters.ZC_G.x && a.x <= gameParameters.ZC_R.x))) {
+				lineYIntercept = (slope * a.x) + yIntercept;
+				lineXIntercept = (lineYIntercept - yIntercept) / slope;
+				if ((lineYIntercept <= a.y && lineYIntercept >= b.y) || (lineYIntercept >= a.y && lineYIntercept <= b.y)) {
+					return false;
+				}
+			} else if (a.y == b.y && ((a.y <= gameParameters.ZC_G.y && a.y >= gameParameters.ZC_R.y) || (a.y >= gameParameters.ZC_G.y && a.y <= gameParameters.ZC_R.y))) {
+				lineXIntercept = (a.y - yIntercept) / slope;
+				lineYIntercept = (slope * lineXIntercept) + yIntercept;
+				if ((lineXIntercept <= a.x && lineXIntercept >= b.x) || (lineXIntercept >= a.x && lineXIntercept <= b.x)) {
+					return false;
+				}
+			}
+		}
 		return true;
 	}
 	

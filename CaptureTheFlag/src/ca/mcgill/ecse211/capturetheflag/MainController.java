@@ -182,11 +182,6 @@ public class MainController {
 		ziplineController = new ZiplineController(odometer, colorPoller, rightMotor, leftMotor, armMotor, gameParameters);
 		blockSearchingController = new BlockSearchingController(odometer, navigationController, navigation, localisation, rightMotor, leftMotor, colorPoller, gameParameters, TILE, TEAM_NUMBER);
 		
-		
-		/*wheelbaseTestRoutine();
-		while(Button.waitForAnyEvent() != Button .ID_ENTER);
-		navigation.forward(TILE, false);
-		while(Button.waitForAnyEvent() != Button .ID_ENTER);*/
 		/*
 		 * Here is the flow of tasks to run.
 		 */
