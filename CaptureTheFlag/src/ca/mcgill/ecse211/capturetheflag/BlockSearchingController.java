@@ -300,7 +300,7 @@ public class BlockSearchingController {
 			yIncrement = 1;
 			travelDir = false;
 			nextSweep = new Coordinate(upperRight.x, lowerLeft.y);
-			if (navigationController.mapPoint(nextSweep) == Zone.RIVER) {
+			if (navigationController.mapPoint(nextSweep.x, nextSweep.y) == Zone.RIVER) {
 				return tryAdjacentPoints();
 			}
 			return true;
@@ -309,7 +309,7 @@ public class BlockSearchingController {
 			yIncrement = -1;
 			travelDir = false;
 			nextSweep = new Coordinate(lowerLeft.x, upperRight.y);
-			if (navigationController.mapPoint(nextSweep) == Zone.RIVER) {
+			if (navigationController.mapPoint(nextSweep.x, nextSweep.y) == Zone.RIVER) {
 				return tryAdjacentPoints();
 			}
 			return true;
@@ -318,7 +318,7 @@ public class BlockSearchingController {
 			yIncrement = -1;
 			travelDir = true;
 			nextSweep = upperRight;
-			if (navigationController.mapPoint(nextSweep) == Zone.RIVER) {
+			if (navigationController.mapPoint(nextSweep.x, nextSweep.y) == Zone.RIVER) {
 				return tryAdjacentPoints();
 			}
 			return true;
@@ -447,7 +447,7 @@ public class BlockSearchingController {
 	 * @return  True if the node is in the search area
 	 */
 	private boolean isInSearchArea(Coordinate node) {
-		if (node.x >= lowerLeft.x - 1 && node.x <= upperRight.x + 1 && node.y >= lowerLeft.y - 1 && node.y <= upperRight.y + 1 && navigationController.mapPoint(node) != Zone.RIVER) {
+		if (node.x >= lowerLeft.x - 1 && node.x <= upperRight.x + 1 && node.y >= lowerLeft.y - 1 && node.y <= upperRight.y + 1 && navigationController.mapPoint(node.x, node.y) != Zone.RIVER) {
 			return true;
 		}
 		return false;

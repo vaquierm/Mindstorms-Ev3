@@ -206,6 +206,7 @@ public class NavigationController {
 			}
 		}
 		if(i == coordinateList.size() - 1) {
+			removeRedundantPoints();
 			return true;
 		}
 		Coordinate ithCoordinate = coordinateList.get(i);
@@ -331,6 +332,23 @@ public class NavigationController {
 				}
 				coordinateList.remove(i + 1);
 				return false;
+			}
+		}
+	}
+	
+	/**
+	 * Removes all redundant points after calculating the trajectory.
+	 */
+	private void removeRedundantPoints() {
+		Coordinate ithCoordinate;
+		Coordinate midCoordinate;
+		Coordinate nextCoordinate;
+		for (int i = 0; i < coordinateList.size() - 2; i++) {
+			ithCoordinate = coordinateList.get(i);
+			midCoordinate = coordinateList.get(i + 1);
+			nextCoordinate = coordinateList.get(i + 2);
+			if ((ithCoordinate.x == midCoordinate.x && ithCoordinate.x == nextCoordinate.x) || (ithCoordinate.y == midCoordinate.y && ithCoordinate.y == nextCoordinate.y)) {
+				coordinateList.remove(i + 1);
 			}
 		}
 	}
