@@ -267,7 +267,7 @@ public class MainController {
 			startingCorner = gameParameters.GreenCorner;
 			greenTeam = true;
 		}
-		else if (gameParameters.GreenTeam == TEAM_NUMBER) {
+		else if (gameParameters.RedTeam == TEAM_NUMBER) {
 			startingCorner = gameParameters.RedCorner;
 			greenTeam = false;			
 		}

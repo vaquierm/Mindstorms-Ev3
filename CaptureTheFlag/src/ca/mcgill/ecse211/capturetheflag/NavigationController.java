@@ -183,7 +183,27 @@ public class NavigationController {
 					return false;
 				}
 			}
-			coordinateList.add(0, closestIntersection());
+		}
+		if (i >= 5) {
+			boolean repeat = false;
+			for (int k = 3; (k <= (i + 1) / 2); k++) {
+				if (repeat == true) {
+					break;
+				}
+				int counter = 0;
+				for (int j = 0; j < k; j++) {
+					if (coordinateList.get(i - j).equals(coordinateList.get(i - j - k))) {
+						counter++;
+						if (counter == k) {
+							repeat = true;
+							break;
+						}
+					}
+				}
+			}
+			if (repeat) {
+				return false;
+			}
 		}
 		if(i == coordinateList.size() - 1) {
 			return true;
@@ -196,25 +216,25 @@ public class NavigationController {
 				if (obstacleCheck(ithCoordinate, nextCoordinate) && recursivePath(i + 1)) {
 					return true;
 				} else {
-					Coordinate option = new Coordinate(ithCoordinate.x, ithCoordinate.y + TILE);
+					Coordinate option;
 					Coordinate previous = null;
+					int[] currentStatus = {0};
 					if(i > 0) {
 						previous = coordinateList.get(i - 1);
 					}
-					if (mapPoint(option) != Zone.RIVER && mapPoint(option) != Zone.BRIDGE && !option.equals(previous)) {
-						coordinateList.add(i + 1, option);
-						if (recursivePath(i + 1)) {
-							return true;
+					for(int j = 0; j < 8; j++) {
+						if (mapPoint(ithCoordinate) == Zone.BRIDGE) {
+							option = closeShift(ithCoordinate, nextCoordinate, currentStatus, true, true);
+						} else {
+							option = closeShift(ithCoordinate, nextCoordinate, currentStatus, true, false);
 						}
-						coordinateList.remove(i + 1);
-					}
-					option = new Coordinate(ithCoordinate.x, ithCoordinate.y - TILE);
-					if (mapPoint(option) != Zone.RIVER && mapPoint(option) != Zone.BRIDGE && !option.equals(previous)) {
-						coordinateList.add(i + 1, option);
-						if (recursivePath(i + 1)) {
-							return true;
+						if (mapPoint(option) != Zone.RIVER && !option.equals(previous)) {
+							coordinateList.add(i + 1, option);
+							if (recursivePath(i + 1)) {
+								return true;
+							}
+							coordinateList.remove(i + 1);
 						}
-						coordinateList.remove(i + 1);
 					}
 					return false;
 				}
@@ -234,25 +254,25 @@ public class NavigationController {
 				if (obstacleCheck(ithCoordinate, nextCoordinate) && recursivePath(i + 1)) {
 					return true;
 				} else {
-					Coordinate option = new Coordinate(ithCoordinate.x + TILE, ithCoordinate.y);
+					Coordinate option;
 					Coordinate previous = null;
+					int[] currentStatus = {0};
 					if(i > 0) {
 						previous = coordinateList.get(i - 1);
 					}
-					if (mapPoint(option) != Zone.RIVER && mapPoint(option) != Zone.BRIDGE && !option.equals(previous)) {
-						coordinateList.add(i + 1, option);
-						if (recursivePath(i + 1)) {
-							return true;
+					for (int j = 0; j < 8; j++) {
+						if (mapPoint(ithCoordinate) == Zone.BRIDGE) {
+							option = closeShift(ithCoordinate, nextCoordinate, currentStatus, true, true);
+						} else {
+							option = closeShift(ithCoordinate, nextCoordinate, currentStatus, false, true);
 						}
-						coordinateList.remove(i + 1);
-					}
-					option = new Coordinate(ithCoordinate.x - TILE, ithCoordinate.y);
-					if (mapPoint(option) != Zone.RIVER && mapPoint(option) != Zone.BRIDGE && !option.equals(previous)) {
-						coordinateList.add(i + 1, option);
-						if (recursivePath(i + 1)) {
-							return true;
+						if (mapPoint(option) != Zone.RIVER && !option.equals(previous)) {
+							coordinateList.add(i + 1, option);
+							if (recursivePath(i + 1)) {
+								return true;
+							}
+							coordinateList.remove(i + 1);
 						}
-						coordinateList.remove(i + 1);
 					}
 					return false;
 				}
@@ -271,7 +291,11 @@ public class NavigationController {
 			if (mapPoint(ithCoordinate) == mapPoint(nextCoordinate) || mapPoint(nextCoordinate) == Zone.BRIDGE || mapPoint(ithCoordinate) == Zone.BRIDGE) {
 				Coordinate midVH = new Coordinate(ithCoordinate.x, nextCoordinate.y);
 				Coordinate midHV = new Coordinate(nextCoordinate.x, ithCoordinate.y);
-				if (mapPoint(midVH) != Zone.RIVER && mapPoint(midVH) != Zone.BRIDGE && (mapPoint(ithCoordinate) != Zone.BRIDGE || mapPoint(midVH) == mapPoint(nextCoordinate)) && obstacleCheck(ithCoordinate, midVH) /*&& obstacleCheck(midVH, nextCoordinate)*/
+				Coordinate previous = null;
+				if(i > 0) {
+					previous = coordinateList.get(i - 1);
+				}
+				if (!midVH.equals(previous) && mapPoint(midVH) != Zone.RIVER && mapPoint(midVH) != Zone.BRIDGE && (mapPoint(ithCoordinate) != Zone.BRIDGE || mapPoint(midVH) == mapPoint(nextCoordinate)) && obstacleCheck(ithCoordinate, midVH) && obstacleCheck(midVH, nextCoordinate)
 						&& !(mapPoint(midHV) != Zone.RIVER && mapPoint(midHV) != Zone.BRIDGE && (mapPoint(ithCoordinate) != Zone.BRIDGE || mapPoint(midHV) == mapPoint(nextCoordinate)) && obstacleCheck(ithCoordinate, midHV) && obstacleCheck(midHV, nextCoordinate))) {
 					coordinateList.add(i + 1, midVH);
 					if (recursivePath(i + 1)) {
@@ -279,48 +303,24 @@ public class NavigationController {
 					}
 					coordinateList.remove(i + 1);
 				}
-				if (mapPoint(midHV) != Zone.RIVER && mapPoint(midHV) != Zone.BRIDGE && (mapPoint(ithCoordinate) != Zone.BRIDGE || mapPoint(midHV) == mapPoint(nextCoordinate)) && obstacleCheck(ithCoordinate, midHV) /*&& obstacleCheck(midHV, nextCoordinate)*/) {
+				if (!midHV.equals(previous) && mapPoint(midHV) != Zone.RIVER && mapPoint(midHV) != Zone.BRIDGE && (mapPoint(ithCoordinate) != Zone.BRIDGE || mapPoint(midHV) == mapPoint(nextCoordinate)) && obstacleCheck(ithCoordinate, midHV) && obstacleCheck(midHV, nextCoordinate)) {
 					coordinateList.add(i + 1, midHV);
 					if (recursivePath(i + 1)) {
 						return true;
 					}
 					coordinateList.remove(i + 1);
 				}
-				Coordinate option = new Coordinate(ithCoordinate.x + TILE, ithCoordinate.y);
-				Coordinate previous = null;
-				if(i > 0) {
-					previous = coordinateList.get(i - 1);
-				}
-				if (mapPoint(option) != Zone.RIVER && mapPoint(option) != Zone.BRIDGE && !option.equals(previous) && obstacleCheck(ithCoordinate, option) && obstacleCheck(option, nextCoordinate)) {
-					coordinateList.add(i + 1, option);
-					if (recursivePath(i + 1)) {
-						return true;
+				int[] currentStatus = {0};
+				Coordinate option;
+				for (int j = 0; j < 8; j++) {
+					option = closeShift(ithCoordinate, nextCoordinate, currentStatus, true, true);
+					if (mapPoint(option) != Zone.RIVER && !option.equals(previous) && obstacleCheck(ithCoordinate, option) && obstacleCheck(option, nextCoordinate)) {
+						coordinateList.add(i + 1, option);
+						if (recursivePath(i + 1)) {
+							return true;
+						}
+						coordinateList.remove(i + 1);
 					}
-					coordinateList.remove(i + 1);
-				}
-				option = new Coordinate(ithCoordinate.x - TILE, ithCoordinate.y);
-				if (mapPoint(option) != Zone.RIVER && mapPoint(option) != Zone.BRIDGE && !option.equals(previous) && obstacleCheck(ithCoordinate, option) && obstacleCheck(option, nextCoordinate)) {
-					coordinateList.add(i + 1, option);
-					if (recursivePath(i + 1)) {
-						return true;
-					}
-					coordinateList.remove(i + 1);
-				}
-				option = new Coordinate(ithCoordinate.x, ithCoordinate.y + TILE);
-				if (mapPoint(option) != Zone.RIVER && mapPoint(option) != Zone.BRIDGE && !option.equals(previous) && obstacleCheck(ithCoordinate, option) && obstacleCheck(option, nextCoordinate)) {
-					coordinateList.add(i + 1, option);
-					if (recursivePath(i + 1)) {
-						return true;
-					}
-					coordinateList.remove(i + 1);
-				}
-				option = new Coordinate(ithCoordinate.x, ithCoordinate.y - TILE);
-				if (mapPoint(option) != Zone.RIVER && mapPoint(option) != Zone.BRIDGE && !option.equals(previous) && obstacleCheck(ithCoordinate, option) && obstacleCheck(option, nextCoordinate)) {
-					coordinateList.add(i + 1, option);
-					if (recursivePath(i + 1)) {
-						return true;
-					}
-					coordinateList.remove(i + 1);
 				}
 				return false;
 			}
@@ -333,6 +333,73 @@ public class NavigationController {
 				return false;
 			}
 		}
+	}
+	
+	/**
+	 * This method returns the closest shift to get to the destination
+	 * @param ithCoordinate  Current position
+	 * @param nextCoordinate  Destination
+	 * @param currentStatus  Status of which direction were visited
+	 * @param vertical  Allow vertical shifting
+	 * @param horizontal  Allow horizontal shifting
+	 * @return  The coordinate of the shift
+	 */
+	private Coordinate closeShift(Coordinate ithCoordinate, Coordinate nextCoordinate, int[] currentStatus, boolean vertical, boolean horizontal) {
+		double distance = Integer.MAX_VALUE;
+		double x = -1;
+		double y = -1;
+		int add = -1;
+		if (horizontal && (currentStatus[0] & 1) == 0) {
+			distance = Math.sqrt(Math.abs(ithCoordinate.x + TILE - nextCoordinate.x) + Math.abs(ithCoordinate.y - nextCoordinate.y));
+			x = ithCoordinate.x + TILE;
+			y = ithCoordinate.y;
+			add = 1;
+		}
+		if (horizontal && (currentStatus[0] & 2) == 0 && Math.sqrt(Math.abs(ithCoordinate.x - TILE - nextCoordinate.x) + Math.abs(ithCoordinate.y - nextCoordinate.y)) < distance) {
+			distance = Math.sqrt(Math.abs(ithCoordinate.x - TILE - nextCoordinate.x) + Math.abs(ithCoordinate.y - nextCoordinate.y));
+			x = ithCoordinate.x - TILE;
+			y = ithCoordinate.y;
+			add = 2;
+		}
+		if (vertical && (currentStatus[0] & 4) == 0 && Math.sqrt(Math.abs(ithCoordinate.x - nextCoordinate.x) + Math.abs(ithCoordinate.y + TILE - nextCoordinate.y)) < distance) {
+			distance = Math.sqrt(Math.abs(ithCoordinate.x - nextCoordinate.x) + Math.abs(ithCoordinate.y + TILE - nextCoordinate.y));
+			x = ithCoordinate.x;
+			y = ithCoordinate.y + TILE;
+			add = 4;
+		}
+		if (vertical && (currentStatus[0] & 8) == 0 && Math.sqrt(Math.abs(ithCoordinate.x - nextCoordinate.x) + Math.abs(ithCoordinate.y - TILE - nextCoordinate.y)) < distance) {
+			distance = Math.sqrt(Math.abs(ithCoordinate.x - nextCoordinate.x) + Math.abs(ithCoordinate.y - TILE - nextCoordinate.y));
+			x = ithCoordinate.x;
+			y = ithCoordinate.y - TILE;
+			add = 8;
+		}
+		if (horizontal && (currentStatus[0] & 16) == 0 && Math.sqrt(Math.abs(ithCoordinate.x + (TILE/2) - nextCoordinate.x) + Math.abs(ithCoordinate.y - nextCoordinate.y)) < distance) {
+			distance = Math.sqrt(Math.abs(ithCoordinate.x + (TILE/2) - nextCoordinate.x) + Math.abs(ithCoordinate.y - nextCoordinate.y));
+			x = ithCoordinate.x + (TILE/2);
+			y = ithCoordinate.y;
+			add = 16;
+		}
+		if (horizontal && (currentStatus[0] & 32) == 0 && Math.sqrt(Math.abs(ithCoordinate.x - (TILE/2) - nextCoordinate.x) + Math.abs(ithCoordinate.y - nextCoordinate.y)) < distance) {
+			distance = Math.sqrt(Math.abs(ithCoordinate.x - (TILE/2) - nextCoordinate.x) + Math.abs(ithCoordinate.y - nextCoordinate.y));
+			x = ithCoordinate.x - (TILE/2);
+			y = ithCoordinate.y;
+			add = 32;
+		}
+		if (vertical && (currentStatus[0] & 64) == 0 && Math.sqrt(Math.abs(ithCoordinate.x - nextCoordinate.x) + Math.abs(ithCoordinate.y + (TILE/2) - nextCoordinate.y)) < distance) {
+			distance = Math.sqrt(Math.abs(ithCoordinate.x - nextCoordinate.x) + Math.abs(ithCoordinate.y + (TILE/2) - nextCoordinate.y));
+			x = ithCoordinate.x;
+			y = ithCoordinate.y + (TILE/2);
+			add = 64;
+		}
+		if (vertical && (currentStatus[0] & 128) == 0 && Math.sqrt(Math.abs(ithCoordinate.x - nextCoordinate.x) + Math.abs(ithCoordinate.y - (TILE/2) - nextCoordinate.y)) < distance) {
+			distance = Math.sqrt(Math.abs(ithCoordinate.x - nextCoordinate.x) + Math.abs(ithCoordinate.y - (TILE/2) - nextCoordinate.y));
+			x = ithCoordinate.x;
+			y = ithCoordinate.y - (TILE/2);
+			add = 128;
+		}
+		if(add > 0)
+			currentStatus[0] += add;
+		return new Coordinate(x, y);
 	}
 	
 	
@@ -358,6 +425,13 @@ public class NavigationController {
 		else if((node.x > gameParameters.SV_LL.x && node.x < gameParameters.SV_UR.x && node.y > gameParameters.SV_LL.y && node.y < gameParameters.SV_UR.y)
 				||(node.x > gameParameters.SH_LL.x && node.x < gameParameters.SH_UR.x && node.y > gameParameters.SH_LL.y && node.y < gameParameters.SH_UR.y))
 		{
+			return Zone.BRIDGE;
+		}
+		else if (((node.x >= gameParameters.Green_LL.x && node.x <= gameParameters.Green_UR.x && node.y >= gameParameters.Green_LL.y && node.y <= gameParameters.Green_UR.y)
+				|| (node.x >= gameParameters.Red_LL.x && node.x <= gameParameters.Red_UR.x && node.y >= gameParameters.Red_LL.y && node.y <= gameParameters.Red_UR.y))
+				&& ((node.x >= gameParameters.SV_LL.x && node.x <= gameParameters.SV_UR.x && node.y >= gameParameters.SV_LL.y && node.y <= gameParameters.SV_UR.y)
+				||(node.x >= gameParameters.SH_LL.x && node.x <= gameParameters.SH_UR.x && node.y >= gameParameters.SH_LL.y && node.y <= gameParameters.SH_UR.y))
+				&& (!(node.x == gameParameters.SH_LL.x && node.y == gameParameters.SH_LL.y) && !(node.x == gameParameters.SH_UR.x && node.y == gameParameters.SH_UR.y) && !(node.x == gameParameters.SV_LL.x && node.y == gameParameters.SV_LL.y) && !(node.x == gameParameters.SV_UR.x && node.y == gameParameters.SV_UR.y)) ) {
 			return Zone.BRIDGE;
 		}
 		else {
@@ -411,6 +485,13 @@ public class NavigationController {
 					return false;
 				}
 			}
+			if (gameParameters.ZC_G.x == gameParameters.ZC_R.x) {
+				if ((a.y < gameParameters.ZC_R.y && a.y > gameParameters.ZC_G.y) || (a.y > gameParameters.ZC_R.y && a.y < gameParameters.ZC_G.y)) {
+					if (((a.x <= gameParameters.ZC_G.x && b.x >= gameParameters.ZC_G.x) || (a.x >= gameParameters.ZC_G.x && b.x <= gameParameters.ZC_G.x))) {
+						return false;
+					}
+				}
+			}
 		}
 		if (a.x == b.x) {
 			if (a.x == gameParameters.ZC_R.x) {
@@ -421,6 +502,13 @@ public class NavigationController {
 			if (a.x == gameParameters.ZC_G.x) {
 				if (((a.y <= gameParameters.ZC_G.y && b.y >= gameParameters.ZC_G.y) || (a.y >= gameParameters.ZC_G.y && b.y <= gameParameters.ZC_G.y))) {
 					return false;
+				}
+			}
+			if (gameParameters.ZC_G.y == gameParameters.ZC_R.y) {
+				if ((a.x < gameParameters.ZC_R.x && a.x > gameParameters.ZC_G.x) && (a.x > gameParameters.ZC_R.x && a.x < gameParameters.ZC_G.x)) {
+					if (((a.y <= gameParameters.ZC_G.y && b.y >= gameParameters.ZC_G.y) || (a.y >= gameParameters.ZC_G.y && b.y <= gameParameters.ZC_G.y))) {
+						return false;
+					}
 				}
 			}
 		}
