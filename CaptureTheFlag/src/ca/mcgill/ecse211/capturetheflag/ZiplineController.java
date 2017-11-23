@@ -23,8 +23,8 @@ public class ZiplineController {
 	private volatile boolean paused = false;
 	
 	private static final int DRIVE_SPEED = 200;
-	private static final int PULLEY_SPEED = 200;
-	private static final int PULLEY__FAST_SPEED = 300;
+	private static final int PULLEY_SPEED = 250;
+	private static final int PULLEY__FAST_SPEED = 370;
 	private static final int PULLEY_FAST_ACCEL = 3000;
 	private static final int PULLEY_SLOW_ACCEL = 200;
 	

@@ -69,7 +69,7 @@ public class MainController {
 	//Environmental and robot constants
 	private static int startingCorner;
 	private static final double TILE = 30.48;
-	private static final int BOARD_SIZE = 8; //TODO change for competition
+	private static final int BOARD_SIZE = 12;
 	private static final double WHEEL_RADIUS = 2.1;
 	private static final double TRACK = 9.64;
 	
@@ -132,30 +132,8 @@ public class MainController {
 		
 
 		gameParameters = WiFiGameParameters.getGameParameters(TILE);
-		/**
-		 * This is the hardcoded game parameters to not have to input them every time.
-		 */
-		/*while (Button.waitForAnyPress() != Button.ID_ENTER); //TODO delete for beta
-		gameParameters = new GameParameters(20 , 10, //Team numbers
-	    		  2, 0, //Starting corners
-	    		  1, 1, //Color of flags
-	    		  new Coordinate(0 * TILE, 6 * TILE), //Red_LL
-	    		  new Coordinate(8 * TILE, 8 * TILE), //Red_UR
-	    		  new Coordinate(0 * TILE, 0 * TILE), //Green_LL
-	    		  new Coordinate(4 * TILE, 5 * TILE), //Green_UR
-	    		  new Coordinate(2 * TILE, 6 * TILE), //ZC_R
-	    		  new Coordinate(2 * TILE, 7 * TILE), //ZO_R
-	    		  new Coordinate(2 * TILE, 2 * TILE), //ZC_G
-	    		  new Coordinate(2 * TILE, 1 * TILE), //ZO_G
-	    		  new Coordinate(4 * TILE, 4 * TILE), //SH_LL
-	    		  new Coordinate(6 * TILE, 5 * TILE), //SH_UR
-	    		  new Coordinate(4 * TILE, 4 * TILE), //SV_LL
-	    		  new Coordinate(6 * TILE, 5 * TILE), //SV_UR
-	    		  new Coordinate(3 * TILE, 7 * TILE), //SR_LL
-	    		  new Coordinate(5 * TILE, 8 * TILE), //SR_UR
-	    		  new Coordinate(0 * TILE, 3 * TILE), //SG_LL
-	    		  new Coordinate(1 * TILE, 5 * TILE) //SG_UR
-	    		  );*/
+
+
 		
 		determineStartingCorner();
 		
@@ -182,11 +160,13 @@ public class MainController {
 		ziplineController = new ZiplineController(odometer, colorPoller, rightMotor, leftMotor, armMotor, gameParameters);
 		blockSearchingController = new BlockSearchingController(odometer, navigationController, navigation, localisation, rightMotor, leftMotor, colorPoller, gameParameters, TILE, TEAM_NUMBER);
 		
+		
+		//wheelbaseTestRoutine();
 		/*
 		 * Here is the flow of tasks to run.
 		 */
 		localisationController.initialLocalisationRoutine();
-		
+		Sound.beepSequenceUp();
 		if(greenTeam) {
 			//Travel to zipline
 			navigationController.addWayPoint(gameParameters.ZO_G.x, gameParameters.ZO_G.y);
@@ -225,7 +205,7 @@ public class MainController {
 			returnToStartingCorner();
 		}
 		
-		
+		Sound.playSample(new File("MarioCourseClearSound2.wav"));
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		System.exit(0);
 	}
@@ -301,9 +281,12 @@ public class MainController {
 	 * This method is used as a test to determine if the wheelbase of the robot is set to the right value
 	 */
 	private static void wheelbaseTestRoutine() {
+		navigation.forward(TILE, false);
+		while (Button.waitForAnyPress() != Button.ID_ENTER);
 		navigation.turnTo(90);
 		navigation.turnTo(180);
 		navigation.turnTo(270);
 		navigation.turnTo(0);
+		while (Button.waitForAnyPress() != Button.ID_ENTER);
 	}
 }

@@ -143,7 +143,7 @@ public class BlockSearchingController {
 				}	
 				break;
 			case FOUND:
-				Sound.playSample(new File("MarioCourseClearSound2.wav"));
+				Sound.beepSequenceUp();
 				rightMotor.stop(true);
 				leftMotor.stop();
 				return;

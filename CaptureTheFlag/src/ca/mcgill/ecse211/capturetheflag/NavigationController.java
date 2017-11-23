@@ -33,7 +33,7 @@ public class NavigationController {
 	private volatile boolean objectDetection = false;
 	private static NavigationState state = NavigationState.READY;
 	
-	private static int RELOCALISATION_CONSTANT = 4;
+	private static int RELOCALISATION_CONSTANT = 5;
 	private final GameParameters gameParameters;
 	private final double TILE;
 
@@ -102,6 +102,7 @@ public class NavigationController {
 
 		if (rectangularPath) {
 			try {
+				System.out.println("Dest : " + coordinateList.get(0).x + " " + coordinateList.get(0).y);
 				recursivePath(0);
 			} catch (StackOverflowError e) {
 				Sound.buzz();
@@ -129,14 +130,26 @@ public class NavigationController {
 						Coordinate closestIntersection = closestIntersection();
 						Zone zoneOfIntersection = mapPoint(closestIntersection);
 						if (zoneOfIntersection != Zone.RIVER && !closestIntersection.equals(gameParameters.ZC_G) && !closestIntersection.equals(gameParameters.ZC_R)) {
-							rightMotor.stop(true);
-							leftMotor.stop(); //TODO maybe dont wait
-							navigation.travelTo(closestIntersection.x, closestIntersection.y, false);
-							localisation.colorLocalisation(false);
-							if(rectangularPath) {
-								recursivePath(0);
+							double currentTheta = odometer.getThetaDegrees();
+							double nextHeading = Math.toDegrees(Math.atan2(closestIntersection.x - odometer.getX(), closestIntersection.y - odometer.getY()));
+							double rightRotation = nextHeading - currentTheta;
+							if (rightRotation < 0) {
+								rightRotation = rightRotation + 360;
 							}
-							setNavigationState(NavigationState.READY);
+							double leftRotation = currentTheta - nextHeading;
+							if (leftRotation < 0) {
+								leftRotation = leftRotation + 360;
+							}
+							if (rightRotation < 60 || leftRotation < 60) {
+								rightMotor.stop(true);
+								leftMotor.stop();
+								navigation.travelTo(closestIntersection.x, closestIntersection.y, false);
+								localisation.colorLocalisation(false);
+								if(rectangularPath) {
+									recursivePath(0);
+								}
+								setNavigationState(NavigationState.READY);
+							}
 						}
 					}
 				}
@@ -155,7 +168,7 @@ public class NavigationController {
 				break;
 			}
 			try {
-				Thread.sleep(300);
+				Thread.sleep(200);
 			} catch (InterruptedException e) {
 
 			}
@@ -184,6 +197,7 @@ public class NavigationController {
 	 */
 	public boolean recursivePath(int i) throws StackOverflowError {
 		if(i == 0) {
+			System.out.println("start : " + closestIntersection().x + " " + closestIntersection().y);
 			coordinateList.add(0, closestIntersection());
 			for(Coordinate coord : coordinateList) {
 				if (mapPoint(coord) == Zone.RIVER || coord.equals(gameParameters.ZC_R) || coord.equals(gameParameters.ZC_G)) {
@@ -330,14 +344,14 @@ public class NavigationController {
 					previous = coordinateList.get(i - 1);
 				}
 				if (!midVH.equals(previous) && mapPoint(midVH) != Zone.RIVER && mapPoint(midVH) != Zone.BRIDGE && (mapPoint(midVH) == mapPoint(ithCoordinate) || mapPoint(midVH) == mapPoint(nextCoordinate)) && obstacleCheck(ithCoordinate, midVH) && obstacleCheck(midVH, nextCoordinate)
-						&& !(mapPoint(midHV) != Zone.RIVER && mapPoint(midHV) != Zone.BRIDGE && (mapPoint(ithCoordinate) != Zone.BRIDGE || mapPoint(midHV) == mapPoint(nextCoordinate)) && obstacleCheck(ithCoordinate, midHV) && obstacleCheck(midHV, nextCoordinate))) {
+						&& !(mapPoint(midHV) != Zone.RIVER && mapPoint(midHV) != Zone.BRIDGE && (mapPoint(ithCoordinate) == mapPoint(midHV) || mapPoint(midHV) == mapPoint(nextCoordinate)) && obstacleCheck(ithCoordinate, midHV) && obstacleCheck(midHV, nextCoordinate))) {
 					coordinateList.add(i + 1, midVH);
 					if (recursivePath(i + 1)) {
 						return true;
 					}
 					coordinateList.remove(i + 1);
 				}
-				if (!midHV.equals(previous) && mapPoint(midHV) != Zone.RIVER && mapPoint(midHV) != Zone.BRIDGE && (mapPoint(midVH) == mapPoint(ithCoordinate) || mapPoint(midHV) == mapPoint(nextCoordinate)) && obstacleCheck(ithCoordinate, midHV) && obstacleCheck(midHV, nextCoordinate)) {
+				if (!midHV.equals(previous) && mapPoint(midHV) != Zone.RIVER && mapPoint(midHV) != Zone.BRIDGE && (mapPoint(midHV) == mapPoint(ithCoordinate) || mapPoint(midHV) == mapPoint(nextCoordinate)) && obstacleCheck(ithCoordinate, midHV) && obstacleCheck(midHV, nextCoordinate)) {
 					coordinateList.add(i + 1, midHV);
 					if (recursivePath(i + 1)) {
 						return true;

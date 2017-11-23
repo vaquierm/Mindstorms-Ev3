@@ -64,16 +64,16 @@ public class BlockSearchingData {
 			target = gameParameters.OR;
 		}
 		switch (target) {
-		case 1:
+		case 1: //Red
 			target = 0;
 			break;
-		case 2:
+		case 2: //Blue
 			target = 2;
 			break;
-		case 3:
+		case 3: //Yellow
 			target = 3;
 			break;
-		case 4:
+		case 4: //White
 			target = 6;
 			break;
 		default:
