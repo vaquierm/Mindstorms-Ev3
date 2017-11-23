@@ -9,6 +9,7 @@ import java.util.List;
 
 import ca.mcgill.ecse211.capturetheflag.GameParameters.Zone;
 import ca.mcgill.ecse211.capturetheflag.UltrasonicPoller.UltrasonicPollingState;
+import lejos.hardware.Sound;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.motor.EV3MediumRegulatedMotor;
 
@@ -32,7 +33,7 @@ public class NavigationController {
 	private volatile boolean objectDetection = false;
 	private static NavigationState state = NavigationState.READY;
 	
-	private static int RELOCALISATION_CONSTANT = 3;
+	private static int RELOCALISATION_CONSTANT = 4;
 	private final GameParameters gameParameters;
 	private final double TILE;
 
@@ -100,7 +101,12 @@ public class NavigationController {
 	public void runNavigationTask(boolean rectangularPath) {
 
 		if (rectangularPath) {
-			recursivePath(0);
+			try {
+				recursivePath(0);
+			} catch (StackOverflowError e) {
+				Sound.buzz();
+				//TODO hardcoding option
+			}
 		}
 		if (objectDetection) {
 			ultrasonicPoller.startPolling(UltrasonicPollingState.NAVIGATION);
@@ -122,7 +128,7 @@ public class NavigationController {
 					if (odometer.getDistanceSinceLastLocalisation() > TILE * RELOCALISATION_CONSTANT) {
 						Coordinate closestIntersection = closestIntersection();
 						Zone zoneOfIntersection = mapPoint(closestIntersection);
-						if (zoneOfIntersection != Zone.RIVER && zoneOfIntersection != Zone.BRIDGE) {
+						if (zoneOfIntersection != Zone.RIVER && !closestIntersection.equals(gameParameters.ZC_G) && !closestIntersection.equals(gameParameters.ZC_R)) {
 							rightMotor.stop(true);
 							leftMotor.stop(); //TODO maybe dont wait
 							navigation.travelTo(closestIntersection.x, closestIntersection.y, false);
@@ -176,10 +182,9 @@ public class NavigationController {
 	 * 
 	 * @return  Returns true if a path was found, false otherwise
 	 */
-	public boolean recursivePath(int i) {
+	public boolean recursivePath(int i) throws StackOverflowError {
 		if(i == 0) {
 			coordinateList.add(0, closestIntersection());
-			System.out.println(closestIntersection());
 			for(Coordinate coord : coordinateList) {
 				if (mapPoint(coord) == Zone.RIVER || coord.equals(gameParameters.ZC_R) || coord.equals(gameParameters.ZC_G)) {
 					return false;
@@ -491,7 +496,8 @@ public class NavigationController {
 				|| (node.x >= gameParameters.Red_LL.x && node.x <= gameParameters.Red_UR.x && node.y >= gameParameters.Red_LL.y && node.y <= gameParameters.Red_UR.y))
 				&& ((node.x >= gameParameters.SV_LL.x && node.x <= gameParameters.SV_UR.x && node.y >= gameParameters.SV_LL.y && node.y <= gameParameters.SV_UR.y)
 				||(node.x >= gameParameters.SH_LL.x && node.x <= gameParameters.SH_UR.x && node.y >= gameParameters.SH_LL.y && node.y <= gameParameters.SH_UR.y))
-				&& (!(node.x == gameParameters.SH_LL.x && node.y == gameParameters.SH_LL.y) && !(node.x == gameParameters.SH_UR.x && node.y == gameParameters.SH_UR.y) && !(node.x == gameParameters.SV_LL.x && node.y == gameParameters.SV_LL.y) && !(node.x == gameParameters.SV_UR.x && node.y == gameParameters.SV_UR.y)) ) {
+				&& (!(node.x == gameParameters.SH_LL.x && node.y == gameParameters.SH_LL.y) && !(node.x == gameParameters.SH_UR.x && node.y == gameParameters.SH_UR.y) && !(node.x == gameParameters.SV_LL.x && node.y == gameParameters.SV_LL.y) && !(node.x == gameParameters.SV_UR.x && node.y == gameParameters.SV_UR.y))
+				&& (!(node.x == gameParameters.SH_LL.x && node.y == gameParameters.SH_UR.y) && !(node.x == gameParameters.SH_UR.x && node.y == gameParameters.SH_LL.y) && !(node.x == gameParameters.SV_LL.x && node.y == gameParameters.SV_UR.y) && !(node.x == gameParameters.SV_UR.x && node.y == gameParameters.SV_LL.y))) {
 			return Zone.BRIDGE;
 		}
 		else {
@@ -509,16 +515,16 @@ public class NavigationController {
 	 */
 	public Zone mapPoint(double x, double y)
 	{
-		if(x > gameParameters.Green_LL.x && x < gameParameters.Green_UR.x && y > gameParameters.Green_LL.y && y < gameParameters.Green_UR.y)
+		if(x > gameParameters.Green_LL.x + 1 && x < gameParameters.Green_UR.x - 1 && y > gameParameters.Green_LL.y + 1 && y < gameParameters.Green_UR.y - 1)
 		{
 			return Zone.GREEN;
 		}
-		else if(x > gameParameters.Red_LL.x && x < gameParameters.Red_UR.x && y > gameParameters.Red_LL.y && y < gameParameters.Red_UR.y)
+		else if(x > gameParameters.Red_LL.x + 1 && x < gameParameters.Red_UR.x - 1 && y > gameParameters.Red_LL.y + 1 && y < gameParameters.Red_UR.y - 1)
 		{
 			return Zone.RED;
 		}
-		else if((x > gameParameters.SV_LL.x && x < gameParameters.SV_UR.x && y > gameParameters.SV_LL.y && y < gameParameters.SV_UR.y)
-				||(x > gameParameters.SH_LL.x && x < gameParameters.SH_UR.x && y > gameParameters.SH_LL.y && y < gameParameters.SH_UR.y))
+		else if((x > gameParameters.SV_LL.x + 1 && x < gameParameters.SV_UR.x - 1 && y > gameParameters.SV_LL.y + 1 && y < gameParameters.SV_UR.y - 1)
+				||(x > gameParameters.SH_LL.x + 1 && x < gameParameters.SH_UR.x - 1 && y > gameParameters.SH_LL.y + 1 && y < gameParameters.SH_UR.y - 1))
 		{
 			return Zone.BRIDGE;
 		}

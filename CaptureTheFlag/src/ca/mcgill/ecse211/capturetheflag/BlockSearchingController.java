@@ -111,7 +111,6 @@ public class BlockSearchingController {
 	public void runBlockSearchingTask() {
 		navigationController.addWayPoint(nextSweep);
 		
-		System.out.println(nextSweep.x + " " + nextSweep.y);
 		navigationController.runNavigationTask(true);
 		setBlockSearchingState(BlockSearchingState.SEARCHING);
 		colorPoller.startPolling(ColorPollingState.BLOCK_SEARCHING);
@@ -293,7 +292,7 @@ public class BlockSearchingController {
 			yIncrement = 1;
 			travelDir = true;
 			nextSweep = lowerLeft;
-			if (navigationController.mapPoint(nextSweep) == Zone.RIVER) {
+			if (navigationController.mapPoint(nextSweep.x, nextSweep.y) == Zone.RIVER) {
 				return tryAdjacentPoints();
 			}
 			return true;
