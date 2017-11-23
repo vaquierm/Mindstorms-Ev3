@@ -329,7 +329,7 @@ public class NavigationController {
 				if(i > 0) {
 					previous = coordinateList.get(i - 1);
 				}
-				if (!midVH.equals(previous) && mapPoint(midVH) != Zone.RIVER && mapPoint(midVH) != Zone.BRIDGE && (mapPoint(ithCoordinate) != Zone.BRIDGE || mapPoint(midVH) == mapPoint(nextCoordinate)) && obstacleCheck(ithCoordinate, midVH) && obstacleCheck(midVH, nextCoordinate)
+				if (!midVH.equals(previous) && mapPoint(midVH) != Zone.RIVER && mapPoint(midVH) != Zone.BRIDGE && (mapPoint(midVH) == mapPoint(ithCoordinate) || mapPoint(midVH) == mapPoint(nextCoordinate)) && obstacleCheck(ithCoordinate, midVH) && obstacleCheck(midVH, nextCoordinate)
 						&& !(mapPoint(midHV) != Zone.RIVER && mapPoint(midHV) != Zone.BRIDGE && (mapPoint(ithCoordinate) != Zone.BRIDGE || mapPoint(midHV) == mapPoint(nextCoordinate)) && obstacleCheck(ithCoordinate, midHV) && obstacleCheck(midHV, nextCoordinate))) {
 					coordinateList.add(i + 1, midVH);
 					if (recursivePath(i + 1)) {
@@ -337,7 +337,7 @@ public class NavigationController {
 					}
 					coordinateList.remove(i + 1);
 				}
-				if (!midHV.equals(previous) && mapPoint(midHV) != Zone.RIVER && mapPoint(midHV) != Zone.BRIDGE && (mapPoint(ithCoordinate) != Zone.BRIDGE || mapPoint(midHV) == mapPoint(nextCoordinate)) && obstacleCheck(ithCoordinate, midHV) && obstacleCheck(midHV, nextCoordinate)) {
+				if (!midHV.equals(previous) && mapPoint(midHV) != Zone.RIVER && mapPoint(midHV) != Zone.BRIDGE && (mapPoint(midVH) == mapPoint(ithCoordinate) || mapPoint(midHV) == mapPoint(nextCoordinate)) && obstacleCheck(ithCoordinate, midHV) && obstacleCheck(midHV, nextCoordinate)) {
 					coordinateList.add(i + 1, midHV);
 					if (recursivePath(i + 1)) {
 						return true;
@@ -438,25 +438,25 @@ public class NavigationController {
 			y = ithCoordinate.y - TILE;
 			add = 8;
 		}
-		if (horizontal && (currentStatus[0] & 16) == 0 && Math.sqrt(Math.abs(ithCoordinate.x + (TILE/2) - nextCoordinate.x) + Math.abs(ithCoordinate.y - nextCoordinate.y)) < distance) {
+		if (horizontal && (currentStatus[0] & 16) == 0 && (currentStatus[0] & 1) > 0 && Math.sqrt(Math.abs(ithCoordinate.x + (TILE/2) - nextCoordinate.x) + Math.abs(ithCoordinate.y - nextCoordinate.y)) < distance) {
 			distance = Math.sqrt(Math.abs(ithCoordinate.x + (TILE/2) - nextCoordinate.x) + Math.abs(ithCoordinate.y - nextCoordinate.y));
 			x = ithCoordinate.x + (TILE/2);
 			y = ithCoordinate.y;
 			add = 16;
 		}
-		if (horizontal && (currentStatus[0] & 32) == 0 && Math.sqrt(Math.abs(ithCoordinate.x - (TILE/2) - nextCoordinate.x) + Math.abs(ithCoordinate.y - nextCoordinate.y)) < distance) {
+		if (horizontal && (currentStatus[0] & 32) == 0 && (currentStatus[0] & 2) > 0 && Math.sqrt(Math.abs(ithCoordinate.x - (TILE/2) - nextCoordinate.x) + Math.abs(ithCoordinate.y - nextCoordinate.y)) < distance) {
 			distance = Math.sqrt(Math.abs(ithCoordinate.x - (TILE/2) - nextCoordinate.x) + Math.abs(ithCoordinate.y - nextCoordinate.y));
 			x = ithCoordinate.x - (TILE/2);
 			y = ithCoordinate.y;
 			add = 32;
 		}
-		if (vertical && (currentStatus[0] & 64) == 0 && Math.sqrt(Math.abs(ithCoordinate.x - nextCoordinate.x) + Math.abs(ithCoordinate.y + (TILE/2) - nextCoordinate.y)) < distance) {
+		if (vertical && (currentStatus[0] & 64) == 0 && (currentStatus[0] & 4) > 0 && Math.sqrt(Math.abs(ithCoordinate.x - nextCoordinate.x) + Math.abs(ithCoordinate.y + (TILE/2) - nextCoordinate.y)) < distance) {
 			distance = Math.sqrt(Math.abs(ithCoordinate.x - nextCoordinate.x) + Math.abs(ithCoordinate.y + (TILE/2) - nextCoordinate.y));
 			x = ithCoordinate.x;
 			y = ithCoordinate.y + (TILE/2);
 			add = 64;
 		}
-		if (vertical && (currentStatus[0] & 128) == 0 && Math.sqrt(Math.abs(ithCoordinate.x - nextCoordinate.x) + Math.abs(ithCoordinate.y - (TILE/2) - nextCoordinate.y)) < distance) {
+		if (vertical && (currentStatus[0] & 128) == 0 && (currentStatus[0] & 8) > 0 && Math.sqrt(Math.abs(ithCoordinate.x - nextCoordinate.x) + Math.abs(ithCoordinate.y - (TILE/2) - nextCoordinate.y)) < distance) {
 			distance = Math.sqrt(Math.abs(ithCoordinate.x - nextCoordinate.x) + Math.abs(ithCoordinate.y - (TILE/2) - nextCoordinate.y));
 			x = ithCoordinate.x;
 			y = ithCoordinate.y - (TILE/2);
