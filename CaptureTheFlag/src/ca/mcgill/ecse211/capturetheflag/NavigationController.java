@@ -178,6 +178,8 @@ public class NavigationController {
 	 */
 	public boolean recursivePath(int i) {
 		if(i == 0) {
+			coordinateList.add(0, closestIntersection());
+			System.out.println(closestIntersection());
 			for(Coordinate coord : coordinateList) {
 				if (mapPoint(coord) == Zone.RIVER || coord.equals(gameParameters.ZC_R) || coord.equals(gameParameters.ZC_G)) {
 					return false;
@@ -219,15 +221,28 @@ public class NavigationController {
 				} else {
 					Coordinate option;
 					Coordinate previous = null;
+					Coordinate goal;
 					int[] currentStatus = {0};
 					if(i > 0) {
 						previous = coordinateList.get(i - 1);
 					}
+					if(mapPoint(ithCoordinate) == Zone.BRIDGE) {
+						goal = nextCoordinate;
+					}
+					else if(mapPoint(ithCoordinate) == Zone.GREEN) {
+						goal = gameParameters.ZO_G;
+					}
+					else if(mapPoint(ithCoordinate) == Zone.RED) {
+						goal = gameParameters.ZO_R;
+					}
+					else {
+						goal = nextCoordinate;
+					}
 					for(int j = 0; j < 8; j++) {
 						if (mapPoint(ithCoordinate) == Zone.BRIDGE) {
-							option = closeShift(ithCoordinate, nextCoordinate, currentStatus, true, true);
+							option = closeShift(ithCoordinate, goal, currentStatus, true, true);
 						} else {
-							option = closeShift(ithCoordinate, nextCoordinate, currentStatus, true, false);
+							option = closeShift(ithCoordinate, goal, currentStatus, true, false);
 						}
 						if (mapPoint(option) != Zone.RIVER && !option.equals(previous)) {
 							coordinateList.add(i + 1, option);
@@ -257,15 +272,28 @@ public class NavigationController {
 				} else {
 					Coordinate option;
 					Coordinate previous = null;
+					Coordinate goal;
 					int[] currentStatus = {0};
 					if(i > 0) {
 						previous = coordinateList.get(i - 1);
 					}
+					if(mapPoint(ithCoordinate) == Zone.BRIDGE) {
+						goal = nextCoordinate;
+					}
+					else if(mapPoint(ithCoordinate) == Zone.GREEN) {
+						goal = gameParameters.ZO_G;
+					}
+					else if(mapPoint(ithCoordinate) == Zone.RED) {
+						goal = gameParameters.ZO_R;
+					}
+					else {
+						goal = nextCoordinate;
+					}
 					for (int j = 0; j < 8; j++) {
 						if (mapPoint(ithCoordinate) == Zone.BRIDGE) {
-							option = closeShift(ithCoordinate, nextCoordinate, currentStatus, true, true);
+							option = closeShift(ithCoordinate, goal, currentStatus, true, true);
 						} else {
-							option = closeShift(ithCoordinate, nextCoordinate, currentStatus, false, true);
+							option = closeShift(ithCoordinate, goal, currentStatus, false, true);
 						}
 						if (mapPoint(option) != Zone.RIVER && !option.equals(previous)) {
 							coordinateList.add(i + 1, option);
@@ -313,8 +341,21 @@ public class NavigationController {
 				}
 				int[] currentStatus = {0};
 				Coordinate option;
+				Coordinate goal;
+				if(mapPoint(ithCoordinate) == Zone.BRIDGE) {
+					goal = nextCoordinate;
+				}
+				else if(mapPoint(ithCoordinate) == Zone.GREEN) {
+					goal = gameParameters.ZO_G;
+				}
+				else if(mapPoint(ithCoordinate) == Zone.RED) {
+					goal = gameParameters.ZO_R;
+				}
+				else {
+					goal = nextCoordinate;
+				}
 				for (int j = 0; j < 8; j++) {
-					option = closeShift(ithCoordinate, nextCoordinate, currentStatus, true, true);
+					option = closeShift(ithCoordinate, goal, currentStatus, true, true);
 					if (mapPoint(option) != Zone.RIVER && !option.equals(previous) && obstacleCheck(ithCoordinate, option) && obstacleCheck(option, nextCoordinate)) {
 						coordinateList.add(i + 1, option);
 						if (recursivePath(i + 1)) {
@@ -337,7 +378,7 @@ public class NavigationController {
 	}
 	
 	/**
-	 * Removes all redundant points after calculating the trajectory.
+	 * Removes redundant points at the end of generating a path.
 	 */
 	private void removeRedundantPoints() {
 		Coordinate ithCoordinate;
@@ -349,6 +390,7 @@ public class NavigationController {
 			nextCoordinate = coordinateList.get(i + 2);
 			if ((ithCoordinate.x == midCoordinate.x && ithCoordinate.x == nextCoordinate.x) || (ithCoordinate.y == midCoordinate.y && ithCoordinate.y == nextCoordinate.y)) {
 				coordinateList.remove(i + 1);
+				i--;
 			}
 		}
 	}

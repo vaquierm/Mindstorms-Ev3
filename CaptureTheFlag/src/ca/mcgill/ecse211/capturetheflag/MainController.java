@@ -71,7 +71,7 @@ public class MainController {
 	private static final double TILE = 30.48;
 	private static final int BOARD_SIZE = 8; //TODO change for competition
 	private static final double WHEEL_RADIUS = 2.1;
-	private static final double TRACK = 9.71; //9.92
+	private static final double TRACK = 9.64;
 	
 	
 	//This code can be used to find the timing of threads.
@@ -136,25 +136,25 @@ public class MainController {
 		 * This is the hardcoded game parameters to not have to input them every time.
 		 */
 		/*while (Button.waitForAnyPress() != Button.ID_ENTER); //TODO delete for beta
-		gameParameters = new GameParameters(1 , 20, //Team numbers
-	    		  1, 1, //Starting corners
-	    		  1, 0, //Color of flags
-	    		  new Coordinate(0 * TILE, 5 * TILE), //Red_LL
-	    		  new Coordinate(5 * TILE, 8 * TILE), //Red_UR
-	    		  new Coordinate(3 * TILE, 0 * TILE), //Green_LL
-	    		  new Coordinate(8 * TILE, 3 * TILE), //Green_UR
+		gameParameters = new GameParameters(20 , 10, //Team numbers
+	    		  2, 0, //Starting corners
+	    		  1, 1, //Color of flags
+	    		  new Coordinate(0 * TILE, 6 * TILE), //Red_LL
+	    		  new Coordinate(8 * TILE, 8 * TILE), //Red_UR
+	    		  new Coordinate(0 * TILE, 0 * TILE), //Green_LL
+	    		  new Coordinate(4 * TILE, 5 * TILE), //Green_UR
 	    		  new Coordinate(2 * TILE, 6 * TILE), //ZC_R
-	    		  new Coordinate(1 * TILE, 7 * TILE), //ZO_R
-	    		  new Coordinate(5 * TILE, 3 * TILE), //ZC_G
-	    		  new Coordinate(6 * TILE, 2 * TILE), //ZO_G
-	    		  new Coordinate(5 * TILE, 6 * TILE), //SH_LL
-	    		  new Coordinate(7 * TILE, 7 * TILE), //SH_UR
-	    		  new Coordinate(6 * TILE, 3 * TILE), //SV_LL
-	    		  new Coordinate(7 * TILE, 7 * TILE), //SV_UR
-	    		  new Coordinate(3 * TILE, 7 * TILE), //SR_LL 
+	    		  new Coordinate(2 * TILE, 7 * TILE), //ZO_R
+	    		  new Coordinate(2 * TILE, 2 * TILE), //ZC_G
+	    		  new Coordinate(2 * TILE, 1 * TILE), //ZO_G
+	    		  new Coordinate(4 * TILE, 4 * TILE), //SH_LL
+	    		  new Coordinate(6 * TILE, 5 * TILE), //SH_UR
+	    		  new Coordinate(4 * TILE, 4 * TILE), //SV_LL
+	    		  new Coordinate(6 * TILE, 5 * TILE), //SV_UR
+	    		  new Coordinate(3 * TILE, 7 * TILE), //SR_LL
 	    		  new Coordinate(5 * TILE, 8 * TILE), //SR_UR
-	    		  new Coordinate(3 * TILE, 0 * TILE), //SG_LL
-	    		  new Coordinate(5 * TILE, 1 * TILE) //SG_UR
+	    		  new Coordinate(0 * TILE, 3 * TILE), //SG_LL
+	    		  new Coordinate(1 * TILE, 5 * TILE) //SG_UR
 	    		  );*/
 		
 		determineStartingCorner();
