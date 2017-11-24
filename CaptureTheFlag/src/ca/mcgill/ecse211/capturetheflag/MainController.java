@@ -70,8 +70,8 @@ public class MainController {
 	private static int startingCorner;
 	private static final double TILE = 30.48;
 	private static final int BOARD_SIZE = 12;
-	private static final double WHEEL_RADIUS = 2.1;
-	private static final double TRACK = 9.64;
+	private static final double WHEEL_RADIUS = 2.13;
+	private static final double TRACK = 9.7;
 	
 	
 	//This code can be used to find the timing of threads.
@@ -140,7 +140,7 @@ public class MainController {
 		odometer = new Odometer(leftMotor, rightMotor, WHEEL_RADIUS, TRACK);
 		setEstimateInitialPosition();
 		Display odometryDisplay = new Display(odometer, t);
-		odometryDisplay.start();
+		//odometryDisplay.start();
 		odometer.startOdometerTimer();
 		
 		colorLocalisationData = new ColorLocalisationData();
@@ -162,6 +162,11 @@ public class MainController {
 		
 		
 		//wheelbaseTestRoutine();
+		/*rightMotor.setSpeed(420);
+		leftMotor.setSpeed(420);
+		leftMotor.forward();
+		rightMotor.forward();
+		while(Button.waitForAnyEvent() == Button.ID_ENTER);*/
 		/*
 		 * Here is the flow of tasks to run.
 		 */
@@ -205,7 +210,7 @@ public class MainController {
 			returnToStartingCorner();
 		}
 		
-		Sound.playSample(new File("MarioCourseClearSound2.wav"));
+		Sound.playSample(new File("MarioCourseClearSound2.wav"), 100);
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		System.exit(0);
 	}

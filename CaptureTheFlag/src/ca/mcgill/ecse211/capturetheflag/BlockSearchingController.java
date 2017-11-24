@@ -143,7 +143,7 @@ public class BlockSearchingController {
 				}	
 				break;
 			case FOUND:
-				Sound.beepSequenceUp();
+				Sound.playSample(new File("mariocoinsound.wav"), 100);
 				rightMotor.stop(true);
 				leftMotor.stop();
 				return;

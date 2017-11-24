@@ -106,7 +106,120 @@ public class NavigationController {
 				recursivePath(0);
 			} catch (StackOverflowError e) {
 				Sound.buzz();
-				//TODO hardcoding option
+				Coordinate bridgeMid = new Coordinate((gameParameters.SV_UR.x + gameParameters.SV_LL.x) / 2, (gameParameters.SH_UR.y + gameParameters.SH_LL.y) / 2);
+				Coordinate destination= new Coordinate(coordinateList.get(coordinateList.size()-1).x,coordinateList.get(coordinateList.size()-1).y);
+				Coordinate SVmid1=new Coordinate((gameParameters.SV_UR.x+gameParameters.SV_LL.x)/2,gameParameters.SV_UR.y);
+				Coordinate SVmid2=new Coordinate(gameParameters.SV_UR.x,(gameParameters.SV_UR.y+gameParameters.SV_LL.y)/2);
+				Coordinate SVmid3=new Coordinate((gameParameters.SV_UR.x+gameParameters.SV_LL.x)/2,gameParameters.SV_LL.y);
+				Coordinate SVmid4=new Coordinate(gameParameters.SV_LL.x,(gameParameters.SV_UR.y+gameParameters.SV_LL.y)/2);
+				
+				Coordinate SHmid1=new Coordinate((gameParameters.SH_UR.x+gameParameters.SH_LL.x)/2,gameParameters.SH_UR.y);
+				Coordinate SHmid2=new Coordinate(gameParameters.SH_UR.x,(gameParameters.SH_UR.y+gameParameters.SH_LL.y)/2);
+				Coordinate SHmid3=new Coordinate((gameParameters.SH_UR.x+gameParameters.SH_LL.x)/2,gameParameters.SH_LL.y);
+				Coordinate SHmid4=new Coordinate(gameParameters.SH_LL.x,(gameParameters.SH_UR.y+gameParameters.SH_LL.y)/2);
+				
+				Coordinate Greenside=bridgeMid;
+				Coordinate Redside=bridgeMid;
+				if(edgecheck(SVmid1)==10)
+				{
+					Greenside=SVmid1;
+				}
+				else if(edgecheck(SVmid2)==10)
+				{
+					Greenside=SVmid2;
+				}
+				else if(edgecheck(SVmid3)==10)
+				{
+					Greenside=SVmid3;
+				}
+				else if(edgecheck(SVmid4)==10)
+				{
+					Greenside=SVmid4;
+				}
+				else if(edgecheck(SHmid1)==10)
+				{
+					Greenside=SHmid1;
+				}
+				else if(edgecheck(SHmid2)==10)
+				{
+					Greenside=SHmid2;
+				}
+				else if(edgecheck(SHmid3)==10)
+				{
+					Greenside=SHmid3;
+				}
+				else if(edgecheck(SHmid4)==10)
+				{
+					Greenside=SHmid4;
+				}
+				
+				
+				if(edgecheck(SVmid1)==20)
+				{
+					Redside=SVmid1;
+				}
+				else if(edgecheck(SVmid2)==20)
+				{
+					Redside=SVmid2;
+				}
+				else if(edgecheck(SVmid3)==20)
+				{
+					Redside=SVmid3;
+				}
+				else if(edgecheck(SVmid4)==20)
+				{
+					Redside=SVmid4;
+				}
+				else if(edgecheck(SHmid1)==20)
+				{
+					Redside=SHmid1;
+				}
+				else if(edgecheck(SHmid2)==20)
+				{
+					Redside=SHmid2;
+				}
+				else if(edgecheck(SHmid3)==20)
+				{
+					Redside=SHmid3;
+				}
+				else if(edgecheck(SHmid4)==20)
+				{
+					Redside=SHmid4;
+				}
+				
+				while(coordinateList.isEmpty()!=true)
+				{
+					coordinateList.remove(coordinateList.size()-1);
+				}
+				
+				coordinateList.add(0, closestIntersection());//TODO hardcoding option				
+				if(mapPoint(closestIntersection())==Zone.GREEN && mapPoint(destination)!=Zone.GREEN)
+				{
+					
+					coordinateList.add(gameParameters.ZO_G);
+					coordinateList.add(Greenside);
+					coordinateList.add(bridgeMid);
+					coordinateList.add(Redside);
+					coordinateList.add(gameParameters.ZO_R);
+					
+				}
+				else if(mapPoint(closestIntersection())==Zone.RED && mapPoint(destination)!=Zone.RED)
+				{
+					coordinateList.add(gameParameters.ZO_R);
+					coordinateList.add(Redside);
+					coordinateList.add(bridgeMid);
+					coordinateList.add(Greenside);
+					coordinateList.add(gameParameters.ZO_G);
+				}
+				else if(mapPoint(closestIntersection())==Zone.GREEN && mapPoint(destination)==Zone.GREEN)
+				{
+					coordinateList.add(gameParameters.ZO_G);
+				}
+				else if(mapPoint(closestIntersection())==Zone.RED && mapPoint(destination)==Zone.RED)
+				{
+					coordinateList.add(gameParameters.ZO_R);
+				}
+				coordinateList.add(destination);
 			}
 		}
 		if (objectDetection) {
@@ -182,6 +295,25 @@ public class NavigationController {
 	 */
 	public Coordinate closestIntersection() {
 		return new Coordinate(localisation.getClosestMultiple(odometer.getX()), localisation.getClosestMultiple(odometer.getY()));
+	}
+	
+	/**
+	 * Returns an integer depending on the zone a point is in
+	 * @param node  The point to check
+	 * @return  10 for green zone, 20 for red zone and -10 for the rest
+	 */
+	public int edgecheck(Coordinate node)
+	{
+		if(node.x >= gameParameters.Green_LL.x && node.x <= gameParameters.Green_UR.x && node.y >= gameParameters.Green_LL.y && node.y <= gameParameters.Green_UR.y)
+		{
+			return 10;
+		}
+		else if(node.x >= gameParameters.Red_LL.x && node.x<= gameParameters.Red_UR.x && node.y >= gameParameters.Red_LL.y && node.y <= gameParameters.Red_UR.y)
+		{
+			return 20;
+		}
+		return -10;
+
 	}
 
 	

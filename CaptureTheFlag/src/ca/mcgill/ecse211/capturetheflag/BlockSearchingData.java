@@ -21,6 +21,8 @@ public class BlockSearchingData {
 	//Target color to find
 	private int target;
 	private final int teamNumber;
+	private int counter = 0;
+	private static final int THRESHOLD = 4;
 	
 	//Associations
 	private BlockSearchingController blockSearchingController;
@@ -39,12 +41,17 @@ public class BlockSearchingData {
 	
 	/**
 	 * Sends an interrupt to the blockSearchingController if the block is found.
-	 * @param dataFront
-	 * @param dataSide
+	 * @param dataFront  ColorID Data from the front color sensor
+	 * @param dataSide  ColorID data from the side color sensor
 	 */
 	public void processData(int dataFront, int dataSide) {
 		if(dataFront == target || dataSide == target) {
-			blockSearchingController.resumeThread();
+			counter++;
+			if (counter > THRESHOLD) {
+				blockSearchingController.resumeThread();
+			}
+		} else {
+			counter = 0;
 		}
 	}
 	
